@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane fx:id="m_oMainAnchorPane" xmlns:fx="http://javafx.com/fxml/1" prefHeight="600" prefWidth="800" fx:controller="driveindex.ui.fx.cMainLayoutController">
+    <children>
+        <TabPane fx:id="m_oTabPaneRoot" AnchorPane.leftAnchor="2" AnchorPane.topAnchor="2" AnchorPane.rightAnchor="2" AnchorPane.bottomAnchor="2">
+            <tabs>
+                <Tab fx:id="m_oSearchTab" text="Search">
+                    <AnchorPane id="SearchTabAnchorPane" prefHeight="600" prefWidth="800">
+                        <children>
+                            <Label fx:id="m_oSearchLabel" layoutX="4" layoutY="7" text="Search: " />
+                            <CheckBox fx:id="m_oWholeWords" AnchorPane.topAnchor="7" AnchorPane.rightAnchor="120" text="Whole Words Only"/>
+                            <Button fx:id="m_oSearchButton" minWidth="100" AnchorPane.topAnchor="2" AnchorPane.rightAnchor="2" text="Search" onAction="#handleSearch" />
+
+                            <VBox fx:id="m_oSearchBox" AnchorPane.leftAnchor="2" AnchorPane.rightAnchor="2" AnchorPane.topAnchor="30" />  
+                            <TableView fx:id="m_oResultTable" editable="false" AnchorPane.leftAnchor="2" AnchorPane.topAnchor="90" AnchorPane.rightAnchor="2" AnchorPane.bottomAnchor="30" />
+                        </children>
+                    </AnchorPane>
+                </Tab>
+                <Tab fx:id="m_oDrives" text="Drives">
+                    <AnchorPane id="DrivesAnchorPane" prefHeight="600" prefWidth="800">
+                        <children>
+                            <Button fx:id="m_oIndexButton" minWidth="100" AnchorPane.topAnchor="2" AnchorPane.rightAnchor="2" text="Index Drives" onAction="#handleIndexDrives" />
+                            <ListView fx:id="m_oDriveList" editable="false" AnchorPane.leftAnchor="2" AnchorPane.topAnchor="30" AnchorPane.rightAnchor="2.0" AnchorPane.bottomAnchor="30.0" />
+                        </children>
+                    </AnchorPane>
+                </Tab>
+                <Tab fx:id="m_oIndex" text="Index">
+                    <AnchorPane id="IndexAnchorPane" prefHeight="600" prefWidth="800">
+                        <children>
+                            <Label fx:id="m_oIndexDirectoryLabel" layoutX="4" layoutY="5" text="Index Directory: " />
+                            <Label fx:id="m_oIndexSizeLabel" layoutX="4" layoutY="30" text="Index Size: " />
+                            <Label fx:id="m_oNumberOfDocumentsLabel" layoutX="4" layoutY="55" text="Number Of Documents: " />
+
+                            <Button fx:id="m_oDeleteIndexButton" minWidth="100" AnchorPane.topAnchor="23" AnchorPane.rightAnchor="2.0" text="Delete Index" onAction="#handleDeleteIndex" />
+                            <Button fx:id="m_oRefreshButton" minWidth="100" AnchorPane.topAnchor="50" AnchorPane.rightAnchor="2.0" text="Refresh" onAction="#handleRefresh" />
+                            <TableView fx:id="m_oTotDocsTable" editable="false" AnchorPane.leftAnchor="2" AnchorPane.topAnchor="80" AnchorPane.rightAnchor="2.0" AnchorPane.bottomAnchor="30.0" />
+                        </children>
+                    </AnchorPane>
+                </Tab>
+            </tabs>
+        </TabPane>
+        <Label fx:id="m_oStatusLabel" AnchorPane.leftAnchor="2" AnchorPane.bottomAnchor="2" text="Status: " />
+    </children>
+</AnchorPane>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.embed.swing.*?>
+
+<AnchorPane fx:id="m_oAnchorPane" prefHeight="80" prefWidth="750" xmlns:fx="http://javafx.com/fxml/1" fx:controller="driveindex.ui.fx.cProgressPanelController">
+    <children>
+        <Label fx:id="m_oDrivePathLabel" layoutX="2" layoutY="2" text="Drive: " />
+        <Label fx:id="m_oLastScanLabel" layoutX="90" layoutY="2" text="Last Scan: " />
+        <Label fx:id="m_oFolderWatcherLabel" layoutX="350" layoutY="2" text="Folder Watcher: Inactive" />
+        <Label fx:id="m_oUsedSpaceLabel" layoutX="500" layoutY="2" text="Used Space: " />
+        <Label fx:id="m_oTotalSpaceLabel" layoutX="650" layoutY="2" text="Total: " />
+        <Label fx:id="m_oStatusLabel" layoutX="2" layoutY="30" maxWidth="700"  text="Status: " />
+        <SwingNode fx:id="m_oProgressNode" AnchorPane.leftAnchor="2" AnchorPane.bottomAnchor="2" AnchorPane.rightAnchor="2" />
+    </children>
+</AnchorPane>
