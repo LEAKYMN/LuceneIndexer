@@ -283,6 +283,7 @@ public class cMainLayoutController implements Observer, Initializable
 
   public void setResults(ArrayList<eDocument> lsResults)
   {
+    m_oResultTable.getItems().clear();
     for (eDocument oDoc: lsResults)
     {
       Map<String, String> oDataRow = new HashMap<>();

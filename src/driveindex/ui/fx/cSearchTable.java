@@ -8,6 +8,7 @@ import driveindex.lucene.cLuceneIndexReader;
 import driveindex.lucene.eDocument;
 import driveindex.lucene.eSearchField;
 import java.util.ArrayList;
+import java.util.logging.Level;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -22,6 +23,8 @@ import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.util.Callback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,10 +45,22 @@ public class cSearchTable
   private ContextMenu m_oContextMenu;
   private MenuItem m_oMenuItemSearch;
   private MenuItem m_oMenuItemClear;
-  
+
   public cSearchTable(double dColumnWidth)
   {
     m_oSearchTable.setEditable(true);
+    m_oSearchTable.addEventFilter(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>()
+    {
+      @Override
+      public void handle(KeyEvent e)
+      {
+        if (e.getCode() == KeyCode.ENTER)
+        {
+          executeSearchOnNewThread();
+        }
+      }
+    });
+
     Callback<TableColumn<SearchField, String>, TableCell<SearchField, String>> cellFactory
             = (TableColumn<SearchField, String> param) -> new EditingCell();
 
@@ -54,81 +69,85 @@ public class cSearchTable
     oPathCol.setCellValueFactory(cellData -> cellData.getValue().pathProperty());
     oPathCol.setCellFactory(cellFactory);
     oPathCol.setOnEditCommit(
-            (TableColumn.CellEditEvent<SearchField, String> t) -> 
-                    {
-                      ((SearchField) t.getTableView().getItems()
+            (TableColumn.CellEditEvent<SearchField, String> t)
+            -> 
+            {
+              ((SearchField) t.getTableView().getItems()
                       .get(t.getTablePosition().getRow()))
                       .setPath(t.getNewValue());
-            });
+    });
 
     TableColumn<SearchField, String> oFilenameCol = new TableColumn(eDocument.TAG_Filename);
     oFilenameCol.setMinWidth(dColumnWidth);
     oFilenameCol.setCellValueFactory(cellData -> cellData.getValue().filenameProperty());
     oFilenameCol.setCellFactory(cellFactory);
     oFilenameCol.setOnEditCommit(
-            (TableColumn.CellEditEvent<SearchField, String> t) -> 
-                    {
-                      ((SearchField) t.getTableView().getItems()
+            (TableColumn.CellEditEvent<SearchField, String> t)
+            -> 
+            {
+              ((SearchField) t.getTableView().getItems()
                       .get(t.getTablePosition().getRow()))
                       .setFilename(t.getNewValue());
-            });
+    });
 
     TableColumn<SearchField, String> oExtensionCol = new TableColumn(eDocument.TAG_Extension);
     oExtensionCol.setMinWidth(dColumnWidth);
     oExtensionCol.setCellValueFactory(cellData -> cellData.getValue().extensionProperty());
     oExtensionCol.setCellFactory(cellFactory);
     oExtensionCol.setOnEditCommit(
-            (TableColumn.CellEditEvent<SearchField, String> t) -> 
-                    {
-                      ((SearchField) t.getTableView().getItems()
+            (TableColumn.CellEditEvent<SearchField, String> t)
+            -> 
+            {
+              ((SearchField) t.getTableView().getItems()
                       .get(t.getTablePosition().getRow()))
                       .setExtension(t.getNewValue());
-            });
+    });
 
     TableColumn<SearchField, String> oCategoryCol = new TableColumn(eDocument.TAG_Category);
     oCategoryCol.setMinWidth(dColumnWidth);
     oCategoryCol.setCellValueFactory(cellData -> cellData.getValue().categoryProperty());
     oCategoryCol.setCellFactory(cellFactory);
     oCategoryCol.setOnEditCommit(
-            (TableColumn.CellEditEvent<SearchField, String> t) -> 
-                    {
-                      ((SearchField) t.getTableView().getItems()
+            (TableColumn.CellEditEvent<SearchField, String> t)
+            -> 
+            {
+              ((SearchField) t.getTableView().getItems()
                       .get(t.getTablePosition().getRow()))
                       .setCategory(t.getNewValue());
-            });
+    });
 
     TableColumn<SearchField, String> oSizeCol = new TableColumn(eDocument.TAG_Size);
     oSizeCol.setMinWidth(dColumnWidth);
     oSizeCol.setCellValueFactory(cellData -> cellData.getValue().sizeProperty());
     oSizeCol.setCellFactory(cellFactory);
     oSizeCol.setOnEditCommit(
-            (TableColumn.CellEditEvent<SearchField, String> t) -> 
-                    {
-                      ((SearchField) t.getTableView().getItems()
+            (TableColumn.CellEditEvent<SearchField, String> t)
+            -> 
+            {
+              ((SearchField) t.getTableView().getItems()
                       .get(t.getTablePosition().getRow()))
                       .setSize(t.getNewValue());
-            });
+    });
 
     m_oSearchTable.setItems(m_oSearchData);
     m_oSearchTable.getColumns().addAll(oPathCol, oFilenameCol, oExtensionCol, oCategoryCol, oSizeCol);
     m_oSearchTable.setFixedCellSize(28);
     m_oSearchTable.prefHeightProperty().bind(Bindings.size(m_oSearchTable.getItems()).multiply(m_oSearchTable.getFixedCellSize()).add(30));
-    
+
     // create the context menu
     cContextMenuEventHandler oContextMenuEventHandler = new cContextMenuEventHandler();
     m_oContextMenu = new ContextMenu();
-    
+
     m_oMenuItemSearch = new MenuItem("Search");
     m_oMenuItemSearch.setOnAction(oContextMenuEventHandler);
     m_oMenuItemSearch.setId("search");
-   
+
     m_oMenuItemClear = new MenuItem("Clear");
     m_oMenuItemClear.setOnAction(oContextMenuEventHandler);
     m_oMenuItemClear.setId("clear");
-    
+
     m_oContextMenu.getItems().addAll(m_oMenuItemSearch, m_oMenuItemClear);
     m_oSearchTable.setContextMenu(m_oContextMenu);
-    
   }
 
   public TableView getTable()
@@ -136,19 +155,39 @@ public class cSearchTable
     return m_oSearchTable;
   }
 
+  public void executeSearchOnNewThread()
+  {
+    new Thread(()
+            -> 
+            {
+              try
+              {
+                Thread.sleep(100);
+              }
+              catch (InterruptedException ex)
+              {
+                g_oLog.error("Interupted exception: " + ex.getMessage());
+              }
+              search();
+    }, "handleSearch").start();
+  }
+
   public void search()
   {
+    cMainLayoutController oUIController = cInjector.getInjector().getInstance(cMainLayoutController.class);
+    // clear the results table
+    oUIController.setResults(new ArrayList<eDocument>());
+            
     SearchField oSearchField = m_oSearchData.get(0);
     String sPath = oSearchField.sPath.get();
     String sFilename = oSearchField.sFilename.get();
     String sExtension = oSearchField.sExtension.get();
     String sCategory = oSearchField.sCategory.get();
     String sSize = oSearchField.sSize.get();
-    
-    cMainLayoutController oUIController = cInjector.getInjector().getInstance(cMainLayoutController.class);
+
     System.out.println("Searching... (" + sPath + ":" + sFilename + ":" + sExtension + ":" + sCategory + ":" + sSize + ")");
     oUIController.setStatus("Searching... (" + sPath + ":" + sFilename + ":" + sExtension + ":" + sCategory + ":" + sSize + ")");
-    
+
     ArrayList<eSearchField> lsSearchFields = new ArrayList();
     if (!sPath.isEmpty())
     {
@@ -170,14 +209,13 @@ public class cSearchTable
     {
       lsSearchFields.add(new eSearchField(eDocument.TAG_Size, sSize));
     }
-    
-    
+
     cLuceneIndexReader oReader = cLuceneIndexReader.instance();
     ArrayList<eDocument> lsResults = oReader.search(lsSearchFields, oUIController.getWholeWords(), oUIController.getCaseSensitive());
     oUIController.setResults(lsResults);
     oUIController.setStatus("");
   }
-  
+
   private class SearchField
   {
     private final SimpleStringProperty sPath;
@@ -332,7 +370,7 @@ public class cSearchTable
     private void createTextField()
     {
       m_oTextField = new TextField(getString());
-      
+
       m_oTextField.setMinWidth(this.getWidth() - this.getGraphicTextGap() * 2);
       m_oTextField.setOnAction((e) -> commitEdit(m_oTextField.getText()));
       m_oTextField.focusedProperty().addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue)
@@ -350,15 +388,15 @@ public class cSearchTable
       return getItem() == null ? "" : getItem();
     }
   }
-  
+
   private class cContextMenuEventHandler implements EventHandler<ActionEvent>
   {
     @Override
     public void handle(ActionEvent event)
     {
       MenuItem oSource = (MenuItem) event.getSource();
-      
-      switch (oSource.getId()) 
+
+      switch (oSource.getId())
       {
         case "search":
           search();
@@ -371,7 +409,7 @@ public class cSearchTable
           oSearchField.setCategory("");
           oSearchField.setSize("");
           break;
-        
+
         default:
           break;
       }

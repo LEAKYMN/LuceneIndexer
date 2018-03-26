@@ -1,12 +1,13 @@
-
 package driveindex.ui.fx;
 
 import driveindex.injection.cInjector;
 import javafx.application.Application;
+import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
 /**
  *
@@ -15,7 +16,7 @@ import javafx.stage.Stage;
 public class DriveIndexFx extends Application
 {
   private cMainLayoutController oMainLayoutController;
-  
+
   @Override
   public void start(Stage oStage) throws Exception
   {
@@ -25,9 +26,17 @@ public class DriveIndexFx extends Application
     oStage.setTitle("Drive Index");
     oStage.setScene(oScene);
     oStage.show();
-    
+
+    oStage.setOnCloseRequest(new EventHandler<WindowEvent>()
+    {
+      @Override
+      public void handle(WindowEvent t)
+      {
+        System.exit(0);
+      }
+    });
+
     oMainLayoutController = oLoader.<cMainLayoutController>getController();
-    
     cInjector oInjector = new cInjector(this, oMainLayoutController);
   }
 
