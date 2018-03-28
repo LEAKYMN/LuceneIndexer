@@ -8,7 +8,6 @@ import driveindex.lucene.cLuceneIndexReader;
 import driveindex.lucene.eDocument;
 import driveindex.lucene.eSearchField;
 import java.util.ArrayList;
-import java.util.logging.Level;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -176,7 +175,7 @@ public class cSearchTable
   {
     cMainLayoutController oUIController = cInjector.getInjector().getInstance(cMainLayoutController.class);
     // clear the results table
-    oUIController.setResults(new ArrayList<eDocument>());
+    oUIController.setResults(new ArrayList());
             
     SearchField oSearchField = m_oSearchData.get(0);
     String sPath = oSearchField.sPath.get();

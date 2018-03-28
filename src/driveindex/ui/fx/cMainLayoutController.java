@@ -21,11 +21,13 @@ import javafx.scene.control.TableView;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import javafx.embed.swing.SwingNode;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
 import javafx.scene.control.cell.MapValueFactory;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
+import javax.swing.JScrollPane;
 import org.apache.commons.io.FileUtils;
 
 /**
@@ -61,7 +63,7 @@ public class cMainLayoutController implements Observer, Initializable
     new TableColumn(eDocument.TAG_Size)
   };
 
-  private cSearchTable m_oSearchTable;
+  private driveindex.ui.swing.cSearchTable m_oSearchTable;
   private cDriveMediator oMediator;
   
 //  private Method columnToFitMethod;
@@ -113,8 +115,11 @@ public class cMainLayoutController implements Observer, Initializable
       m_oTotDocsTable.getColumns().add(oIndexColumn);
     }
 
-    m_oSearchTable = new cSearchTable(dColumnWidth);
-    m_oSearchBox.getChildren().addAll(m_oSearchTable.getTable());
+    m_oSearchTable = new driveindex.ui.swing.cSearchTable(); //m_oSearchTable = new cSearchTable(dColumnWidth);
+    JScrollPane oJTable = m_oSearchTable.getTable();
+    SwingNode oSwingNode = new SwingNode();
+    oSwingNode.setContent(oJTable);
+    m_oSearchBox.getChildren().addAll(oSwingNode);
     
     oMediator = cDriveMediator.instance();
     
