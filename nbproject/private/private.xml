@@ -1,4 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
+    <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
+        <group>
+            <file>file:/home/philip/github/Indexer/src/driveindex/ui/fx/cMainLayout.fxml</file>
+            <file>file:/home/philip/github/Indexer/src/driveindex/ui/fx/cMainLayoutController.java</file>
+            <file>file:/home/philip/github/Indexer/build.xml</file>
+            <file>file:/home/philip/github/Indexer/src/driveindex/ui/fx/DriveIndexFx.java</file>
+            <file>file:/home/philip/github/Indexer/manifest.mf</file>
+            <file>file:/home/philip/github/Indexer/nbproject/build-impl.xml</file>
+            <file>file:/home/philip/github/Indexer/nbproject/project.properties</file>
+            <file>file:/home/philip/github/Indexer/src/driveindex/ui/fx/cProgressPanel.fxml</file>
+            <file>file:/home/philip/github/Indexer/DriveIndex.xml</file>
+            <file>file:/home/philip/github/Indexer/src/driveindex/ui/fx/cProgressPanelController.java</file>
+            <file>file:/home/philip/github/Indexer/src/driveindex/ui/fx/cSearchTable.java</file>
+            <file>file:/home/philip/github/Indexer/src/driveindex/ui/fx/cProgressPanelFx.java</file>
+            <file>file:/home/philip/github/Indexer/.gitattributes</file>
+            <file>file:/home/philip/github/Indexer/src/driveindex/cConfig.java</file>
+        </group>
+    </open-files>
 </project-private>
