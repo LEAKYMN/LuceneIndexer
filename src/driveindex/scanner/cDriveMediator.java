@@ -1,8 +1,3 @@
-/**
- * Copyright (c) 2017 GEW Technologies (GEW). All rights reserved.
- */
-
-
 package driveindex.scanner;
 
 import driveindex.cConfig;

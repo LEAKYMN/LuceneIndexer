@@ -1,6 +1,3 @@
-/**
- * Copyright (c) 2017 GEW Technologies (GEW). All rights reserved.
- */
 package driveindex.ui.fx;
 
 import driveindex.injection.cInjector;
