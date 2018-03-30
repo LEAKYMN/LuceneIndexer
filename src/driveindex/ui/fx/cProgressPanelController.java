@@ -159,19 +159,22 @@ public class cProgressPanelController implements Initializable
     cDriveMediator.instance().setStatus(null);
   }
 
-  public void appendIndexSize(long lFileSize)
+  public void appendIndexSize(String sFile, long lFileSize)
   {
     long lIndexedSize = oIndexedSize.addAndGet(lFileSize);
-
+    String sProgress = "Indexed: " + oNumberFormat.format(lIndexedSize/m_oDivider) + m_oDividerLabel;
+//    if (lFileSize > 0)
+//    {
+//      System.out.println(sProgress + " -> " + sFile + " (" + lFileSize + ")");
+//    }
     //jProgressBar.setString("Indexed: " + FileUtils.byteCountToDisplaySize(lIndexedSize) + " / " + FileUtils.byteCountToDisplaySize(lTotalSize));
     //m_oProgressBar.setString("Indexed: " + oNumberFormat.format(lIndexedSize/m_oDivider) + m_oDividerLabel);
     Platform.runLater(() -> 
     {
-      jProgressBar.setString("Indexed: " + oNumberFormat.format(lIndexedSize/m_oDivider) + m_oDividerLabel);
+      jProgressBar.setString(sProgress);
       jProgressBar.setValue((int)getPercentage(lIndexedSize,lUsedSize));
       jProgressBar.repaint();
     });
-    
   }
   
   public void complete()

@@ -134,8 +134,8 @@ public class cProgressPanelFx extends Application
     oProgressPanelController.complete();
   }
 
-  public void appendIndexSize(long length)
+  public void appendIndexSize(String sFile, long length)
   {
-    oProgressPanelController.appendIndexSize(length);
+    oProgressPanelController.appendIndexSize(sFile, length);
   }
 }

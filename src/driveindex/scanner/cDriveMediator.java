@@ -50,7 +50,8 @@ public class cDriveMediator extends Observable
       File[] paths = File.listRoots();
       for (File oRootFile: paths)
       {
-        if (cConfig.instance().getScanDriveType(oFileSystemView.getSystemTypeDescription(oRootFile)))
+        if (oFileSystemView.getSystemTypeDescription(oRootFile) == null || 
+                cConfig.instance().getScanDriveType(oFileSystemView.getSystemTypeDescription(oRootFile)))
         {
           cDriveScanner oDriveScanner = m_oDrives.get(oRootFile.getAbsolutePath());
           if (oDriveScanner == null)

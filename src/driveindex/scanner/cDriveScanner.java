@@ -136,7 +136,7 @@ public class cDriveScanner
             else
             {
               boolean bSuccess = indexFile(oChildFile);
-              oStatusPanel.appendIndexSize(oChildFile.length());
+              oStatusPanel.appendIndexSize(oChildFile.getPath(), oChildFile.length());
             }
           }
           oAlive.decrementAndGet();

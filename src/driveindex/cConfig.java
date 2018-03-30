@@ -12,6 +12,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 import org.apache.commons.io.FilenameUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -116,32 +120,45 @@ public class cConfig
   
   public void saveConfig()
   {
-    Writer oWriter = null;
     try
     {
-      oWriter = new FileWriter(m_oConfigFile);
-      //XMLConfiguration oConfig = new XMLConfiguration();
+      DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+      DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+
+      // root elements
+      Document doc = docBuilder.newDocument();
+      Element rootElement = doc.createElement("LuceneIndex");
+      doc.appendChild(rootElement);
+
+      Element oIndex = doc.createElement("Index");
+      rootElement.appendChild(oIndex);
+      Element oLocation = doc.createElement("Location");
+      oIndex.appendChild(oLocation);
+      oLocation.setTextContent("home/$USER/index/");
       
-      //oConfig.write(oWriter);
+      Element oDrives = doc.createElement("Drives");
+      rootElement.appendChild(oDrives);
+      Element oType = doc.createElement("Type");
+      oDrives.appendChild(oType);
+      oType.setAttribute("Scan", "true");
+      
+      Element oCategories = doc.createElement("Categories");
+      oCategories.setAttribute("Default", "File");
+      rootElement.appendChild(oCategories);
+      Element oCategory = doc.createElement("Category");
+      oCategories.appendChild(oCategory);
+      oCategory.setAttribute("Name", "File");
+      oCategory.setTextContent("*.*");
+      
+      TransformerFactory transformerFactory = TransformerFactory.newInstance();
+      Transformer transformer = transformerFactory.newTransformer();
+      DOMSource source = new DOMSource(doc);
+      StreamResult result = new StreamResult(m_oConfigFile);
+      transformer.transform(source, result);
     }
     catch (Exception ex)
     {
       Logger.getLogger(cConfig.class.getName()).log(Level.SEVERE, null, ex);
-    }
-    finally
-    {
-      if (oWriter != null)
-      {
-        try 
-        {
-          oWriter.flush();
-          oWriter.close();
-        }
-        catch (IOException ex) 
-        {
-          Logger.getLogger(cConfig.class.getName()).log(Level.SEVERE, null, ex);
-        }
-      }
     }
   }
   
