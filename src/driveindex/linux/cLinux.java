@@ -101,7 +101,7 @@ public class cLinux
         {
           //String sUsername = getUsername();
           String sDev = sDevice.substring(sDevice.lastIndexOf("/")+1);
-          sMountPoint = "/home/lucene/" + sDev;
+          sMountPoint = "/home/" + sDev;
           m_oDrivesMountedByThisApp.add(sMountPoint);
           String sCommand = "mkdir " + sMountPoint;
           System.out.println(sCommand);

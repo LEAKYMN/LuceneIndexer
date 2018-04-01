@@ -1,6 +1,7 @@
 package driveindex.ui.fx;
 
 import driveindex.injection.cInjector;
+import driveindex.linux.cLinux;
 import javafx.application.Application;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
@@ -32,6 +33,11 @@ public class DriveIndexFx extends Application
       @Override
       public void handle(WindowEvent t)
       {
+        String sOperatingSystem = System.getProperty("os.name");
+        if (sOperatingSystem.equalsIgnoreCase("Linux"))
+        {
+          cLinux.unmountMountedDrives();
+        }
         System.exit(0);
       }
     });
