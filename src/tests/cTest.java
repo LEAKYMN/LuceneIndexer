@@ -17,7 +17,6 @@
 package tests;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.HashMap;
@@ -25,7 +24,6 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.filechooser.FileSystemView;
 
 /**
  *
@@ -36,24 +34,6 @@ public class cTest
 
   public static void main(String[] args)
   {
-    /*
-    first command: sudo find /dev/sd*
-    /dev/sda
-    /dev/sda1
-    /dev/sda2
-    /dev/sda5
-    /dev/sdb
-    /dev/sdb1
-    /dev/sdc
-    /dev/sdc1
-    /dev/sdd
-    /dev/sdd1
-    /dev/sde
-    /dev/sde1
-    where there is a 1 at the end mount it.
-    second command: sudo mkdir /media/philip/sdc1
-    final command: sudo mount /dev/sdc1 /media/philip/sdc1
-     */
     HashMap<String, String> oDeviceMounts = new HashMap();
     for (char c = 'a'; c <= 'z'; c++)
     {
