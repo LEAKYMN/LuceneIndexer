@@ -97,7 +97,7 @@ public class cLuceneIndexReader extends Observable
     }
     catch (org.apache.lucene.index.IndexNotFoundException ex1)
     {
-      
+      m_oIndexReader = null;
     }
     catch (Exception ex)
     {

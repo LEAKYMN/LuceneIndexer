@@ -79,40 +79,10 @@ public class cMainLayoutController implements Observer, Initializable
 
   private driveindex.ui.fx.cSearchTable m_oSearchTable;
   private cDriveMediator oMediator;
-  
-//  private Method columnToFitMethod;
-//  public void autoFitTable(TableView tableView) 
-//  {
-//    m_oSearchTable.getItems().addListener(new ListChangeListener<Object>() {
-//      @Override
-//      public void onChanged(Change<?> c) {
-//        for (Object column : tableView.getColumns())
-//        {
-//          try
-//          {
-//            columnToFitMethod.invoke(m_oSearchTable.getSkin(), column, -1);
-//          }
-//          catch (IllegalAccessException | InvocationTargetException e)
-//          {
-//            e.printStackTrace();
-//          }
-//        }
-//      }
-//    });
-//  }
+
   @Override
   public void initialize(URL url, ResourceBundle rb)
   {
-//    try 
-//    {
-//        columnToFitMethod = TableViewSkin.class.getDeclaredMethod("resizeColumnToFitContent", TableColumn.class, int.class);
-//        columnToFitMethod.setAccessible(true);
-//    } 
-//    catch (NoSuchMethodException e) 
-//    {
-//        e.printStackTrace();
-//    }
-
     m_oIndexButton.setId("index");
     double dTotalWidth = m_oMainAnchorPane.getPrefWidth() - 10;
     double dColumnWidth = dTotalWidth / lsResultHeader.length;
@@ -129,12 +99,6 @@ public class cMainLayoutController implements Observer, Initializable
       m_oTotDocsTable.getColumns().add(oIndexColumn);
     }
 
-//    m_oSearchTable = new driveindex.ui.swing.cSearchTable(); //m_oSearchTable = new cSearchTable(dColumnWidth);
-//    JScrollPane oJTable = m_oSearchTable.getTable();
-//    SwingNode oSwingNode = new SwingNode();
-//    oSwingNode.setContent(oJTable);
-//    m_oSearchBox.getChildren().addAll(oSwingNode);
-    
     m_oSearchTable = new cSearchTable(dColumnWidth);
     TableView oTable = m_oSearchTable.getTable();
     m_oSearchBox.getChildren().addAll(oTable);
@@ -184,6 +148,7 @@ public class cMainLayoutController implements Observer, Initializable
   @FXML
   private void handleDeleteIndex(ActionEvent event)
   {
+    m_oTotDocsTable.getItems().clear();
     new Thread(() -> 
     {
       oMediator.stopScan();
@@ -204,7 +169,10 @@ public class cMainLayoutController implements Observer, Initializable
         {
           File oChildFile = new File(cConfig.instance().getIndexLocation() + File.separator + sFile);
           System.out.println("Deleting Index File: " + oChildFile.getAbsolutePath());
-          oChildFile.delete();
+          if (!oChildFile.delete())
+          {
+            System.err.println("Failed to delete index file: " + oChildFile.getAbsolutePath());
+          }
         }
       }
 
@@ -292,6 +260,7 @@ public class cMainLayoutController implements Observer, Initializable
   
   public void setIndexTableDocuments(ArrayList<eDocument> lsDocuments)
   {
+    m_oTotDocsTable.getItems().clear();
     for (eDocument oDoc: lsDocuments)
     {
       Map<String, String> oDataRow = new HashMap<>();
