@@ -1,6 +1,7 @@
 package driveindex.scanner;
 
 import driveindex.cConfig;
+import driveindex.linux.cLinux;
 import driveindex.lucene.cLuceneIndexWriter;
 import driveindex.ui.fx.cProgressPanelFx;
 import java.io.File;
@@ -23,6 +24,7 @@ public class cDriveMediator extends Observable
   private AtomicInteger m_iOpenWriters = new AtomicInteger(0);
   private HashMap<String, cDriveScanner> m_oDrives = new HashMap();
   private FileSystemView oFileSystemView = FileSystemView.getFileSystemView();
+  private File[] lsRoots = null;
   private static volatile cDriveMediator m_oInstance = null;
  
   public static cDriveMediator instance()
@@ -47,7 +49,8 @@ public class cDriveMediator extends Observable
     try
     {
       System.out.println("Scanning computer...");
-      File[] paths = File.listRoots();
+      File[] paths = getFileSystemRoots();
+      
       for (File oRootFile: paths)
       {
         if (oFileSystemView.getSystemTypeDescription(oRootFile) == null || 
@@ -75,23 +78,45 @@ public class cDriveMediator extends Observable
     }
   }
   
-  public void setStatus(String sStatus)
+  public File[] getFileSystemRoots()
   {
-    setChanged();
-    notifyObservers(sStatus);
+    if (lsRoots == null)
+    {
+      String sOperatingSystem = System.getProperty("os.name");
+      if (sOperatingSystem.equalsIgnoreCase("Windows"))
+      {
+        lsRoots = File.listRoots();
+      }
+      else if (sOperatingSystem.equalsIgnoreCase("Linux"))
+      {
+        lsRoots = cLinux.mountAllDrives(true);
+      }
+      else
+      {
+        lsRoots = File.listRoots();
+      }
+    }
+    return lsRoots;
   }
   
   public cProgressPanelFx[] listDrives()
   {
-    File[] paths = File.listRoots();
+    File[] paths = getFileSystemRoots();
     cProgressPanelFx[] oReturn = new cProgressPanelFx[paths.length];
+
     int iCount = 0;
     for (File oRoot: paths)
     {
       cProgressPanelFx oPanel = cProgressPanelFx.get(oRoot.getAbsolutePath());
       oReturn[iCount++] = oPanel;
     }
+    
     return oReturn;
+  }
+  
+  public void startScan()
+  {
+    scanComputer();
   }
   
   public void stopScan()
@@ -104,11 +129,6 @@ public class cDriveMediator extends Observable
       cDriveScanner oDrive = oIterator.next();
       oDrive.stopScan();
     }
-  }
-  
-  public void startScan()
-  {
-    scanComputer();
   }
 
   public void scanDrive(File oRoot)
@@ -136,5 +156,11 @@ public class cDriveMediator extends Observable
     {
       cLuceneIndexWriter.instance().commit();
     }
+  }
+  
+  public void setStatus(String sStatus)
+  {
+    setChanged();
+    notifyObservers(sStatus);
   }
 }

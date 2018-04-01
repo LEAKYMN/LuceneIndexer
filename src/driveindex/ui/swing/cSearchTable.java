@@ -20,6 +20,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ScrollPaneConstants;
+import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
 
 /**
@@ -37,14 +38,14 @@ public class cSearchTable extends Observable
   public cSearchTable()
   {
     String data[][]={ {"", "", "", "", ""} };    
-    String column[]=lsHeader;     
+    String column[]=lsHeader;
     oTable = new JTable(data, column);
     oTable.setRowHeight(22);
     oScrollPane = new JScrollPane(oTable);
     oScrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
     oScrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
     
-    oTable.addKeyListener(new cKeyListener());
+    //oTable.addKeyListener(new cKeyListener());
     
     cPopupMenuActionListener oPopupMenuActionListener = new cPopupMenuActionListener();
     oPopupMenu = new JPopupMenu();
@@ -62,7 +63,7 @@ public class cSearchTable extends Observable
       @Override
       public void mouseReleased(MouseEvent e) 
       {
-        if (e.isPopupTrigger() && oPopupMenu != null) 
+        if (e.getButton() != 0 && e.getButton() != 1 && oPopupMenu != null) 
         {
           oPopupMenu.show((JComponent) e.getSource(), e.getX(), e.getY());
         }
@@ -126,12 +127,14 @@ public class cSearchTable extends Observable
     public void keyTyped(KeyEvent e)
     {
       // Do nothing
+      System.out.println(e.getKeyChar());
     }
 
     @Override
     public void keyPressed(KeyEvent e)
     {
       // Do nothing
+      System.out.println(e.getKeyChar());
     }
 
     @Override

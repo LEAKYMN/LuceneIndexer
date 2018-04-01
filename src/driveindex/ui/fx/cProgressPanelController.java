@@ -23,7 +23,6 @@ import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.HBox;
 import javax.swing.JProgressBar;
 import org.apache.commons.io.FileUtils;
 
@@ -115,7 +114,9 @@ public class cProgressPanelController implements Initializable
     m_oDriveRoot = oDriveRoot;
     
     m_oDrivePathLabel.setText("Drive: " + oDriveRoot.getAbsolutePath());
-    m_oMetadata = new cMetadata(oDriveRoot.getAbsolutePath().charAt(0)+"");
+    String sMountPoint = oDriveRoot.getAbsolutePath();
+    sMountPoint = sMountPoint.replaceAll("[^a-zA-Z0-9]", "");
+    m_oMetadata = new cMetadata(sMountPoint+"");
     if (m_oMetadata.exists())
     {
       m_oLastScanLabel.setText("Last Scan: " + ((m_oMetadata.getPropertyValue("lastscan")==null) ? "" : m_oMetadata.getPropertyValue("lastscan")));

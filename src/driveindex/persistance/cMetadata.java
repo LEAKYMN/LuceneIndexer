@@ -29,9 +29,9 @@ public class cMetadata
   private String m_sMetadataFileExtension = "properties";
   private String m_sMetadataFile = "DriveIndexMetadata.properties";
   
-  public cMetadata(String sDriveLetter)
+  public cMetadata(String sMountPoint)
   {
-    m_sMetadataFile = m_sMetadataFileName + "_" + sDriveLetter + "." + m_sMetadataFileExtension;
+    m_sMetadataFile = m_sMetadataFileName + "_" + sMountPoint + "." + m_sMetadataFileExtension;
   }
   
   public boolean exists()
