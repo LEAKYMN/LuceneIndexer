@@ -1,2 +1,2 @@
-CD ../../LuceneIndexer/
+cd ../../LuceneIndexer/
 java -jar dist/LuceneIndexer.jar

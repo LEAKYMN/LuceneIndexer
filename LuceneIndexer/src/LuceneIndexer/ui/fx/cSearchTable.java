@@ -21,6 +21,8 @@ import LuceneIndexer.lucene.cLuceneIndexReader;
 import LuceneIndexer.lucene.eDocument;
 import LuceneIndexer.lucene.eSearchField;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -38,8 +40,6 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.util.Callback;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -47,8 +47,6 @@ import org.slf4j.LoggerFactory;
  */
 public class cSearchTable
 {
-  private static final Logger g_oLog = LoggerFactory.getLogger(cSearchTable.class);
-
   private TableView<SearchField> m_oSearchTable = new TableView<>();
 
   private final ObservableList<SearchField> m_oSearchData = FXCollections.observableArrayList(
@@ -178,7 +176,7 @@ public class cSearchTable
               }
               catch (InterruptedException ex)
               {
-                g_oLog.error("Interupted exception: " + ex.getMessage());
+                Logger.getLogger(cSearchTable.class.getName()).log(Level.SEVERE, null, ex);
               }
               search();
     }, "handleSearch").start();

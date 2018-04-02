@@ -22,8 +22,7 @@ import com.google.inject.Injector;
 import java.util.logging.Level;
 import LuceneIndexer.ui.fx.LuceneIndexerFX;
 import LuceneIndexer.ui.fx.cMainLayoutController;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.logging.Logger;
 
 /**
  *
@@ -31,7 +30,6 @@ import org.slf4j.LoggerFactory;
  */
 public class cInjector extends AbstractModule
 {
-  private static final Logger g_oLog = LoggerFactory.getLogger(cInjector.class);
   private final LuceneIndexerFX m_oMainUI;
   private final cMainLayoutController m_oMainUIController;
   private static Injector g_oInjector;
@@ -61,7 +59,7 @@ public class cInjector extends AbstractModule
     } 
     catch (Exception ex)
     {
-      g_oLog.error("Exception configuring injector.", ex);
+      Logger.getLogger(cInjector.class.getName()).log(Level.SEVERE, null, ex);
     }
   }
  
@@ -77,7 +75,7 @@ public class cInjector extends AbstractModule
         }
         catch (InterruptedException ex)
         {
-          java.util.logging.Logger.getLogger(cInjector.class.getName()).log(Level.SEVERE, null, ex);
+          Logger.getLogger(cInjector.class.getName()).log(Level.SEVERE, null, ex);
         }
       }
     }
