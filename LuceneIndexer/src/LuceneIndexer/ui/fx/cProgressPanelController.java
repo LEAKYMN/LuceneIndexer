@@ -299,7 +299,13 @@ public class cProgressPanelController implements Initializable
 
   public void resetProgress() 
   {
-    Platform.runLater(() -> {oIndexedSize.set(0);});
+    Platform.runLater(() -> 
+    {
+      jProgressBar.setString("0%");
+      jProgressBar.setValue((int)0);
+      jProgressBar.repaint();
+      oIndexedSize.set(0);
+    });
   }
   
   public float getPercentage(long n, long total) 

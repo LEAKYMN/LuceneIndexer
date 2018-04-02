@@ -43,6 +43,11 @@ public class cDriveScanner
   
   public cDriveScanner()
   {
+    resetExecutor();
+  }
+  
+  private void resetExecutor()
+  {
     ThreadFactory tFactory = (Runnable runnable) ->
     {
       Thread thread = new Thread(runnable);
@@ -51,6 +56,7 @@ public class cDriveScanner
       thread.setPriority(3);
       return thread;
     };
+    
     m_oExecutorService = Executors.newFixedThreadPool(m_iTOTAL_THREADS, tFactory);
   }
   
@@ -135,6 +141,7 @@ public class cDriveScanner
           if (bCancel)
           {
             m_oExecutorService.shutdownNow();
+            resetExecutor();
           }
 
           File oChildFile = new File(oParentFile.getAbsolutePath() + File.separator + sFile);
