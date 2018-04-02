@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<LuceneIndex>
+<Index>
+<Location>index/</Location>
+</Index>
+
+<Drives>
+<Type Scan="true"/>
+</Drives>
+
+<Categories Default="File">
+<Category Name="File">*.*</Category>
+</Categories>
+
+</LuceneIndex>
