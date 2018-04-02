@@ -182,6 +182,7 @@ public class cProgressPanelController implements Initializable
     String sProgress = "Indexed: " + oNumberFormat.format(lIndexedSize/m_oDivider) + m_oDividerLabel;
     Platform.runLater(() -> 
     {
+      //System.out.println(m_oDriveRoot.getAbsolutePath() + ": " + sProgress);
       jProgressBar.setString(sProgress);
       jProgressBar.setValue((int)getPercentage(lIndexedSize,lUsedSize));
       jProgressBar.repaint();

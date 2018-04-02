@@ -32,14 +32,9 @@ import org.apache.lucene.document.Field;
 import org.apache.lucene.document.FieldType;
 import org.apache.lucene.document.StringField;
 import org.apache.lucene.document.TextField;
-import org.apache.lucene.index.DirectoryReader;
-import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.Term;
-import org.apache.lucene.search.IndexSearcher;
-import org.apache.lucene.search.TermQuery;
-import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.store.NoLockFactory;
 import org.apache.lucene.util.BytesRef;
@@ -211,7 +206,10 @@ public class cLuceneIndexWriter extends Observable
       {
         try
         {
-          m_oIndexWriter.commit();
+          if (m_oIndexWriter.isOpen())
+          {
+            m_oIndexWriter.commit();
+          }
         }
         catch (IOException ex)
         {

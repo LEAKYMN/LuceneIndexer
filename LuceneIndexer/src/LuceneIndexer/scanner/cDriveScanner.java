@@ -24,7 +24,10 @@ import java.io.File;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -33,7 +36,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class cDriveScanner
 {
   private final Object m_oLOCK = new Object();
-  
+  private File m_oRootFile;
   private cLuceneIndexWriter oWriter = cLuceneIndexWriter.instance();
   private ExecutorService m_oExecutorService;
   private boolean bDone = true;
@@ -72,6 +75,7 @@ public class cDriveScanner
   
   public void scanDrive(File oRootFile)
   {
+    m_oRootFile = oRootFile;
     bCancel = false;
     bDone = false;
     Thread thread = new Thread(() -> 
@@ -79,7 +83,7 @@ public class cDriveScanner
       cProgressPanelFx oStatusPanel = cProgressPanelFx.get(oRootFile.getAbsolutePath());
       try
       {
-        System.out.println("Scanning drive: '" + oRootFile.getAbsolutePath());
+        System.out.println("Scanning drive: '" + oRootFile.getAbsolutePath() + "'");
         cDriveMediator.instance().setStatus("Scanning... (See Drive tab for detail)");
         oStatusPanel.resetProgress();
         oStatusPanel.setStatus("Scanning: " + oRootFile.getAbsolutePath());
@@ -140,7 +144,14 @@ public class cDriveScanner
         {
           if (bCancel)
           {
-            m_oExecutorService.shutdownNow();
+            try
+            {
+              m_oExecutorService.awaitTermination(10, TimeUnit.SECONDS);
+            }
+            catch (InterruptedException ex)
+            {
+              Logger.getLogger(cDriveScanner.class.getName()).log(Level.SEVERE, null, ex);
+            }
             resetExecutor();
           }
 
@@ -218,7 +229,7 @@ public class cDriveScanner
   
   public void stopScan()
   {
-    System.out.println("Stop Scan");
+    System.out.println("Stopping Scan : '" + m_oRootFile.getAbsolutePath() + "'");
     bCancel = true;
   }
 

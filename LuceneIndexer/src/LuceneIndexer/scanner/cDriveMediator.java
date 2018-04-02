@@ -137,7 +137,6 @@ public class cDriveMediator extends Observable
   
   public void stopScan()
   {
-    System.out.println("Stop Scan");
     Collection<cDriveScanner> lsDrives = m_oDrives.values();
     Iterator<cDriveScanner> oIterator = lsDrives.iterator();
     while (oIterator.hasNext())
