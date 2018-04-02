@@ -1,3 +1,6 @@
 /nbproject/private/
 /build/
 *.class
+/LuceneIndexer/build/
+/LuceneIndexer/dist/
+/LuceneIndexer/nbproject/private/
