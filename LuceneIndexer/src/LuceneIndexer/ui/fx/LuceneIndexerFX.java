@@ -42,6 +42,8 @@ public class LuceneIndexerFX extends Application
     Parent oRoot = oLoader.load();
     Scene oScene = new Scene(oRoot);
     oStage.setTitle("Drive Index");
+    oStage.setX(50);
+    oStage.setY(20);
     oStage.setScene(oScene);
     oStage.show();
 
