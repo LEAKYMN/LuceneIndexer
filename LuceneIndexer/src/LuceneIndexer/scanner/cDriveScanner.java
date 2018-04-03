@@ -21,6 +21,10 @@ import LuceneIndexer.lucene.cLuceneIndexWriter;
 import LuceneIndexer.ui.fx.cMainLayoutController;
 import LuceneIndexer.ui.fx.cProgressPanelFx;
 import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.TimeZone;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -43,10 +47,14 @@ public class cDriveScanner
   private boolean bCancel = false;
   private final int m_iTOTAL_THREADS = 50;
   private AtomicInteger oAlive = new AtomicInteger(0);
+  private static SimpleDateFormat g_DF = new SimpleDateFormat("HH:mm:ss");
+  private long m_lScanStartTime = 0;
+  private long m_lScanStopTime = 0;
   
   public cDriveScanner()
   {
     resetExecutor();
+    g_DF.setTimeZone(TimeZone.getTimeZone("UTC"));
   }
   
   private void resetExecutor()
@@ -80,6 +88,7 @@ public class cDriveScanner
     bDone = false;
     Thread thread = new Thread(() -> 
     {
+      m_lScanStartTime = new GregorianCalendar().getTimeInMillis();
       cProgressPanelFx oStatusPanel = cProgressPanelFx.get(oRootFile.getAbsolutePath());
       try
       {
@@ -122,8 +131,9 @@ public class cDriveScanner
         
           bDone = true;
           cDriveMediator.instance().closeIndexWriter();
+          m_lScanStopTime = new GregorianCalendar().getTimeInMillis();
           cInjector.getInjector().getInstance(cMainLayoutController.class).scanComplete();
-          oStatusPanel.setStatus("Scan Complete");
+          oStatusPanel.setStatus("Scan Complete. Running Time: " + g_DF.format(new Date(m_lScanStopTime-m_lScanStartTime)));
         }
       }
     });
