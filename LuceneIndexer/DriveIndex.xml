@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <LuceneIndex>
 <Index>
-<Location>index/</Location>
+	<Location>/index</Location>
 </Index>
-
 <Drives>
-<Type Scan="true"/>
+	<Type Scan="true">Local Disk</Type>
+	<Type Scan="true">Network Drive</Type>
 </Drives>
-
-<Categories Default="File">
-<Category Name="File">*.*</Category>
+<Categories Default="Undefined">
+	<Category Name="Document">txt,doc,docx,pdf</Category>
+	<Category Name="Video">avi,mp4,mkv,flv</Category>
+	<Category Name="Image">jpeg,jpg,png</Category>
+	<Category Name="Audio">mp3,flac,m4a,wma,gp3</Category>
 </Categories>
-
 </LuceneIndex>

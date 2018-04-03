@@ -41,7 +41,7 @@ public class cDriveScanner
   private ExecutorService m_oExecutorService;
   private boolean bDone = true;
   private boolean bCancel = false;
-  private final int m_iTOTAL_THREADS = 10;
+  private final int m_iTOTAL_THREADS = 50;
   private AtomicInteger oAlive = new AtomicInteger(0);
   
   public cDriveScanner()

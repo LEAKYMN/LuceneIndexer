@@ -146,21 +146,38 @@ public class cConfig
       rootElement.appendChild(oIndex);
       Element oLocation = doc.createElement("Location");
       oIndex.appendChild(oLocation);
-      oLocation.setTextContent("home/$USER/index/");
+      oLocation.setTextContent("/index");
       
       Element oDrives = doc.createElement("Drives");
       rootElement.appendChild(oDrives);
       Element oType = doc.createElement("Type");
       oDrives.appendChild(oType);
       oType.setAttribute("Scan", "true");
+      oType.setTextContent("Local Disk");
+      Element oType1 = doc.createElement("Type");
+      oDrives.appendChild(oType1);
+      oType1.setAttribute("Scan", "true");
+      oType1.setTextContent("Network Drive");
       
       Element oCategories = doc.createElement("Categories");
       oCategories.setAttribute("Default", "File");
       rootElement.appendChild(oCategories);
       Element oCategory = doc.createElement("Category");
       oCategories.appendChild(oCategory);
-      oCategory.setAttribute("Name", "File");
-      oCategory.setTextContent("*.*");
+      oCategory.setAttribute("Name", "Document");
+      oCategory.setTextContent("txt,doc,docx,pdf");
+      Element oCategory1 = doc.createElement("Category");
+      oCategories.appendChild(oCategory1);
+      oCategory1.setAttribute("Name", "Video");
+      oCategory1.setTextContent("avi,mp4,mkv,flv");
+      Element oCategory2 = doc.createElement("Category");
+      oCategories.appendChild(oCategory2);
+      oCategory2.setAttribute("Name", "Image");
+      oCategory2.setTextContent("jpeg,jpg,png");
+      Element oCategory3 = doc.createElement("Category");
+      oCategories.appendChild(oCategory3);
+      oCategory3.setAttribute("Name", "Audio");
+      oCategory3.setTextContent("mp3,flac,m4a,wma,gp3");
       
       TransformerFactory transformerFactory = TransformerFactory.newInstance();
       Transformer transformer = transformerFactory.newTransformer();
