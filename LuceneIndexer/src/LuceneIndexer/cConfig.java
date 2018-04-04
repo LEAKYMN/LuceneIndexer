@@ -46,6 +46,7 @@ public class cConfig
   private static String sConfigKeyValue = "DriveIndex.xml";
   
   private String m_sIndexLocation = "";
+  private boolean m_bHashDocuments = false;
   private String m_sDefaultCategory = "";
   private HashMap<String, String> m_oCategoryForFile = new HashMap();
   private HashSet<String> m_oScanDrives = new HashSet();
@@ -98,6 +99,7 @@ public class cConfig
       
       Element oIndexElement = getElement("Index");
       m_sIndexLocation = getChildElement(oIndexElement, "Location").getTextContent();
+      m_bHashDocuments = Boolean.parseBoolean(getChildElement(oIndexElement, "HashDocuments").getTextContent());
       
       Element oDrivesElement = getElement("Drives");
       ArrayList<Element> lsDriveTypes = getChildElements(oDrivesElement, "Type");
@@ -267,6 +269,11 @@ public class cConfig
   public String getIndexLocation()
   {
     return m_sIndexLocation;
+  }
+  
+  public boolean getHashDocuments()
+  {
+    return m_bHashDocuments;
   }
   
   public String getCategory(File oFile)

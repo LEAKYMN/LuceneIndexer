@@ -17,6 +17,7 @@
 package LuceneIndexer.lucene;
 
 import LuceneIndexer.cConfig;
+import LuceneIndexer.cryptopackage.cCryptographer;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
@@ -125,6 +126,11 @@ public class cLuceneIndexWriter extends Observable
         oDocument.add(new Field(eDocument.TAG_Category, cConfig.instance().getCategory(oFile), new FieldType(TextField.TYPE_STORED)));
         oDocument.add(new Field(eDocument.TAG_Size, oFile.length()+"", new FieldType(TextField.TYPE_STORED)));
 
+        if (cConfig.instance().getHashDocuments())
+        {
+          cCryptographer.hash(cCryptographer.)
+          oDocument.add(new Field(eDocument.TAG_Size, oFile.length()+"", new FieldType(TextField.TYPE_STORED)));
+        }
 
         m_oIndexWriter.updateDocument(new Term(eDocument.TAG_ID, oFile.getAbsolutePath()), oDocument);
         bResult = true;
