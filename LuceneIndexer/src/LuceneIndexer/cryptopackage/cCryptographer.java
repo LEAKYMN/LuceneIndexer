@@ -16,8 +16,11 @@
  */
 package LuceneIndexer.cryptopackage;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -617,20 +620,48 @@ public class cCryptographer
   
   public static String hash(File oFile)
   {
-   // public static byte [] hash(MessageDigest digest, BufferedInputStream in, int bufferSize) throws IOException {
-    byte [] buffer = new byte[4096];
-    int sizeRead = -1;
-    while ((sizeRead = in.read(buffer)) != -1) {
-        digest.update(buffer, 0, sizeRead);
+    String sha256hex = null;
+    FileInputStream oFileInputStream = null;
+    try 
+    {
+      // public static byte [] hash(MessageDigest digest, BufferedInputStream in, int bufferSize) throws IOException {
+      MessageDigest md = MessageDigest.getInstance("SHA-256");
+      byte [] buffer = new byte[4096];
+      int sizeRead;
+      oFileInputStream = new FileInputStream(oFile);
+      try (BufferedInputStream oBufferedInputStream = new BufferedInputStream(oFileInputStream))
+      {
+        while ((sizeRead = oBufferedInputStream.read(buffer)) != -1)
+        {
+          md.update(buffer, 0, sizeRead);
+        }
+      }
+      
+      byte[] hash = md.digest();
+      sha256hex = new String(Hex.encode(hash));
     }
-    in.close();
-
-    byte [] hash = null;
-    hash = new byte[digest.getDigestLength()];
-    hash = digest.digest();
-
-
-    String sha256hex = new String(Hex.encode(hash));
+    catch (FileNotFoundException ex)
+    {
+      Logger.getLogger(cCryptographer.class.getName()).log(Level.SEVERE, null, ex);
+    }
+    catch (IOException | NoSuchAlgorithmException ex)
+    {
+      Logger.getLogger(cCryptographer.class.getName()).log(Level.SEVERE, null, ex);
+    }
+    finally
+    {
+      try
+      {
+        if (oFileInputStream != null)
+        {
+          oFileInputStream.close();
+        }
+      }
+      catch (IOException ex)
+      {
+        Logger.getLogger(cCryptographer.class.getName()).log(Level.SEVERE, null, ex);
+      }
+    }
     return sha256hex;
   }
   

@@ -128,8 +128,8 @@ public class cLuceneIndexWriter extends Observable
 
         if (cConfig.instance().getHashDocuments())
         {
-          cCryptographer.hash(cCryptographer.)
-          oDocument.add(new Field(eDocument.TAG_Size, oFile.length()+"", new FieldType(TextField.TYPE_STORED)));
+          String hash = cCryptographer.hash(oFile);
+          oDocument.add(new Field(eDocument.TAG_Size, hash, new FieldType(TextField.TYPE_STORED)));
         }
 
         m_oIndexWriter.updateDocument(new Term(eDocument.TAG_ID, oFile.getAbsolutePath()), oDocument);
