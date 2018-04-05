@@ -16,6 +16,7 @@
  */
 package LuceneIndexer.lucene;
 
+import LuceneIndexer.cConfig;
 import org.apache.commons.io.FileUtils;
 import org.apache.lucene.document.Document;
 
@@ -31,12 +32,14 @@ public class eDocument
   public static String TAG_Extension = "Extension";
   public static String TAG_Category = "Category";
   public static String TAG_Size = "Size";
+  public static String TAG_Hash = "Hash";
   
   public String sFileAbsolutePath = "";
   public String sFilePath = "";
   public String sFileName = "";
   public String sFileExtension = "";
   public String sFileCategory = "";
+  public String sFileHash = "";
   public long lFileSize = 0;
   
   public static eDocument from(Document oDocument)
@@ -47,6 +50,10 @@ public class eDocument
     oReturn.sFileName = oDocument.get(TAG_Filename);
     oReturn.sFileExtension = oDocument.get(TAG_Extension);
     oReturn.sFileCategory = oDocument.get(TAG_Category);
+    if (cConfig.instance().getHashDocuments())
+    {
+      oReturn.sFileHash = oDocument.get(TAG_Hash);
+    }
     oReturn.lFileSize = Long.parseLong(oDocument.get(TAG_Size));
     return oReturn;
   }

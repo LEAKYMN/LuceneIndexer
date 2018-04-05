@@ -68,21 +68,38 @@ public class cMainLayoutController implements Observer, Initializable
   @FXML private Button m_oRefreshButton;
   @FXML private TableView m_oTotDocsTable;
 
-  private final TableColumn[] lsResultHeader = new TableColumn[]
-  {
-    new TableColumn(eDocument.TAG_Path),
-    new TableColumn(eDocument.TAG_Filename),
-    new TableColumn(eDocument.TAG_Extension),
-    new TableColumn(eDocument.TAG_Category),
-    new TableColumn(eDocument.TAG_Size)
-  };
-
   private LuceneIndexer.ui.fx.cSearchTable m_oSearchTable;
   private cDriveMediator oMediator;
+  
+  private TableColumn[] lsResultHeader;
 
   @Override
   public void initialize(URL url, ResourceBundle rb)
   {
+    if (cConfig.instance().getHashDocuments())
+    {
+      lsResultHeader = new TableColumn[]
+      {
+        new TableColumn(eDocument.TAG_Path),
+        new TableColumn(eDocument.TAG_Filename),
+        new TableColumn(eDocument.TAG_Extension),
+        new TableColumn(eDocument.TAG_Category),
+        new TableColumn(eDocument.TAG_Size),
+        new TableColumn(eDocument.TAG_Hash)
+      };
+    }
+    else
+    {
+      lsResultHeader = new TableColumn[]
+      {
+        new TableColumn(eDocument.TAG_Path),
+        new TableColumn(eDocument.TAG_Filename),
+        new TableColumn(eDocument.TAG_Extension),
+        new TableColumn(eDocument.TAG_Category),
+        new TableColumn(eDocument.TAG_Size)
+      };
+    }
+    
     m_oIndexButton.setId("index");
     double dTotalWidth = m_oMainAnchorPane.getPrefWidth() - 10;
     double dColumnWidth = dTotalWidth / lsResultHeader.length;
@@ -92,7 +109,6 @@ public class cMainLayoutController implements Observer, Initializable
       oResultColumn.setCellValueFactory(new MapValueFactory(oResultColumn.getText()));
       oResultColumn.setMinWidth(dColumnWidth);
       m_oResultTable.getColumns().add(oResultColumn);
-      
       TableColumn<Map, String> oIndexColumn = new TableColumn<>(oResultColumn.getText());
       oIndexColumn.setCellValueFactory(new MapValueFactory(oResultColumn.getText()));
       oIndexColumn.setMinWidth(dColumnWidth);
@@ -283,6 +299,10 @@ public class cMainLayoutController implements Observer, Initializable
       oDataRow.put(eDocument.TAG_Extension, oDoc.sFileExtension);
       oDataRow.put(eDocument.TAG_Category, oDoc.sFileCategory);
       oDataRow.put(eDocument.TAG_Size, oDoc.getFormattedFileSize());
+      if (cConfig.instance().getHashDocuments())
+      {
+        oDataRow.put(eDocument.TAG_Hash, oDoc.sFileHash);
+      }
       m_oTotDocsTable.getItems().add(oDataRow);    
     }
   }
@@ -298,6 +318,10 @@ public class cMainLayoutController implements Observer, Initializable
       oDataRow.put(eDocument.TAG_Extension, oDoc.sFileExtension);
       oDataRow.put(eDocument.TAG_Category, oDoc.sFileCategory);
       oDataRow.put(eDocument.TAG_Size, oDoc.getFormattedFileSize());
+      if (cConfig.instance().getHashDocuments())
+      {
+        oDataRow.put(eDocument.TAG_Hash, oDoc.sFileHash);
+      }
       m_oResultTable.getItems().add(oDataRow);    
     }
   }

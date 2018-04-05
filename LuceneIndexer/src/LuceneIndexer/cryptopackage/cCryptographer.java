@@ -620,13 +620,24 @@ public class cCryptographer
   
   public static String hash(File oFile)
   {
-    String sha256hex = null;
+    String hashhex = null;
     FileInputStream oFileInputStream = null;
     try 
     {
       // public static byte [] hash(MessageDigest digest, BufferedInputStream in, int bufferSize) throws IOException {
       MessageDigest md = MessageDigest.getInstance("SHA-256");
-      byte [] buffer = new byte[4096];
+      int iSize = 4096*1024;
+      try
+      {
+        iSize = (int)oFile.length();
+      } catch (Exception ex)
+      { }
+      
+      if (iSize > 100*1024) // 100 MB
+      {
+        iSize = 4096*1024;
+      }
+      byte [] buffer = new byte[iSize];
       int sizeRead;
       oFileInputStream = new FileInputStream(oFile);
       try (BufferedInputStream oBufferedInputStream = new BufferedInputStream(oFileInputStream))
@@ -638,11 +649,18 @@ public class cCryptographer
       }
       
       byte[] hash = md.digest();
-      sha256hex = new String(Hex.encode(hash));
+      hashhex = new String(Hex.encode(hash));
     }
     catch (FileNotFoundException ex)
     {
-      Logger.getLogger(cCryptographer.class.getName()).log(Level.SEVERE, null, ex);
+      if (ex.getMessage().contains("used by another process"))
+      {
+        Logger.getLogger(cCryptographer.class.getName()).log(Level.WARNING, "Cannot access file, it is in use: ''{0}''", oFile.getAbsolutePath());
+      }
+      else
+      {
+        Logger.getLogger(cCryptographer.class.getName()).log(Level.SEVERE, null, ex);
+      }
     }
     catch (IOException | NoSuchAlgorithmException ex)
     {
@@ -662,7 +680,7 @@ public class cCryptographer
         Logger.getLogger(cCryptographer.class.getName()).log(Level.SEVERE, null, ex);
       }
     }
-    return sha256hex;
+    return hashhex;
   }
   
   

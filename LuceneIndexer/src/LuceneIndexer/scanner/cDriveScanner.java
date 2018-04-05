@@ -16,6 +16,8 @@
  */
 package LuceneIndexer.scanner;
 
+import LuceneIndexer.cConfig;
+import LuceneIndexer.cryptopackage.cCryptographer;
 import LuceneIndexer.injection.cInjector;
 import LuceneIndexer.lucene.cLuceneIndexWriter;
 import LuceneIndexer.ui.fx.cMainLayoutController;
@@ -71,9 +73,9 @@ public class cDriveScanner
     m_oExecutorService = Executors.newFixedThreadPool(m_iTOTAL_THREADS, tFactory);
   }
   
-  public boolean indexFile(File oFile)
+  public boolean indexFile(File oFile, String sFileHash)
   {
-    return oWriter.indexFile(oFile);
+    return oWriter.indexFile(oFile, sFileHash);
   }
   
   public boolean deleteFile(File oFile)
@@ -176,7 +178,12 @@ public class cDriveScanner
             }
             else
             {
-              boolean bSuccess = indexFile(oChildFile);
+              String sHash = "";
+              if (cConfig.instance().getHashDocuments())
+              {
+                sHash = cCryptographer.hash(oChildFile);
+              }
+              boolean bSuccess = indexFile(oChildFile, sHash);
               oStatusPanel.appendIndexSize(oChildFile.getPath(), oChildFile.length());
             }
           }

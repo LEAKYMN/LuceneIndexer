@@ -16,6 +16,7 @@
  */
 package LuceneIndexer.ui.fx;
 
+import LuceneIndexer.cConfig;
 import LuceneIndexer.injection.cInjector;
 import LuceneIndexer.lucene.cLuceneIndexReader;
 import LuceneIndexer.lucene.eDocument;
@@ -50,7 +51,7 @@ public class cSearchTable
   private TableView<SearchField> m_oSearchTable = new TableView<>();
 
   private final ObservableList<SearchField> m_oSearchData = FXCollections.observableArrayList(
-          new SearchField("", "", "", "", "")
+          new SearchField("", "", "", "", "", "")
   );
   private ContextMenu m_oContextMenu;
   private MenuItem m_oMenuItemSearch;
@@ -138,11 +139,30 @@ public class cSearchTable
                       .get(t.getTablePosition().getRow()))
                       .setSize(t.getNewValue());
     });
+    
+    TableColumn<SearchField, String> oHashCol = new TableColumn(eDocument.TAG_Hash);
+    oHashCol.setMinWidth(dColumnWidth);
+    oHashCol.setCellValueFactory(cellData -> cellData.getValue().hashProperty());
+    oHashCol.setCellFactory(cellFactory);
+    oHashCol.setOnEditCommit(
+            (TableColumn.CellEditEvent<SearchField, String> t)
+            -> 
+            {
+              ((SearchField) t.getTableView().getItems()
+                      .get(t.getTablePosition().getRow()))
+                      .setHash(t.getNewValue());
+    });
 
     m_oSearchTable.setItems(m_oSearchData);
-    m_oSearchTable.getColumns().addAll(oPathCol, oFilenameCol, oExtensionCol, oCategoryCol, oSizeCol);
+    m_oSearchTable.getColumns().addAll(oPathCol, oFilenameCol, oExtensionCol, 
+            oCategoryCol, oSizeCol);
+    if (cConfig.instance().getHashDocuments())
+    {
+      m_oSearchTable.getColumns().add(oHashCol);
+    }
     m_oSearchTable.setFixedCellSize(28);
-    m_oSearchTable.prefHeightProperty().bind(Bindings.size(m_oSearchTable.getItems()).multiply(m_oSearchTable.getFixedCellSize()).add(30));
+    m_oSearchTable.prefHeightProperty().bind(Bindings.size(m_oSearchTable.getItems()).
+            multiply(m_oSearchTable.getFixedCellSize()).add(30));
 
     // create the context menu
     cContextMenuEventHandler oContextMenuEventHandler = new cContextMenuEventHandler();
@@ -194,9 +214,10 @@ public class cSearchTable
     String sExtension = oSearchField.sExtension.get();
     String sCategory = oSearchField.sCategory.get();
     String sSize = oSearchField.sSize.get();
+    String sHash = oSearchField.sHash.get();
 
-    System.out.println("Searching... (" + sPath + ":" + sFilename + ":" + sExtension + ":" + sCategory + ":" + sSize + ")");
-    oUIController.setStatus("Searching... (" + sPath + ":" + sFilename + ":" + sExtension + ":" + sCategory + ":" + sSize + ")");
+    System.out.println("Searching... (" + sPath + ":" + sFilename + ":" + sExtension + ":" + sCategory + ":" + sSize + ":" + sHash + ")");
+    oUIController.setStatus("Searching... (" + sPath + ":" + sFilename + ":" + sExtension + ":" + sCategory + ":" + sSize + ":" + sHash + ")");
 
     ArrayList<eSearchField> lsSearchFields = new ArrayList();
     if (!sPath.isEmpty())
@@ -219,9 +240,14 @@ public class cSearchTable
     {
       lsSearchFields.add(new eSearchField(eDocument.TAG_Size, sSize));
     }
+    if (!sHash.isEmpty())
+    {
+      lsSearchFields.add(new eSearchField(eDocument.TAG_Hash, sHash));
+    }
 
     cLuceneIndexReader oReader = cLuceneIndexReader.instance();
-    ArrayList<eDocument> lsResults = oReader.search(lsSearchFields, oUIController.getWholeWords(), oUIController.getCaseSensitive());
+    ArrayList<eDocument> lsResults = oReader.search(lsSearchFields, 
+            oUIController.getWholeWords(), oUIController.getCaseSensitive());
     oUIController.setResults(lsResults);
     oUIController.setStatus("");
   }
@@ -233,14 +259,17 @@ public class cSearchTable
     private final SimpleStringProperty sExtension;
     private final SimpleStringProperty sCategory;
     private final SimpleStringProperty sSize;
+    private final SimpleStringProperty sHash;
 
-    public SearchField(String sPath, String sFilename, String sExtension, String sCategory, String sSize)
+    public SearchField(String sPath, String sFilename, String sExtension, 
+            String sCategory, String sSize, String sHash)
     {
       this.sPath = new SimpleStringProperty(sPath);
       this.sFilename = new SimpleStringProperty(sFilename);
       this.sExtension = new SimpleStringProperty(sExtension);
       this.sCategory = new SimpleStringProperty(sCategory);
       this.sSize = new SimpleStringProperty(sSize);
+      this.sHash = new SimpleStringProperty(sHash);
     }
 
     public String getPath()
@@ -317,6 +346,21 @@ public class cSearchTable
     {
       this.sSize.set(sSize);
     }
+    
+    public String getHash()
+    {
+      return sHash.get();
+    }
+
+    public StringProperty hashProperty()
+    {
+      return this.sHash;
+    }
+
+    public void setHash(String sHash)
+    {
+      this.sHash.set(sHash);
+    }
   }
 
   private class EditingCell extends TableCell<SearchField, String>
@@ -325,7 +369,7 @@ public class cSearchTable
 
     private EditingCell()
     {
-      //m_oTextField = oTextField;
+      createTextField();
     }
 
     @Override
@@ -334,7 +378,6 @@ public class cSearchTable
       if (!isEmpty())
       {
         super.startEdit();
-        createTextField();
         setText(null);
         setGraphic(m_oTextField);
         m_oTextField.selectAll();
@@ -418,6 +461,7 @@ public class cSearchTable
           oSearchField.setExtension("");
           oSearchField.setCategory("");
           oSearchField.setSize("");
+          oSearchField.setHash("");
           break;
 
         default:

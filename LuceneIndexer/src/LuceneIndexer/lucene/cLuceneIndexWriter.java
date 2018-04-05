@@ -17,7 +17,6 @@
 package LuceneIndexer.lucene;
 
 import LuceneIndexer.cConfig;
-import LuceneIndexer.cryptopackage.cCryptographer;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
@@ -93,7 +92,7 @@ public class cLuceneIndexWriter extends Observable
     }
   }
   
-  public boolean indexFile(File oFile)
+  public boolean indexFile(File oFile, String sFileHash)
   {
     boolean bResult = false;
     try
@@ -128,8 +127,7 @@ public class cLuceneIndexWriter extends Observable
 
         if (cConfig.instance().getHashDocuments())
         {
-          String hash = cCryptographer.hash(oFile);
-          oDocument.add(new Field(eDocument.TAG_Size, hash, new FieldType(TextField.TYPE_STORED)));
+          oDocument.add(new Field(eDocument.TAG_Hash, sFileHash, new FieldType(TextField.TYPE_STORED)));
         }
 
         m_oIndexWriter.updateDocument(new Term(eDocument.TAG_ID, oFile.getAbsolutePath()), oDocument);
