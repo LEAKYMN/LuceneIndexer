@@ -22,9 +22,11 @@ import LuceneIndexer.injection.cInjector;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Observable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.analysis.util.CharArraySet;
 import org.apache.lucene.document.Document;
@@ -33,14 +35,19 @@ import org.apache.lucene.index.IndexNotFoundException;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.classic.MultiFieldQueryParser;
+import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.PhraseQuery;
 import org.apache.lucene.search.Query;
+import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopDocs;
+import org.apache.lucene.search.TopScoreDocCollector;
+import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.store.NoLockFactory;
+import org.apache.lucene.store.SimpleFSDirectory;
 
 
 /**
@@ -181,6 +188,21 @@ public class cLuceneIndexReader extends Observable
                 builder1.add(oQuery, BooleanClause.Occur.MUST);
             }
             oQuery = builder1.build();
+          
+//          TopScoreDocCollector collector = TopScoreDocCollector.create(100);
+//          String sLocation = cConfig.instance().getIndexLocation();
+//          File oFile = new File(sLocation);
+//Directory directory = new SimpleFSDirectory(oFile.toPath());
+//IndexSearcher searcher = new IndexSearcher(m_oIndexReader);
+//
+//          Analyzer oDefaultAnalyzer = new StandardAnalyzer(CharArraySet.copy(Collections.emptySet()));
+//          QueryParser oQueryParser = new QueryParser("filename", oDefaultAnalyzer);
+//          oQueryParser.setDefaultOperator(QueryParser.Operator.AND);
+//          oQuery = oQueryParser.parse("commons-io-2.4");
+//          
+//          searcher.search(oQuery, collector);
+//          ScoreDoc[] hits = collector.topDocs().scoreDocs;
+//          System.out.println(hits.length);
         }
         else
         {

@@ -47,7 +47,7 @@ public class cDriveScanner
   private ExecutorService m_oExecutorService;
   private boolean bDone = true;
   private boolean bCancel = false;
-  private final int m_iTOTAL_THREADS = 50;
+  private int m_iTOTAL_THREADS = 50;
   private AtomicInteger oAlive = new AtomicInteger(0);
   private static SimpleDateFormat g_DF = new SimpleDateFormat("HH:mm:ss");
   private long m_lScanStartTime = 0;
@@ -61,6 +61,7 @@ public class cDriveScanner
   
   private void resetExecutor()
   {
+    m_iTOTAL_THREADS = cConfig.instance().getScanThreads();
     ThreadFactory tFactory = (Runnable runnable) ->
     {
       Thread thread = new Thread(runnable);

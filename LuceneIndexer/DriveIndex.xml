@@ -2,7 +2,8 @@
 <LuceneIndex>
 <Index>
 	<Location>/index</Location>
-	<HashDocuments>true</HashDocuments>
+	<HashDocuments>false</HashDocuments>
+	<ScanThreads>10</ScanThreads>
 </Index>
 <Drives>
 	<Type Scan="true">Local Disk</Type>
