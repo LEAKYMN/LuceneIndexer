@@ -15,6 +15,7 @@
         <Label fx:id="m_oUsedSpaceLabel" layoutX="400" layoutY="2" text="Used Space: " />
         <Label fx:id="m_oTotalSpaceLabel" layoutX="650" layoutY="2" text="Total: " />
         <Label fx:id="m_oStatusLabel" layoutX="2" layoutY="66" maxWidth="700"  text="Status: " />
-        <SwingNode fx:id="m_oProgressNode" AnchorPane.leftAnchor="2" AnchorPane.bottomAnchor="2" AnchorPane.rightAnchor="2" />
+        <ProgressBar fx:id="m_oProgressNode" AnchorPane.leftAnchor="2" AnchorPane.bottomAnchor="2" AnchorPane.rightAnchor="55" />
+        <ProgressIndicator fx:id="m_oProgressIndicator" AnchorPane.bottomAnchor="2" AnchorPane.rightAnchor="2"/>
     </children>
 </AnchorPane>

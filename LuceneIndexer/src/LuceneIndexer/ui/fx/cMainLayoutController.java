@@ -17,6 +17,7 @@
 package LuceneIndexer.ui.fx;
 
 import LuceneIndexer.cConfig;
+import LuceneIndexer.dialogs.cConfirmDialog;
 import LuceneIndexer.lucene.cLuceneIndexReader;
 import LuceneIndexer.lucene.eDocument;
 import LuceneIndexer.scanner.cDriveMediator;
@@ -39,6 +40,7 @@ import java.util.HashMap;
 import java.util.Map;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
+import javafx.scene.control.Tab;
 import javafx.scene.control.cell.MapValueFactory;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
@@ -67,6 +69,10 @@ public class cMainLayoutController implements Observer, Initializable
   @FXML private Button m_oDeleteIndexButton;
   @FXML private Button m_oRefreshButton;
   @FXML private TableView m_oTotDocsTable;
+  
+  @FXML private Tab m_oSearchTab;
+  @FXML private Tab m_oDrives;
+  @FXML private Tab m_oIndex;
 
   private LuceneIndexer.ui.fx.cSearchTable m_oSearchTable;
   private cDriveMediator oMediator;
@@ -76,6 +82,9 @@ public class cMainLayoutController implements Observer, Initializable
   @Override
   public void initialize(URL url, ResourceBundle rb)
   {
+    m_oSearchTab.setClosable(false);
+    m_oDrives.setClosable(false);
+    m_oIndex.setClosable(false);
     if (cConfig.instance().getHashDocuments())
     {
       lsResultHeader = new TableColumn[]
@@ -178,36 +187,42 @@ public class cMainLayoutController implements Observer, Initializable
   @FXML
   private void handleDeleteIndex(ActionEvent event)
   {
-    m_oTotDocsTable.getItems().clear();
-    new Thread(() -> 
+    cConfirmDialog oDialog = new cConfirmDialog(LuceneIndexerFX.m_oStage, "Are you sure you want to delete the index?");
+    oDialog.showAndWait();
+    int result = oDialog.getResult();
+    if (result == cConfirmDialog.YES)
     {
-      oMediator.stopScan();
-      cProgressPanelFx[] oPanels = cProgressPanelFx.getAll();
-      if (oPanels != null)
+      m_oTotDocsTable.getItems().clear();
+      new Thread(() -> 
       {
-        for (cProgressPanelFx oPanel: oPanels)
+        oMediator.stopScan();
+        cProgressPanelFx[] oPanels = cProgressPanelFx.getAll();
+        if (oPanels != null)
         {
-          oPanel.deleteMetadata();
-        }
-      }
-
-      File oDirectory = new File(cConfig.instance().getIndexLocation());
-      String[] lsFiles = oDirectory.list();
-      if (lsFiles != null)
-      {
-        for (String sFile: lsFiles)
-        {
-          File oChildFile = new File(cConfig.instance().getIndexLocation() + File.separator + sFile);
-          System.out.println("Deleting Index File: " + oChildFile.getAbsolutePath());
-          if (!oChildFile.delete())
+          for (cProgressPanelFx oPanel: oPanels)
           {
-            System.err.println("Failed to delete index file: " + oChildFile.getAbsolutePath());
+            oPanel.deleteMetadata();
           }
         }
-      }
 
-      loadIndexMetadata();
-    }, "handleDeleteIndex").start();
+        File oDirectory = new File(cConfig.instance().getIndexLocation());
+        String[] lsFiles = oDirectory.list();
+        if (lsFiles != null)
+        {
+          for (String sFile: lsFiles)
+          {
+            File oChildFile = new File(cConfig.instance().getIndexLocation() + File.separator + sFile);
+            System.out.println("Deleting Index File: " + oChildFile.getAbsolutePath());
+            if (!oChildFile.delete())
+            {
+              System.err.println("Failed to delete index file: " + oChildFile.getAbsolutePath());
+            }
+          }
+        }
+
+        loadIndexMetadata();
+      }, "handleDeleteIndex").start();
+    }
   }
   
   @FXML

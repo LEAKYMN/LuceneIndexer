@@ -16,9 +16,13 @@
  */
 package LuceneIndexer.ui.fx;
 
+import LuceneIndexer.dialogs.cConfirmDialog;
 import LuceneIndexer.injection.cInjector;
 import LuceneIndexer.linux.cLinux;
+import LuceneIndexer.persistance.cSerializationFactory;
+import LuceneIndexer.persistance.cWindowBounds;
 import LuceneIndexer.scanner.cDriveMediator;
+import java.io.File;
 import javafx.application.Application;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
@@ -33,7 +37,11 @@ import javafx.stage.WindowEvent;
  */
 public class LuceneIndexerFX extends Application
 {
+  private cSerializationFactory m_oSerializationFactory = new cSerializationFactory();
   private cMainLayoutController oMainLayoutController;
+  private cWindowBounds oWindowBounds;
+  private File fBounds;
+  public static Stage m_oStage;
 
   @Override
   public void start(Stage oStage) throws Exception
@@ -41,9 +49,25 @@ public class LuceneIndexerFX extends Application
     FXMLLoader oLoader = new FXMLLoader(getClass().getResource("cMainLayout.fxml"));
     Parent oRoot = oLoader.load();
     Scene oScene = new Scene(oRoot);
-    oStage.setTitle("Drive Index");
-    oStage.setX(50);
-    oStage.setY(20);
+    m_oStage = oStage;
+    oStage.setTitle("Lucene Indexer");
+    
+    oWindowBounds = new cWindowBounds();
+    oWindowBounds.setX(50);
+    oWindowBounds.setY(50);
+    oWindowBounds.setW(1200);
+    oWindowBounds.setH(800);
+    fBounds = new File("bounds.ser");
+    if (fBounds.exists())
+    {
+      oWindowBounds = (cWindowBounds) m_oSerializationFactory.deserialize(fBounds, false);
+    }
+    
+    oStage.setX(oWindowBounds.getX());
+    oStage.setY(oWindowBounds.getY());
+    oStage.setWidth(oWindowBounds.getW());
+    oStage.setHeight(oWindowBounds.getH());
+    
     oStage.setScene(oScene);
     oStage.show();
 
@@ -52,13 +76,17 @@ public class LuceneIndexerFX extends Application
       @Override
       public void handle(WindowEvent t)
       {
-        String sOperatingSystem = System.getProperty("os.name");
-        if (sOperatingSystem.equalsIgnoreCase("Linux"))
+        cConfirmDialog oDialog = new cConfirmDialog(m_oStage, "Are you sure you want to exit?");
+        oDialog.showAndWait();
+        int result = oDialog.getResult();
+        if (result == cConfirmDialog.YES)
         {
-          cLinux.unmountMountedDrives();
+          terminate();
         }
-        cDriveMediator.instance().closeIndexWriter();
-        System.exit(0);
+        else
+        {
+          t.consume();
+        }
       }
     });
 
@@ -66,6 +94,23 @@ public class LuceneIndexerFX extends Application
     cInjector oInjector = new cInjector(this, oMainLayoutController);
   }
 
+  private void terminate()
+  {
+    oWindowBounds.setX((int)m_oStage.getX());
+    oWindowBounds.setY((int)m_oStage.getY());
+    oWindowBounds.setH((int)m_oStage.getHeight());
+    oWindowBounds.setW((int)m_oStage.getWidth());
+    m_oSerializationFactory.serialize(oWindowBounds, fBounds, false);
+    
+    String sOperatingSystem = System.getProperty("os.name");
+    if (sOperatingSystem.equalsIgnoreCase("Linux"))
+    {
+      cLinux.unmountMountedDrives();
+    }
+    cDriveMediator.instance().closeIndexWriter();
+    System.exit(0);
+  }
+  
   /**
    * @param args the command line arguments
    */

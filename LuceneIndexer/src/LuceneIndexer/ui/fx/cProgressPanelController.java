@@ -27,19 +27,21 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.ResourceBundle;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.application.Platform;
-import javafx.embed.swing.SwingNode;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.ProgressBar;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
-import javax.swing.JProgressBar;
 import org.apache.commons.io.FileUtils;
 
 /**
@@ -62,7 +64,6 @@ public class cProgressPanelController implements Initializable
   private double m_oDivider = 1;
   private String m_oDividerLabel = "";
   private MenuItem oMenuItemIndex;
-  private javax.swing.JProgressBar jProgressBar;
   
   @FXML private AnchorPane m_oAnchorPane;
   @FXML private Label m_oDrivePathLabel;
@@ -71,7 +72,8 @@ public class cProgressPanelController implements Initializable
   @FXML private Label m_oUsedSpaceLabel;
   @FXML private Label m_oTotalSpaceLabel;
   @FXML private Label m_oStatusLabel;
-  @FXML private SwingNode m_oProgressNode;
+  @FXML private ProgressBar m_oProgressNode;
+  @FXML private ProgressIndicator m_oProgressIndicator;
   
   /**
    * Initializes the controller class.
@@ -119,10 +121,6 @@ public class cProgressPanelController implements Initializable
         oContextMenu.show(m_oAnchorPane, oEvent.getScreenX(), oEvent.getScreenY());
       }
     });
-    jProgressBar = new JProgressBar();
-    jProgressBar.setStringPainted(true);
-     
-    m_oProgressNode.setContent(jProgressBar);
   }  
 
   public void postInitialize(File oDriveRoot)
@@ -137,7 +135,12 @@ public class cProgressPanelController implements Initializable
     {
       m_oLastScanLabel.setText("Last Scan: " + ((m_oMetadata.getPropertyValue("lastscan")==null) ? "" : m_oMetadata.getPropertyValue("lastscan")));
       m_oStatusLabel.setText("Status: " + m_oMetadata.getPropertyValue("status"));
-      jProgressBar.setValue(Integer.parseInt(m_oMetadata.getPropertyValue("indexed")));
+      double dProgress = Double.parseDouble(m_oMetadata.getPropertyValue("indexed"));
+      setProgress(dProgress);
+    }
+    else
+    {
+      setProgress(0.0);
     }
 
     //startFolderWatcher();
@@ -182,10 +185,17 @@ public class cProgressPanelController implements Initializable
     String sProgress = "Indexed: " + oNumberFormat.format(lIndexedSize/m_oDivider) + m_oDividerLabel;
     Platform.runLater(() -> 
     {
-      //System.out.println(m_oDriveRoot.getAbsolutePath() + ": " + sProgress);
-      jProgressBar.setString(sProgress);
-      jProgressBar.setValue((int)getPercentage(lIndexedSize,lUsedSize));
-      jProgressBar.repaint();
+      double dProgress = m_oProgressNode.getProgress() + 1.0;//getPercentage(lIndexedSize,lUsedSize);
+      System.out.println(dProgress + " -> " + lIndexedSize + " of " + lUsedSize); 
+      setProgress(dProgress); 
+      try
+      {
+        Thread.sleep(200);
+      }
+      catch (InterruptedException ex)
+      {
+        Logger.getLogger(cProgressPanelController.class.getName()).log(Level.SEVERE, null, ex);
+      }
     });
   }
   
@@ -213,8 +223,7 @@ public class cProgressPanelController implements Initializable
       oMenuItemIndex.setText("Index Drive");
       oMenuItemIndex.setId("index");
 
-      jProgressBar.setString("100%");
-      jProgressBar.setValue(100);
+      //setProgress(100);
       setStatus("Indexed");
 
       Date time = new GregorianCalendar().getTime();
@@ -302,9 +311,7 @@ public class cProgressPanelController implements Initializable
   {
     Platform.runLater(() -> 
     {
-      jProgressBar.setString("0%");
-      jProgressBar.setValue((int)0);
-      jProgressBar.repaint();
+      setProgress(0.0);
       oIndexedSize.set(0);
     });
   }
@@ -318,5 +325,11 @@ public class cProgressPanelController implements Initializable
   public File getRoot()
   {
     return m_oDriveRoot;
+  }
+
+  private void setProgress(double dProgress)
+  {
+    m_oProgressNode.setProgress(dProgress);
+    m_oProgressIndicator.setProgress(dProgress);
   }
 }
