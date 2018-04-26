@@ -14,17 +14,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package LuceneIndexer.scanner;
+package LuceneIndexer.drives;
 
 import LuceneIndexer.cConfig;
 import LuceneIndexer.linux.cLinux;
-import LuceneIndexer.lucene.cLuceneIndexWriter;
 import LuceneIndexer.ui.fx.cProgressPanelFx;
 import java.io.File;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Observable;
+import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -38,7 +38,7 @@ import javax.swing.filechooser.FileSystemView;
 public class cDriveMediator extends Observable
 {
   private AtomicInteger m_iOpenWriters = new AtomicInteger(0);
-  private HashMap<String, cDriveScanner> m_oDrives = new HashMap();
+  private TreeMap<String, cDrive> m_oDrives = new TreeMap();
   private FileSystemView oFileSystemView = FileSystemView.getFileSystemView();
   private File[] lsRoots = null;
   private static volatile cDriveMediator m_oInstance = null;
@@ -60,38 +60,64 @@ public class cDriveMediator extends Observable
     return oInstance;
   }
   
+  private cDriveMediator()
+  {
+  }
+  
+  public void loadDrives()
+  {
+    File[] paths = getFileSystemRoots();
+    for (File oRootFile: paths)
+    {
+      if (oFileSystemView.getSystemTypeDescription(oRootFile) == null || 
+              cConfig.instance().getScanDriveType(oFileSystemView.getSystemTypeDescription(oRootFile)))
+      {
+        cDrive oDriveScanner = m_oDrives.get(oRootFile.getAbsolutePath());
+        if (oDriveScanner == null)
+        {
+          oDriveScanner = new cDrive(oRootFile);
+          m_oDrives.put(oRootFile.getAbsolutePath(), oDriveScanner);
+        }
+      }
+      else
+      {
+        System.out.println("Ignoring drive: " + oRootFile.getAbsolutePath() + 
+                " (Type " + oFileSystemView.getSystemTypeDescription(oRootFile) + " not configured to scan)");
+      }
+    }
+  }
+  
+  
   public void scanComputer()
   {
     try
     {
       System.out.println("Scanning computer...");
-      File[] paths = getFileSystemRoots();
       
-      for (File oRootFile: paths)
+      Iterator<cDrive> oIterator = m_oDrives.values().iterator();
+      while (oIterator.hasNext())
       {
-        if (oFileSystemView.getSystemTypeDescription(oRootFile) == null || 
-                cConfig.instance().getScanDriveType(oFileSystemView.getSystemTypeDescription(oRootFile)))
-        {
-          cDriveScanner oDriveScanner = m_oDrives.get(oRootFile.getAbsolutePath());
-          if (oDriveScanner == null)
-          {
-            oDriveScanner = new cDriveScanner();
-            m_oDrives.put(oRootFile.getAbsolutePath(), oDriveScanner);
-          }
-          m_iOpenWriters.incrementAndGet();
-          oDriveScanner.scanDrive(oRootFile);
-        }
-        else
-        {
-          System.out.println("Ignoring drive: " + oRootFile.getAbsolutePath() + 
-                  " (Type " + oFileSystemView.getSystemTypeDescription(oRootFile) + " not configured to scan)");
-        }
+        cDrive oDriveScanner = oIterator.next();
+        m_iOpenWriters.incrementAndGet();
+        oDriveScanner.scanDrive();
       }
     }
     catch (Exception ex)
     {
       Logger.getLogger(cConfig.class.getName()).log(Level.SEVERE, null, ex);
     }
+  }
+  
+  public void scanDrive(File oRoot)
+  {
+    cDrive oDriveScanner = m_oDrives.get(oRoot.getAbsolutePath());
+    if (oDriveScanner == null)
+    {
+      oDriveScanner = new cDrive(oRoot);
+      m_oDrives.put(oRoot.getAbsolutePath(), oDriveScanner);
+    }
+    m_iOpenWriters.incrementAndGet();
+    oDriveScanner.scanDrive();
   }
   
   public File[] getFileSystemRoots()
@@ -117,13 +143,13 @@ public class cDriveMediator extends Observable
   
   public cProgressPanelFx[] listDrives()
   {
-    File[] paths = getFileSystemRoots();
-    cProgressPanelFx[] oReturn = new cProgressPanelFx[paths.length];
-
+    cProgressPanelFx[] oReturn = new cProgressPanelFx[m_oDrives.size()];
+    Iterator<cDrive> oIterator = m_oDrives.values().iterator();
     int iCount = 0;
-    for (File oRoot: paths)
+    while (oIterator.hasNext())
     {
-      cProgressPanelFx oPanel = cProgressPanelFx.get(oRoot.getAbsolutePath());
+      cDrive oDriveScanner = oIterator.next();
+      cProgressPanelFx oPanel = cProgressPanelFx.get(oDriveScanner.getRoot());
       oReturn[iCount++] = oPanel;
     }
     
@@ -137,39 +163,31 @@ public class cDriveMediator extends Observable
   
   public void stopScan()
   {
-    Collection<cDriveScanner> lsDrives = m_oDrives.values();
-    Iterator<cDriveScanner> oIterator = lsDrives.iterator();
+    Collection<cDrive> lsDrives = m_oDrives.values();
+    Iterator<cDrive> oIterator = lsDrives.iterator();
     while (oIterator.hasNext())
     {
-      cDriveScanner oDrive = oIterator.next();
+      cDrive oDrive = oIterator.next();
       oDrive.stopScan();
     }
   }
-
-  public void scanDrive(File oRoot)
-  {
-    cDriveScanner oDriveScanner = m_oDrives.get(oRoot.getAbsolutePath());
-    if (oDriveScanner == null)
-    {
-      oDriveScanner = new cDriveScanner();
-      m_oDrives.put(oRoot.getAbsolutePath(), oDriveScanner);
-    }
-    m_iOpenWriters.incrementAndGet();
-    oDriveScanner.scanDrive(oRoot);
-  }
   
-  public void closeIndexWriter()
+  public void closeIndexWriters()
   {
     int iOpen = m_iOpenWriters.decrementAndGet();
-    
-    if (iOpen == 0)
+    Iterator<cDrive> oIterator = m_oDrives.values().iterator();
+    while (oIterator.hasNext())
     {
-      System.out.println("Closing index writer.");
-      cLuceneIndexWriter.instance().close();
-    }
-    else
-    {
-      cLuceneIndexWriter.instance().commit();
+      cDrive oDriveScanner = oIterator.next();
+      if (iOpen == 0)
+      {
+        System.out.println("Closing index writer.");
+        oDriveScanner.closeIndexWriter();
+      }
+      else
+      {
+        oDriveScanner.commitIndexWriter();
+      }
     }
   }
   
@@ -177,5 +195,15 @@ public class cDriveMediator extends Observable
   {
     setChanged();
     notifyObservers(sStatus);
+  }
+  
+  public cDrive getDrive(String sRoot)
+  {
+    return m_oDrives.get(sRoot);
+  }
+  
+  public TreeMap<String, cDrive> getDrives()
+  {
+    return m_oDrives;
   }
 }

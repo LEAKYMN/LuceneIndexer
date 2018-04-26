@@ -14,16 +14,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package LuceneIndexer.scanner;
+package LuceneIndexer.drives;
 
 import LuceneIndexer.cConfig;
 import LuceneIndexer.cryptopackage.cCryptographer;
 import LuceneIndexer.injection.cInjector;
+import LuceneIndexer.lucene.cLuceneIndexReader;
 import LuceneIndexer.lucene.cLuceneIndexWriter;
+import LuceneIndexer.lucene.eDocument;
+import LuceneIndexer.lucene.eSearchField;
 import LuceneIndexer.ui.fx.cMainLayoutController;
 import LuceneIndexer.ui.fx.cProgressPanelFx;
 import java.io.File;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
@@ -39,11 +43,12 @@ import java.util.logging.Logger;
  *
  * @author Philip M. Trenwith
  */
-public class cDriveScanner
+public class cDrive
 {
+  private cLuceneIndexWriter m_oLuceneIndexWriter = null;
+  private cLuceneIndexReader m_oLuceneIndexReader = null;
   private final Object m_oLOCK = new Object();
   private File m_oRootFile;
-  private cLuceneIndexWriter oWriter = cLuceneIndexWriter.instance();
   private ExecutorService m_oExecutorService;
   private boolean bDone = true;
   private boolean bCancel = false;
@@ -53,10 +58,13 @@ public class cDriveScanner
   private long m_lScanStartTime = 0;
   private long m_lScanStopTime = 0;
   
-  public cDriveScanner()
+  public cDrive(File oRootFile)
   {
-    resetExecutor();
     g_DF.setTimeZone(TimeZone.getTimeZone("UTC"));
+    m_oRootFile = oRootFile;
+    m_oLuceneIndexReader = new cLuceneIndexReader(m_oRootFile, this);
+    m_oLuceneIndexWriter = new cLuceneIndexWriter(m_oRootFile);
+    resetExecutor();
   }
   
   private void resetExecutor()
@@ -74,32 +82,37 @@ public class cDriveScanner
     m_oExecutorService = Executors.newFixedThreadPool(m_iTOTAL_THREADS, tFactory);
   }
   
+  public String getRoot()
+  {
+    return m_oRootFile.getPath();
+  }
+  
   public boolean indexFile(File oFile, String sFileHash)
   {
-    return oWriter.indexFile(oFile, sFileHash);
+    return m_oLuceneIndexWriter.indexFile(oFile, sFileHash);
   }
   
   public boolean deleteFile(File oFile)
   {
-    return oWriter.deleteFile(oFile);
+    return m_oLuceneIndexWriter.deleteFile(oFile);
   }  
   
-  public void scanDrive(File oRootFile)
+  public void scanDrive()
   {
-    m_oRootFile = oRootFile;
+    
     bCancel = false;
     bDone = false;
     Thread thread = new Thread(() -> 
     {
       m_lScanStartTime = new GregorianCalendar().getTimeInMillis();
-      cProgressPanelFx oStatusPanel = cProgressPanelFx.get(oRootFile.getAbsolutePath());
+      cProgressPanelFx oStatusPanel = cProgressPanelFx.get(m_oRootFile.getAbsolutePath());
       try
       {
-        System.out.println("Scanning drive: '" + oRootFile.getAbsolutePath() + "'");
+        System.out.println("Scanning drive: '" + m_oRootFile.getAbsolutePath() + "'");
         cDriveMediator.instance().setStatus("Scanning... (See Drive tab for detail)");
         oStatusPanel.resetProgress();
-        oStatusPanel.setStatus("Scanning: " + oRootFile.getAbsolutePath());
-        scanDirectory(oRootFile, oStatusPanel);
+        oStatusPanel.setStatus("Scanning: " + m_oRootFile.getAbsolutePath());
+        scanDirectory(m_oRootFile, oStatusPanel);
       }
       finally
       {
@@ -130,10 +143,10 @@ public class cDriveScanner
             oStatusPanel.complete();
           }
 
-          System.out.println("Scanning drive: '" + oRootFile.getAbsolutePath() + "' " + sStatus + " (" + oAlive.get() + ")");
+          System.out.println("Scanning drive: '" + m_oRootFile.getAbsolutePath() + "' " + sStatus + " (" + oAlive.get() + ")");
         
           bDone = true;
-          cDriveMediator.instance().closeIndexWriter();
+          closeIndexWriter();
           m_lScanStopTime = new GregorianCalendar().getTimeInMillis();
           cInjector.getInjector().getInstance(cMainLayoutController.class).scanComplete();
           oStatusPanel.setStatus("Scan Complete. Running Time: " + g_DF.format(new Date(m_lScanStopTime-m_lScanStartTime)));
@@ -163,7 +176,7 @@ public class cDriveScanner
             }
             catch (InterruptedException ex)
             {
-              Logger.getLogger(cDriveScanner.class.getName()).log(Level.SEVERE, null, ex);
+              Logger.getLogger(cDrive.class.getName()).log(Level.SEVERE, null, ex);
             }
             resetExecutor();
           }
@@ -254,5 +267,36 @@ public class cDriveScanner
   public boolean isDone()
   {
     return bDone;
+  }
+  
+  public ArrayList<eDocument> search(ArrayList<eSearchField> lsSearchFields, 
+          boolean wholeWords, boolean caseSensitive)
+  {
+    return m_oLuceneIndexReader.search(lsSearchFields, wholeWords, caseSensitive);
+  }
+
+  public void closeIndexWriter()
+  {
+    m_oLuceneIndexWriter.close();
+  }
+
+  public void commitIndexWriter()
+  {
+    m_oLuceneIndexWriter.commit();
+  }
+
+  public int getNumberOfDocuments()
+  {
+    return m_oLuceneIndexReader.getNumberOfDocuments();
+  }
+
+  public ArrayList<eDocument> getTopNDocuments(int n)
+  {
+    return m_oLuceneIndexReader.getTopNDocuments(n);
+  }
+
+  public String getIndexLocation()
+  {
+    return m_oLuceneIndexReader.getIndexLocation();
   }
 }

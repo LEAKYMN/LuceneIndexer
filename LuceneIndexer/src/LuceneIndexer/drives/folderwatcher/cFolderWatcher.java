@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package LuceneIndexer.scanner.folderwatcher;
+package LuceneIndexer.drives.folderwatcher;
 
 import LuceneIndexer.lucene.cLuceneIndexReader;
 import java.io.File;

@@ -21,7 +21,7 @@ import LuceneIndexer.injection.cInjector;
 import LuceneIndexer.linux.cLinux;
 import LuceneIndexer.persistance.cSerializationFactory;
 import LuceneIndexer.persistance.cWindowBounds;
-import LuceneIndexer.scanner.cDriveMediator;
+import LuceneIndexer.drives.cDriveMediator;
 import java.io.File;
 import javafx.application.Application;
 import javafx.event.EventHandler;
@@ -70,7 +70,7 @@ public class LuceneIndexerFX extends Application
     
     oStage.setScene(oScene);
     oStage.show();
-
+    
     oStage.setOnCloseRequest(new EventHandler<WindowEvent>()
     {
       @Override
@@ -92,6 +92,8 @@ public class LuceneIndexerFX extends Application
 
     oMainLayoutController = oLoader.<cMainLayoutController>getController();
     cInjector oInjector = new cInjector(this, oMainLayoutController);
+    
+    cDriveMediator.instance().loadDrives();
   }
 
   private void terminate()
@@ -107,7 +109,7 @@ public class LuceneIndexerFX extends Application
     {
       cLinux.unmountMountedDrives();
     }
-    cDriveMediator.instance().closeIndexWriter();
+    cDriveMediator.instance().closeIndexWriters();
     System.exit(0);
   }
   

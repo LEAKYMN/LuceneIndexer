@@ -17,7 +17,7 @@
 package LuceneIndexer.ui.fx;
 
 import LuceneIndexer.persistance.cMetadata;
-import LuceneIndexer.scanner.folderwatcher.cFolderWatcher;
+import LuceneIndexer.drives.folderwatcher.cFolderWatcher;
 import java.io.File;
 import java.util.Collection;
 import java.util.HashMap;
@@ -114,9 +114,14 @@ public class cProgressPanelFx extends Application
     oProgressPanelController.postInitialize(oDriveRoot);
   }
   
-  public Parent getRoot()
+  public Parent getParent()
   {
     return oRoot;
+  }
+  
+  public String getRoot()
+  {
+    return oDriveRoot.getPath();
   }
   
   public cProgressPanelController getController()

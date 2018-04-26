@@ -19,6 +19,8 @@ package LuceneIndexer.lucene;
 import LuceneIndexer.cConfig;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.Observable;
 import java.util.logging.Level;
@@ -46,28 +48,12 @@ import org.apache.lucene.util.BytesRef;
 public class cLuceneIndexWriter extends Observable
 {
   private final Object m_oLock = new Object();
-  private static volatile cLuceneIndexWriter m_oInstance = null;
   private IndexWriter m_oIndexWriter = null;
+  private File m_oDrive = null;
   
-  public static cLuceneIndexWriter instance()
+  public cLuceneIndexWriter(File oDrive)
   {
-    cLuceneIndexWriter oInstance = cLuceneIndexWriter.m_oInstance;
-    if (oInstance == null)
-    {
-      synchronized (cLuceneIndexWriter.class)
-      {
-        oInstance = cLuceneIndexWriter.m_oInstance;
-        if (oInstance == null)
-        {
-          cLuceneIndexWriter.m_oInstance = oInstance = new cLuceneIndexWriter();
-        }
-      }
-    }
-    return oInstance;
-  }
-  
-  private cLuceneIndexWriter()
-  { 
+    m_oDrive = oDrive;
   }
   
   private void initialize()
@@ -78,7 +64,8 @@ public class cLuceneIndexWriter extends Observable
 
     try 
     {
-      m_oIndexDirectory = FSDirectory.open(new File(sLocation).toPath(), NoLockFactory.INSTANCE);
+      Path oPath = Paths.get(new File(sLocation).getPath(), m_oDrive.getPath().substring(0,1));
+      m_oIndexDirectory = FSDirectory.open(oPath, NoLockFactory.INSTANCE);
       Analyzer oDefaultAnalyzer = new StandardAnalyzer(CharArraySet.copy(Collections.emptySet()));
 
       //PerFieldAnalyzerWrapper oMultipleLanguageAnalyzer = new PerFieldAnalyzerWrapper(oDefaultAnalyzer, m_oLanguageFields);
@@ -86,8 +73,9 @@ public class cLuceneIndexWriter extends Observable
 
       m_oIndexWriter = new IndexWriter(m_oIndexDirectory, oIndexConfig);
     }
-    catch (IOException ex) 
+    catch (Exception ex) 
     {
+      ex.printStackTrace();
       Logger.getLogger(cConfig.class.getName()).log(Level.SEVERE, null, ex);
     }
   }

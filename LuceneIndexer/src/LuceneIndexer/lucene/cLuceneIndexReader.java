@@ -19,14 +19,15 @@ package LuceneIndexer.lucene;
 import LuceneIndexer.cConfig;
 import LuceneIndexer.ui.fx.cMainLayoutController;
 import LuceneIndexer.injection.cInjector;
+import LuceneIndexer.drives.cDrive;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Observable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.analysis.util.CharArraySet;
 import org.apache.lucene.document.Document;
@@ -35,19 +36,14 @@ import org.apache.lucene.index.IndexNotFoundException;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.classic.MultiFieldQueryParser;
-import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.PhraseQuery;
 import org.apache.lucene.search.Query;
-import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopDocs;
-import org.apache.lucene.search.TopScoreDocCollector;
-import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.store.NoLockFactory;
-import org.apache.lucene.store.SimpleFSDirectory;
 
 
 /**
@@ -56,29 +52,16 @@ import org.apache.lucene.store.SimpleFSDirectory;
  */
 public class cLuceneIndexReader extends Observable
 {
-  private static volatile cLuceneIndexReader m_oInstance = null;
   private IndexReader m_oIndexReader = null;
   private boolean m_bIsOpen = false;
+  private File m_oDrive = null;
+  private cDrive m_oDriveScanner;
+  private Path m_oPath;
   
-  public static cLuceneIndexReader instance()
+  public cLuceneIndexReader(File oDrive, cDrive oDriveScanner)
   {
-    cLuceneIndexReader oInstance = cLuceneIndexReader.m_oInstance;
-    if (oInstance == null)
-    {
-      synchronized (cLuceneIndexReader.class)
-      {
-        oInstance = cLuceneIndexReader.m_oInstance;
-        if (oInstance == null)
-        {
-          cLuceneIndexReader.m_oInstance = oInstance = new cLuceneIndexReader();
-        }
-      }
-    }
-    return oInstance;
-  }
-  
-  private cLuceneIndexReader()
-  {
+    m_oDrive = oDrive;
+    m_oDriveScanner = oDriveScanner;
     addObserver(cInjector.getInjector().getInstance(cMainLayoutController.class));
   }
   
@@ -97,9 +80,9 @@ public class cLuceneIndexReader extends Observable
       {
         oFile.mkdirs();
       }
-      //Directory oDirectory = null;
-      m_oIndexReader = DirectoryReader.open(FSDirectory.open(oFile.toPath(),
-              NoLockFactory.INSTANCE));
+      
+      m_oPath = Paths.get(oFile.getPath(), m_oDrive.getPath().substring(0,1));
+      m_oIndexReader = DirectoryReader.open(FSDirectory.open(m_oPath, NoLockFactory.INSTANCE));
       return true;
     }
     catch (org.apache.lucene.index.IndexNotFoundException ex1)
@@ -240,7 +223,7 @@ public class cLuceneIndexReader extends Observable
           }
           else
           {
-            cLuceneIndexWriter.instance().deleteFile(new File(eDoc.sFileAbsolutePath));
+            m_oDriveScanner.deleteFile(new File(eDoc.sFileAbsolutePath));
             if (iMax+1 < oTopDocs.totalHits)
             {
               iMax++;
@@ -281,5 +264,10 @@ public class cLuceneIndexReader extends Observable
   {
     setChanged();
     notifyObservers(sStatus);
+  }
+
+  public String getIndexLocation()
+  {
+    return m_oPath.toString();
   }
 }

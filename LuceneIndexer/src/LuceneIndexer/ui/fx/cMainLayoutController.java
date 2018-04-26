@@ -20,7 +20,8 @@ import LuceneIndexer.cConfig;
 import LuceneIndexer.dialogs.cConfirmDialog;
 import LuceneIndexer.lucene.cLuceneIndexReader;
 import LuceneIndexer.lucene.eDocument;
-import LuceneIndexer.scanner.cDriveMediator;
+import LuceneIndexer.drives.cDriveMediator;
+import LuceneIndexer.drives.cDrive;
 import java.io.File;
 import java.net.URL;
 import java.text.DecimalFormat;
@@ -37,8 +38,10 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.ListView;
 import javafx.scene.control.Tab;
 import javafx.scene.control.cell.MapValueFactory;
@@ -64,6 +67,7 @@ public class cMainLayoutController implements Observer, Initializable
   @FXML private ListView m_oDriveList;
   
   @FXML private Label m_oIndexDirectoryLabel;
+  @FXML private ComboBox m_oIndexDirectories;
   @FXML private Label m_oIndexSizeLabel;
   @FXML private Label m_oNumberOfDocumentsLabel;
   @FXML private Button m_oDeleteIndexButton;
@@ -246,7 +250,10 @@ public class cMainLayoutController implements Observer, Initializable
 
   public void loadIndexMetadata()
   {
-    File oDirectory = new File(cConfig.instance().getIndexLocation());
+    cDrive oDrive = cDriveMediator.instance().getDrive(m_oIndexDirectories.getValue()+"");
+    String sDirectory = oDrive.getIndexLocation();
+    
+    File oDirectory = new File(sDirectory);
     long lSize = 0;
     if (oDirectory.exists())
     {
@@ -257,8 +264,8 @@ public class cMainLayoutController implements Observer, Initializable
         lSize += oFile.length();
       }
     }
-    cLuceneIndexReader.instance().open();
-    int iDocuments = cLuceneIndexReader.instance().getNumberOfDocuments();
+    
+    int iDocuments = oDrive.getNumberOfDocuments();
     
     long flSize = lSize;
     Platform.runLater(() -> 
@@ -276,7 +283,7 @@ public class cMainLayoutController implements Observer, Initializable
       }
     });
     
-    ArrayList<eDocument> topdocs = cLuceneIndexReader.instance().getTopNDocuments(50);
+    ArrayList<eDocument> topdocs = oDrive.getTopNDocuments(50);
     setIndexTableDocuments(topdocs);
   }
   
@@ -288,7 +295,13 @@ public class cMainLayoutController implements Observer, Initializable
       cProgressPanelFx[] lsPanels = oMediator.listDrives();
       for (cProgressPanelFx oPanel: lsPanels)
       {
-        m_oDriveList.getItems().add(oPanel.getRoot());
+        m_oDriveList.getItems().add(oPanel.getParent());
+        m_oIndexDirectories.getItems().add(oPanel.getRoot());
+      }
+      
+      if (m_oIndexDirectories.getItems().size()>0)
+      {
+        m_oIndexDirectories.setValue(m_oIndexDirectories.getItems().get(0));
       }
     });
   }

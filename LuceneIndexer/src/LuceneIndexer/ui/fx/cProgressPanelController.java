@@ -18,7 +18,7 @@ package LuceneIndexer.ui.fx;
 
 import LuceneIndexer.injection.cInjector;
 import LuceneIndexer.persistance.cMetadata;
-import LuceneIndexer.scanner.cDriveMediator;
+import LuceneIndexer.drives.cDriveMediator;
 import java.io.File;
 import java.net.URL;
 import java.text.DecimalFormat;
@@ -27,8 +27,6 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.ResourceBundle;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -60,9 +58,7 @@ public class cProgressPanelController implements Initializable
   private final static SimpleDateFormat g_DF = new SimpleDateFormat("dd MMMMMM yyyy HH:mm:ss");
   private DecimalFormat oNumberFormat = new DecimalFormat( "###.##" );
   private final static double m_dGIGA_BYTE = 1073741824;// metric recommendation
-  private final static double m_dTERA_BYTE = 1099511627776L;// metric recommendation 
-  private double m_oDivider = 1;
-  private String m_oDividerLabel = "";
+  private final static double m_dTERA_BYTE = 1099511627776L;// metric recommendation
   private MenuItem oMenuItemIndex;
   
   @FXML private AnchorPane m_oAnchorPane;
@@ -182,20 +178,11 @@ public class cProgressPanelController implements Initializable
   public void appendIndexSize(String sFile, long lFileSize)
   {
     long lIndexedSize = oIndexedSize.addAndGet(lFileSize);
-    String sProgress = "Indexed: " + oNumberFormat.format(lIndexedSize/m_oDivider) + m_oDividerLabel;
+    //String sProgress = "Indexed: " + oNumberFormat.format(lIndexedSize/m_oDivider) + m_oDividerLabel;
     Platform.runLater(() -> 
     {
-      double dProgress = m_oProgressNode.getProgress() + 1.0;//getPercentage(lIndexedSize,lUsedSize);
-      System.out.println(dProgress + " -> " + lIndexedSize + " of " + lUsedSize); 
+      double dProgress = getPercentage(lIndexedSize,lUsedSize);
       setProgress(dProgress); 
-      try
-      {
-        Thread.sleep(200);
-      }
-      catch (InterruptedException ex)
-      {
-        Logger.getLogger(cProgressPanelController.class.getName()).log(Level.SEVERE, null, ex);
-      }
     });
   }
   
@@ -223,7 +210,7 @@ public class cProgressPanelController implements Initializable
       oMenuItemIndex.setText("Index Drive");
       oMenuItemIndex.setId("index");
 
-      //setProgress(100);
+      setProgress(100);
       setStatus("Indexed");
 
       Date time = new GregorianCalendar().getTime();
@@ -255,26 +242,18 @@ public class cProgressPanelController implements Initializable
     String sTotalSpace = oNumberFormat.format(lUsedSize) + " B";
     if (FileUtils.byteCountToDisplaySize(lUsedSize).endsWith("KB"))
     {
-      m_oDividerLabel = " KB";
-      m_oDivider = 1024;
       sUsedSpace = FileUtils.byteCountToDisplaySize(lUsedSize);
     }
     else if (FileUtils.byteCountToDisplaySize(lUsedSize).endsWith("MB"))
     {
-      m_oDividerLabel = " MB";
-      m_oDivider = 1024*1024;
       sUsedSpace = FileUtils.byteCountToDisplaySize(lUsedSize);
     }
     else if (FileUtils.byteCountToDisplaySize(lUsedSize).endsWith("GB"))
     {
-      m_oDividerLabel = " GB";
-      m_oDivider = m_dGIGA_BYTE;
       sUsedSpace = oNumberFormat.format(lUsedSize/m_dGIGA_BYTE) + " GB";
     }
     else if (FileUtils.byteCountToDisplaySize(lUsedSize).endsWith("TB"))
     {
-      m_oDividerLabel = " GB";
-      m_oDivider = m_dGIGA_BYTE;
       sUsedSpace = oNumberFormat.format(lUsedSize/m_dTERA_BYTE) + " TB";
     }
     
@@ -303,8 +282,6 @@ public class cProgressPanelController implements Initializable
     {
       m_oUsedSpaceLabel.setStyle("-fx-text-fill: red ;");
     }
-    
-    //m_oProgressBar.setStringPainted(true);
   }
 
   public void resetProgress() 
@@ -329,7 +306,8 @@ public class cProgressPanelController implements Initializable
 
   private void setProgress(double dProgress)
   {
-    m_oProgressNode.setProgress(dProgress);
-    m_oProgressIndicator.setProgress(dProgress);
+    double d = dProgress/100f;
+    m_oProgressNode.setProgress(d);
+    m_oProgressIndicator.setProgress(d);
   }
 }

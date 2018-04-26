@@ -18,10 +18,12 @@ package LuceneIndexer.ui.fx;
 
 import LuceneIndexer.cConfig;
 import LuceneIndexer.injection.cInjector;
-import LuceneIndexer.lucene.cLuceneIndexReader;
 import LuceneIndexer.lucene.eDocument;
 import LuceneIndexer.lucene.eSearchField;
+import LuceneIndexer.drives.cDriveMediator;
+import LuceneIndexer.drives.cDrive;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.beans.binding.Bindings;
@@ -245,9 +247,15 @@ public class cSearchTable
       lsSearchFields.add(new eSearchField(eDocument.TAG_Hash, sHash));
     }
 
-    cLuceneIndexReader oReader = cLuceneIndexReader.instance();
-    ArrayList<eDocument> lsResults = oReader.search(lsSearchFields, 
+    Iterator<cDrive> oIterator = cDriveMediator.instance().getDrives().values().iterator();
+    ArrayList<eDocument> lsResults = new ArrayList<>();
+    while(oIterator.hasNext())
+    {
+      cDrive oDrive = oIterator.next();
+      ArrayList<eDocument> lsSubsetResults = oDrive.search(lsSearchFields, 
             oUIController.getWholeWords(), oUIController.getCaseSensitive());
+      lsResults.addAll(lsSubsetResults);
+    }
     oUIController.setResults(lsResults);
     oUIController.setStatus("");
   }

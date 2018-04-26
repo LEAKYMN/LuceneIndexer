@@ -33,7 +33,8 @@
                 <Tab fx:id="m_oIndex" text="Index">
                     <AnchorPane id="IndexAnchorPane" prefHeight="600" prefWidth="800">
                         <children>
-                            <Label fx:id="m_oIndexDirectoryLabel" layoutX="4" layoutY="5" text="Index Directory: " />
+                            <Label fx:id="m_oIndexDirectoryLabel" layoutX="84" layoutY="2" text="Index Directory: " />
+                            <ComboBox fx:id="m_oIndexDirectories" layoutX="2" prefWidth="80" layoutY="2" />
                             <Label fx:id="m_oIndexSizeLabel" layoutX="4" layoutY="30" text="Index Size: " />
                             <Label fx:id="m_oNumberOfDocumentsLabel" layoutX="4" layoutY="55" text="Number Of Documents: " />
 
