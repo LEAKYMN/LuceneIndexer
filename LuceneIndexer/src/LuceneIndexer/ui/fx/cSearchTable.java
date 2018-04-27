@@ -22,6 +22,7 @@ import LuceneIndexer.lucene.eDocument;
 import LuceneIndexer.lucene.eSearchField;
 import LuceneIndexer.drives.cDriveMediator;
 import LuceneIndexer.drives.cDrive;
+import LuceneIndexer.lucene.cIndex;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.logging.Level;
@@ -252,7 +253,7 @@ public class cSearchTable
     while(oIterator.hasNext())
     {
       cDrive oDrive = oIterator.next();
-      ArrayList<eDocument> lsSubsetResults = oDrive.search(lsSearchFields, 
+      ArrayList<eDocument> lsSubsetResults = cIndex.searchAll(lsSearchFields, 
             oUIController.getWholeWords(), oUIController.getCaseSensitive());
       lsResults.addAll(lsSubsetResults);
     }

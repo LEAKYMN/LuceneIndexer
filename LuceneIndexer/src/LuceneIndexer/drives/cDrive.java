@@ -19,6 +19,7 @@ package LuceneIndexer.drives;
 import LuceneIndexer.cConfig;
 import LuceneIndexer.cryptopackage.cCryptographer;
 import LuceneIndexer.injection.cInjector;
+import LuceneIndexer.lucene.cIndex;
 import LuceneIndexer.lucene.cLuceneIndexReader;
 import LuceneIndexer.lucene.cLuceneIndexWriter;
 import LuceneIndexer.lucene.eDocument;
@@ -45,8 +46,7 @@ import java.util.logging.Logger;
  */
 public class cDrive
 {
-  private cLuceneIndexWriter m_oLuceneIndexWriter = null;
-  private cLuceneIndexReader m_oLuceneIndexReader = null;
+  private cIndex m_oIndex;
   private final Object m_oLOCK = new Object();
   private File m_oRootFile;
   private ExecutorService m_oExecutorService;
@@ -62,8 +62,7 @@ public class cDrive
   {
     g_DF.setTimeZone(TimeZone.getTimeZone("UTC"));
     m_oRootFile = oRootFile;
-    m_oLuceneIndexReader = new cLuceneIndexReader(m_oRootFile, this);
-    m_oLuceneIndexWriter = new cLuceneIndexWriter(m_oRootFile);
+    m_oIndex = new cIndex(m_oRootFile,this);
     resetExecutor();
   }
   
@@ -86,16 +85,6 @@ public class cDrive
   {
     return m_oRootFile.getPath();
   }
-  
-  public boolean indexFile(File oFile, String sFileHash)
-  {
-    return m_oLuceneIndexWriter.indexFile(oFile, sFileHash);
-  }
-  
-  public boolean deleteFile(File oFile)
-  {
-    return m_oLuceneIndexWriter.deleteFile(oFile);
-  }  
   
   public void scanDrive()
   {
@@ -146,7 +135,7 @@ public class cDrive
           System.out.println("Scanning drive: '" + m_oRootFile.getAbsolutePath() + "' " + sStatus + " (" + oAlive.get() + ")");
         
           bDone = true;
-          closeIndexWriter();
+          m_oIndex.close();
           m_lScanStopTime = new GregorianCalendar().getTimeInMillis();
           cInjector.getInjector().getInstance(cMainLayoutController.class).scanComplete();
           oStatusPanel.setStatus("Scan Complete. Running Time: " + g_DF.format(new Date(m_lScanStopTime-m_lScanStartTime)));
@@ -197,7 +186,7 @@ public class cDrive
               {
                 sHash = cCryptographer.hash(oChildFile);
               }
-              boolean bSuccess = indexFile(oChildFile, sHash);
+              boolean bSuccess = m_oIndex.indexFile(oChildFile, sHash);
               oStatusPanel.appendIndexSize(oChildFile.getPath(), oChildFile.length());
             }
           }
@@ -268,35 +257,9 @@ public class cDrive
   {
     return bDone;
   }
-  
-  public ArrayList<eDocument> search(ArrayList<eSearchField> lsSearchFields, 
-          boolean wholeWords, boolean caseSensitive)
-  {
-    return m_oLuceneIndexReader.search(lsSearchFields, wholeWords, caseSensitive);
-  }
 
-  public void closeIndexWriter()
+  public cIndex getIndex()
   {
-    m_oLuceneIndexWriter.close();
-  }
-
-  public void commitIndexWriter()
-  {
-    m_oLuceneIndexWriter.commit();
-  }
-
-  public int getNumberOfDocuments()
-  {
-    return m_oLuceneIndexReader.getNumberOfDocuments();
-  }
-
-  public ArrayList<eDocument> getTopNDocuments(int n)
-  {
-    return m_oLuceneIndexReader.getTopNDocuments(n);
-  }
-
-  public String getIndexLocation()
-  {
-    return m_oLuceneIndexReader.getIndexLocation();
+    return m_oIndex;
   }
 }

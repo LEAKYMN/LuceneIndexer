@@ -49,11 +49,11 @@ public class cLuceneIndexWriter extends Observable
 {
   private final Object m_oLock = new Object();
   private IndexWriter m_oIndexWriter = null;
-  private File m_oDrive = null;
+  private cIndex m_oIndex;
   
-  public cLuceneIndexWriter(File oDrive)
+  public cLuceneIndexWriter(cIndex oIndex)
   {
-    m_oDrive = oDrive;
+    m_oIndex = oIndex;
   }
   
   private void initialize()
@@ -64,7 +64,7 @@ public class cLuceneIndexWriter extends Observable
 
     try 
     {
-      Path oPath = Paths.get(new File(sLocation).getPath(), m_oDrive.getPath().substring(0,1));
+      Path oPath = new File(m_oIndex.getIndexLocation()).toPath();
       m_oIndexDirectory = FSDirectory.open(oPath, NoLockFactory.INSTANCE);
       Analyzer oDefaultAnalyzer = new StandardAnalyzer(CharArraySet.copy(Collections.emptySet()));
 

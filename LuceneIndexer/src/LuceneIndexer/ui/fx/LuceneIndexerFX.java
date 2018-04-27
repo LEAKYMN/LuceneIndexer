@@ -22,6 +22,7 @@ import LuceneIndexer.linux.cLinux;
 import LuceneIndexer.persistance.cSerializationFactory;
 import LuceneIndexer.persistance.cWindowBounds;
 import LuceneIndexer.drives.cDriveMediator;
+import LuceneIndexer.lucene.cIndex;
 import java.io.File;
 import javafx.application.Application;
 import javafx.event.EventHandler;
@@ -109,7 +110,7 @@ public class LuceneIndexerFX extends Application
     {
       cLinux.unmountMountedDrives();
     }
-    cDriveMediator.instance().closeIndexWriters();
+    cIndex.closeIndexWriters();
     System.exit(0);
   }
   

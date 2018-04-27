@@ -172,25 +172,6 @@ public class cDriveMediator extends Observable
     }
   }
   
-  public void closeIndexWriters()
-  {
-    int iOpen = m_iOpenWriters.decrementAndGet();
-    Iterator<cDrive> oIterator = m_oDrives.values().iterator();
-    while (oIterator.hasNext())
-    {
-      cDrive oDriveScanner = oIterator.next();
-      if (iOpen == 0)
-      {
-        System.out.println("Closing index writer.");
-        oDriveScanner.closeIndexWriter();
-      }
-      else
-      {
-        oDriveScanner.commitIndexWriter();
-      }
-    }
-  }
-  
   public void setStatus(String sStatus)
   {
     setChanged();

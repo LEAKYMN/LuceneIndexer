@@ -18,10 +18,10 @@ package LuceneIndexer.ui.fx;
 
 import LuceneIndexer.cConfig;
 import LuceneIndexer.dialogs.cConfirmDialog;
-import LuceneIndexer.lucene.cLuceneIndexReader;
 import LuceneIndexer.lucene.eDocument;
 import LuceneIndexer.drives.cDriveMediator;
 import LuceneIndexer.drives.cDrive;
+import LuceneIndexer.lucene.cIndex;
 import java.io.File;
 import java.net.URL;
 import java.text.DecimalFormat;
@@ -251,21 +251,21 @@ public class cMainLayoutController implements Observer, Initializable
   public void loadIndexMetadata()
   {
     cDrive oDrive = cDriveMediator.instance().getDrive(m_oIndexDirectories.getValue()+"");
-    String sDirectory = oDrive.getIndexLocation();
+    cIndex oIndex = oDrive.getIndex();
     
-    File oDirectory = new File(sDirectory);
+    File oDirectory = new File(oIndex.getIndexLocation());
     long lSize = 0;
     if (oDirectory.exists())
     {
       String[] lsFiles = oDirectory.list();
       for (String sFile: lsFiles)
       {
-        File oFile = new File(cConfig.instance().getIndexLocation() + File.separator + sFile);
+        File oFile = new File(oDirectory + File.separator + sFile);
         lSize += oFile.length();
       }
     }
     
-    int iDocuments = oDrive.getNumberOfDocuments();
+    int iDocuments = oIndex.getNumberOfDocuments();
     
     long flSize = lSize;
     Platform.runLater(() -> 
@@ -283,7 +283,7 @@ public class cMainLayoutController implements Observer, Initializable
       }
     });
     
-    ArrayList<eDocument> topdocs = oDrive.getTopNDocuments(50);
+    ArrayList<eDocument> topdocs = oIndex.getTopNDocuments(50);
     setIndexTableDocuments(topdocs);
   }
   

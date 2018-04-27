@@ -54,14 +54,11 @@ public class cLuceneIndexReader extends Observable
 {
   private IndexReader m_oIndexReader = null;
   private boolean m_bIsOpen = false;
-  private File m_oDrive = null;
-  private cDrive m_oDriveScanner;
-  private Path m_oPath;
+  private cIndex m_oIndex;
   
-  public cLuceneIndexReader(File oDrive, cDrive oDriveScanner)
+  public cLuceneIndexReader(cIndex oIndex)
   {
-    m_oDrive = oDrive;
-    m_oDriveScanner = oDriveScanner;
+    m_oIndex = oIndex;
     addObserver(cInjector.getInjector().getInstance(cMainLayoutController.class));
   }
   
@@ -81,13 +78,9 @@ public class cLuceneIndexReader extends Observable
         oFile.mkdirs();
       }
       
-      m_oPath = Paths.get(oFile.getPath(), m_oDrive.getPath().substring(0,1));
-      m_oIndexReader = DirectoryReader.open(FSDirectory.open(m_oPath, NoLockFactory.INSTANCE));
+      Path oPath = new File(m_oIndex.getIndexLocation()).toPath();
+      m_oIndexReader = DirectoryReader.open(FSDirectory.open(oPath, NoLockFactory.INSTANCE));
       return true;
-    }
-    catch (org.apache.lucene.index.IndexNotFoundException ex1)
-    {
-      m_oIndexReader = null;
     }
     catch (Exception ex)
     {
@@ -223,7 +216,7 @@ public class cLuceneIndexReader extends Observable
           }
           else
           {
-            m_oDriveScanner.deleteFile(new File(eDoc.sFileAbsolutePath));
+            m_oIndex.deleteFile(new File(eDoc.sFileAbsolutePath));
             if (iMax+1 < oTopDocs.totalHits)
             {
               iMax++;
@@ -264,10 +257,5 @@ public class cLuceneIndexReader extends Observable
   {
     setChanged();
     notifyObservers(sStatus);
-  }
-
-  public String getIndexLocation()
-  {
-    return m_oPath.toString();
   }
 }
