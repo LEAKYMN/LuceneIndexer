@@ -203,8 +203,9 @@ public class cLuceneIndexReader extends Observable
         }
          
         TopDocs oTopDocs = oSearcher.search(oQuery, Integer.MAX_VALUE);
-        System.out.println("Search Query: " + oQuery + " returned " + oTopDocs.totalHits + " results");
-        setStatus("Search Query: " + oQuery + " returned " + oTopDocs.totalHits + " results");
+        String sStatus = "Searching Index " + m_oIndex.getIndexName() + " returned " + oTopDocs.totalHits + " results (Query: " + oQuery +")";
+        System.out.println(sStatus);
+        setStatus(sStatus);
         int iMax = Math.min(1000, oTopDocs.totalHits);
         for (int i=0; i<iMax; i++)
         {

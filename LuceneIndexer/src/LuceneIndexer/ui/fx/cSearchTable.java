@@ -248,15 +248,7 @@ public class cSearchTable
       lsSearchFields.add(new eSearchField(eDocument.TAG_Hash, sHash));
     }
 
-    Iterator<cDrive> oIterator = cDriveMediator.instance().getDrives().values().iterator();
-    ArrayList<eDocument> lsResults = new ArrayList<>();
-    while(oIterator.hasNext())
-    {
-      cDrive oDrive = oIterator.next();
-      ArrayList<eDocument> lsSubsetResults = cIndex.searchAll(lsSearchFields, 
-            oUIController.getWholeWords(), oUIController.getCaseSensitive());
-      lsResults.addAll(lsSubsetResults);
-    }
+    ArrayList<eDocument> lsResults = cIndex.searchAll(lsSearchFields, oUIController.getWholeWords(), oUIController.getCaseSensitive());    
     oUIController.setResults(lsResults);
     oUIController.setStatus("");
   }

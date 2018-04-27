@@ -38,15 +38,16 @@ public class cIndex
   
   private File m_oDrive = null;
   private cDrive m_oDriveScanner;
+  private final String m_sName;
   private Path m_oPath;
   
   public cIndex(File oDrive, cDrive oDriveScanner)
   {
     m_oDrive = oDrive;
     m_oDriveScanner = oDriveScanner;
-    
+    m_sName = m_oDrive.getPath().substring(0,1);
     File oFile = new File(cConfig.instance().getIndexLocation());
-    m_oPath = Paths.get(oFile.getPath(), m_oDrive.getPath().substring(0,1));
+    m_oPath = Paths.get(oFile.getPath(), m_sName);
     System.out.println("Index path set to: " + m_oPath.toFile().getAbsolutePath());
     m_oLuceneIndexWriter = new cLuceneIndexWriter(this);
     m_oLuceneIndexReader = new cLuceneIndexReader(this);
@@ -117,5 +118,10 @@ public class cIndex
     {
       oIndex.closeIndexWriter();
     }
+  }
+
+  public String getIndexName()
+  {
+    return m_sName;
   }
 }
