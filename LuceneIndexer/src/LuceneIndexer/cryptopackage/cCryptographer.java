@@ -20,7 +20,6 @@ import LuceneIndexer.cConfig;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -75,6 +74,8 @@ public class cCryptographer
   private static String g_sAES_ALGORITHM = "AES/CTR/PKCS5Padding";
   private static final String g_sINIT_VECTOR = "RandomInitVector";
   private static final String g_sPROVIDER = "BC"; // Bouncy Castle
+  private static int iBUFFER_SIZE = 4096;
+  private static byte [] yBUFFER = new byte[iBUFFER_SIZE];
   
   public static void symmetricEncryption(FileChannel oSourceChannel, String sAESSecretKey)
   {
@@ -620,42 +621,31 @@ public class cCryptographer
   
   public static String hash(File oFile)
   {
-    String hashhex = null;
+    String hashhex = "";
     FileInputStream oFileInputStream = null;
     try 
     {
       // public static byte [] hash(MessageDigest digest, BufferedInputStream in, int bufferSize) throws IOException {
       MessageDigest md = MessageDigest.getInstance("SHA-256");
-      int iSize = 4096;
-      try
-      {
-        iSize = (int)oFile.length();
-      } catch (Exception ex)
-      { }
       
-      if (iSize > 100)
-      {
-        iSize = 4096;
-      }
-      byte [] buffer = new byte[iSize];
       int sizeRead;
       oFileInputStream = new FileInputStream(oFile);
       try (BufferedInputStream oBufferedInputStream = new BufferedInputStream(oFileInputStream))
       {
-        while ((sizeRead = oBufferedInputStream.read(buffer)) != -1)
+        while ((sizeRead = oBufferedInputStream.read(yBUFFER)) != -1)
         {
-          md.update(buffer, 0, sizeRead);
+          md.update(yBUFFER, 0, sizeRead);
           if (cConfig.instance().getHashFirstBlockOnly())
           {
             break;
           }
         }
       }
-      
+
       byte[] hash = md.digest();
       hashhex = new String(Hex.encode(hash));
     }
-    catch (FileNotFoundException ex)
+    catch (Exception ex)
     {
       if (ex.getMessage().contains("used by another process"))
       {
@@ -665,10 +655,6 @@ public class cCryptographer
       {
         Logger.getLogger(cCryptographer.class.getName()).log(Level.SEVERE, null, ex);
       }
-    }
-    catch (IOException | NoSuchAlgorithmException ex)
-    {
-      Logger.getLogger(cCryptographer.class.getName()).log(Level.SEVERE, null, ex);
     }
     finally
     {

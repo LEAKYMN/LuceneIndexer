@@ -20,6 +20,7 @@ import LuceneIndexer.persistance.cMetadata;
 import LuceneIndexer.drives.folderwatcher.cFolderWatcher;
 import java.io.File;
 import java.util.Collection;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.logging.Level;
@@ -39,11 +40,10 @@ public class cProgressPanelFx extends Application
   private static HashMap<String, cProgressPanelFx> oDrives = new HashMap();
   private cProgressPanelController oProgressPanelController;
   private cFolderWatcher oFolderWatcher;
-  private boolean bRunning = true;
   private Parent oRoot;
   private Scene oScene;
   private File oDriveRoot;
-  private cMetadata oMetadata;
+  private long m_oLastStatusChangeTimestamp = -1;
   
   public static cProgressPanelFx get(String sRoot)
   {
@@ -81,7 +81,6 @@ public class cProgressPanelFx extends Application
   
   public void terminate()
   {
-    bRunning = false;
     if (oFolderWatcher != null)
     {
       oFolderWatcher.terminate();
@@ -110,7 +109,6 @@ public class cProgressPanelFx extends Application
     oScene = new Scene(oRoot);
        
     oProgressPanelController = oLoader.<cProgressPanelController>getController();
-    
     oProgressPanelController.postInitialize(oDriveRoot);
   }
   
@@ -141,6 +139,7 @@ public class cProgressPanelFx extends Application
 
   public void setStatus(String sStatus)
   {
+    m_oLastStatusChangeTimestamp = new GregorianCalendar().getTimeInMillis();
     oProgressPanelController.setStatus(sStatus);
   }
 
@@ -157,5 +156,14 @@ public class cProgressPanelFx extends Application
   public void appendIndexSize(String sFile, long length)
   {
     oProgressPanelController.appendIndexSize(sFile, length);
+  }
+
+  public long getLastStatusUpdateTime()
+  { 
+    if (m_oLastStatusChangeTimestamp == -1)
+    {
+      m_oLastStatusChangeTimestamp = new GregorianCalendar().getTimeInMillis();
+    }
+    return m_oLastStatusChangeTimestamp;
   }
 }

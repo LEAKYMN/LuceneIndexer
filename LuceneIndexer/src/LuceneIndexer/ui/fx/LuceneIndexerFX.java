@@ -105,6 +105,8 @@ public class LuceneIndexerFX extends Application
     oWindowBounds.setW((int)m_oStage.getWidth());
     m_oSerializationFactory.serialize(oWindowBounds, fBounds, false);
     
+    cDriveMediator.instance().stopScan();
+    
     String sOperatingSystem = System.getProperty("os.name");
     if (sOperatingSystem.equalsIgnoreCase("Linux"))
     {

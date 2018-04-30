@@ -245,8 +245,11 @@ public class cLuceneIndexReader extends Observable
   {
     try
     {
-      m_oIndexReader.close();
-      m_oIndexReader = null;
+      if (m_oIndexReader != null)
+      {
+        m_oIndexReader.close();
+        m_oIndexReader = null;
+      }
     }
     catch (IOException ex)
     {

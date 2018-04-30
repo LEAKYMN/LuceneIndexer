@@ -20,15 +20,10 @@ import LuceneIndexer.cConfig;
 import LuceneIndexer.cryptopackage.cCryptographer;
 import LuceneIndexer.injection.cInjector;
 import LuceneIndexer.lucene.cIndex;
-import LuceneIndexer.lucene.cLuceneIndexReader;
-import LuceneIndexer.lucene.cLuceneIndexWriter;
-import LuceneIndexer.lucene.eDocument;
-import LuceneIndexer.lucene.eSearchField;
 import LuceneIndexer.ui.fx.cMainLayoutController;
 import LuceneIndexer.ui.fx.cProgressPanelFx;
 import java.io.File;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
@@ -50,6 +45,8 @@ public class cDrive
   private final Object m_oLOCK = new Object();
   private File m_oRootFile;
   private ExecutorService m_oExecutorService;
+  private Thread m_oProgressThread = null;
+  private final Object m_oProgressLock = new Object();
   private boolean bDone = true;
   private boolean bCancel = false;
   private int m_iTOTAL_THREADS = 50;
@@ -57,12 +54,51 @@ public class cDrive
   private static SimpleDateFormat g_DF = new SimpleDateFormat("HH:mm:ss");
   private long m_lScanStartTime = 0;
   private long m_lScanStopTime = 0;
+  private cProgressPanelFx m_oStatusPanel;
+  private String m_sLatestIndexedFile = "";
   
   public cDrive(File oRootFile)
   {
     g_DF.setTimeZone(TimeZone.getTimeZone("UTC"));
     m_oRootFile = oRootFile;
     m_oIndex = new cIndex(m_oRootFile,this);
+    m_oProgressThread = new Thread(() -> 
+    {
+      while (!bCancel)
+      {
+        if (bDone)
+        {
+          synchronized (m_oProgressLock)
+          {
+            try
+            {
+              m_oProgressLock.wait();
+            }
+            catch (InterruptedException ex)
+            {
+              Logger.getLogger(cDrive.class.getName()).log(Level.SEVERE, null, ex);
+            }
+          }
+        }
+        else
+        {
+          if (m_oStatusPanel != null && new GregorianCalendar().getTimeInMillis() - m_oStatusPanel.getLastStatusUpdateTime() > 1000)
+          {
+            m_oStatusPanel.setStatus("Scanning: " + m_sLatestIndexedFile);
+          }
+          try
+          {
+            Thread.sleep(100);
+          }
+          catch (InterruptedException ex)
+          {
+            Logger.getLogger(cDrive.class.getName()).log(Level.SEVERE, null, ex);
+          }
+        }
+      }
+    });
+    m_oProgressThread.setDaemon(true);
+    m_oProgressThread.start();
     resetExecutor();
   }
   
@@ -88,20 +124,24 @@ public class cDrive
   
   public void scanDrive()
   {
-    
     bCancel = false;
     bDone = false;
+    synchronized (m_oProgressLock)
+    {
+      m_oProgressLock.notify();
+    }
+              
     Thread thread = new Thread(() -> 
     {
       m_lScanStartTime = new GregorianCalendar().getTimeInMillis();
-      cProgressPanelFx oStatusPanel = cProgressPanelFx.get(m_oRootFile.getAbsolutePath());
+      m_oStatusPanel = cProgressPanelFx.get(m_oRootFile.getAbsolutePath());
       try
       {
         System.out.println("Scanning drive: '" + m_oRootFile.getAbsolutePath() + "'");
         cDriveMediator.instance().setStatus("Scanning... (See Drive tab for detail)");
-        oStatusPanel.resetProgress();
-        oStatusPanel.setStatus("Scanning: " + m_oRootFile.getAbsolutePath());
-        scanDirectory(m_oRootFile, oStatusPanel);
+        m_oStatusPanel.resetProgress();
+        m_oStatusPanel.setStatus("Scanning: " + m_oRootFile.getAbsolutePath());
+        scanDirectory(m_oRootFile, m_oStatusPanel);
       }
       finally
       {
@@ -124,12 +164,12 @@ public class cDrive
           if (bCancel)
           {
             sStatus = "cancelled";
-            oStatusPanel.cancel();
+            m_oStatusPanel.cancel();
           }
           else
           {
             sStatus = "complete";
-            oStatusPanel.complete();
+            m_oStatusPanel.complete();
           }
 
           System.out.println("Scanning drive: '" + m_oRootFile.getAbsolutePath() + "' " + sStatus + " (" + oAlive.get() + ")");
@@ -138,7 +178,7 @@ public class cDrive
           m_oIndex.close();
           m_lScanStopTime = new GregorianCalendar().getTimeInMillis();
           cInjector.getInjector().getInstance(cMainLayoutController.class).scanComplete();
-          oStatusPanel.setStatus("Scan Complete. Running Time: " + g_DF.format(new Date(m_lScanStopTime-m_lScanStartTime)));
+          m_oStatusPanel.setStatus("Scan Complete. Running Time: " + g_DF.format(new Date(m_lScanStopTime-m_lScanStartTime)));
         }
       }
     });
@@ -149,6 +189,7 @@ public class cDrive
   
   private void scanDirectory(File oParentFile, cProgressPanelFx oStatusPanel) 
   {
+    m_oStatusPanel = oStatusPanel;
     String[] list = oParentFile.list();
     if (list != null)
     {
@@ -169,7 +210,7 @@ public class cDrive
             }
             resetExecutor();
           }
-
+          
           File oChildFile = new File(oParentFile.getAbsolutePath() + File.separator + sFile);
           String sFilePath = oChildFile.getAbsolutePath().toUpperCase();
           if (!(sFilePath.contains("RECYCLE.BIN")))
@@ -181,13 +222,22 @@ public class cDrive
             }
             else
             {
-              String sHash = "";
-              if (cConfig.instance().getHashDocuments())
+              try
               {
-                sHash = cCryptographer.hash(oChildFile);
+                m_sLatestIndexedFile = oChildFile.getAbsolutePath();
+                String sHash = "";
+                if (cConfig.instance().getHashDocuments())
+                {
+                  sHash = cCryptographer.hash(oChildFile);
+                }
+                boolean bSuccess = m_oIndex.indexFile(oChildFile, sHash);
+                oStatusPanel.appendIndexSize(oChildFile.getPath(), oChildFile.length());
+              } 
+              catch (Exception ex)
+              {
+                System.err.println("Error: " + ex.getMessage() + " m_oChildFile: " + oChildFile.getAbsolutePath());
+                ex.printStackTrace();
               }
-              boolean bSuccess = m_oIndex.indexFile(oChildFile, sHash);
-              oStatusPanel.appendIndexSize(oChildFile.getPath(), oChildFile.length());
             }
           }
           oAlive.decrementAndGet();
@@ -249,8 +299,12 @@ public class cDrive
   
   public void stopScan()
   {
-    System.out.println("Stopping Scan : '" + m_oRootFile.getAbsolutePath() + "'");
+    if (!bDone)
+    {
+      System.out.println("Stopping Scan : '" + m_oRootFile.getAbsolutePath() + "'");
+    }
     bCancel = true;
+    m_oProgressThread.interrupt();
   }
 
   public boolean isDone()
