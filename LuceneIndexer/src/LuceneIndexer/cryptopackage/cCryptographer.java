@@ -16,6 +16,7 @@
  */
 package LuceneIndexer.cryptopackage;
 
+import LuceneIndexer.cConfig;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -625,16 +626,16 @@ public class cCryptographer
     {
       // public static byte [] hash(MessageDigest digest, BufferedInputStream in, int bufferSize) throws IOException {
       MessageDigest md = MessageDigest.getInstance("SHA-256");
-      int iSize = 4096*1024;
+      int iSize = 4096;
       try
       {
         iSize = (int)oFile.length();
       } catch (Exception ex)
       { }
       
-      if (iSize > 100*1024) // 100 MB
+      if (iSize > 100)
       {
-        iSize = 4096*1024;
+        iSize = 4096;
       }
       byte [] buffer = new byte[iSize];
       int sizeRead;
@@ -644,6 +645,10 @@ public class cCryptographer
         while ((sizeRead = oBufferedInputStream.read(buffer)) != -1)
         {
           md.update(buffer, 0, sizeRead);
+          if (cConfig.instance().getHashFirstBlockOnly())
+          {
+            break;
+          }
         }
       }
       

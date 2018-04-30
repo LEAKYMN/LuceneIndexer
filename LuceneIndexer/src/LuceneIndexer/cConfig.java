@@ -47,6 +47,7 @@ public class cConfig
   
   private String m_sIndexLocation = "";
   private boolean m_bHashDocuments = false;
+  private boolean m_bHashFirstBlockOnly = false;
   private int m_iScanThreads = 10;
   private String m_sDefaultCategory = "";
   private HashMap<String, String> m_oCategoryForFile = new HashMap();
@@ -101,6 +102,7 @@ public class cConfig
       Element oIndexElement = getElement("Index");
       m_sIndexLocation = getChildElement(oIndexElement, "Location").getTextContent();
       m_bHashDocuments = Boolean.parseBoolean(getChildElement(oIndexElement, "HashDocuments").getTextContent());
+      m_bHashFirstBlockOnly = Boolean.parseBoolean(getChildElement(oIndexElement, "HashFirstBlockOnly").getTextContent());
       m_iScanThreads = Integer.parseInt(getChildElement(oIndexElement, "ScanThreads").getTextContent());
       Element oDrivesElement = getElement("Drives");
       ArrayList<Element> lsDriveTypes = getChildElements(oDrivesElement, "Type");
@@ -153,6 +155,9 @@ public class cConfig
       Element oHashDocuments = doc.createElement("HashDocuments");
       oIndex.appendChild(oHashDocuments);
       oHashDocuments.setTextContent("false");
+      Element oHashFirstBlockOnly = doc.createElement("HashFirstBlockOnly");
+      oIndex.appendChild(oHashFirstBlockOnly);
+      oHashFirstBlockOnly.setTextContent("false");
       Element oScanThreads = doc.createElement("ScanThreads");
       oIndex.appendChild(oScanThreads);
       oScanThreads.setTextContent("10");
@@ -281,6 +286,11 @@ public class cConfig
   public boolean getHashDocuments()
   {
     return m_bHashDocuments;
+  }
+  
+  public boolean getHashFirstBlockOnly()
+  {
+    return m_bHashFirstBlockOnly;
   }
   
   public int getScanThreads()

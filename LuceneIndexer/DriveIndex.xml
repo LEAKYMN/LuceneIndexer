@@ -2,7 +2,8 @@
 <LuceneIndex>
 <Index>
 	<Location>index</Location>
-	<HashDocuments>false</HashDocuments>
+	<HashDocuments>true</HashDocuments>
+	<HashFirstBlockOnly>true</HashFirstBlockOnly>
 	<ScanThreads>10</ScanThreads>
 </Index>
 <Drives>
