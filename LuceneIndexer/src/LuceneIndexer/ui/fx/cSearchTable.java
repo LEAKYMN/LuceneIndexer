@@ -248,7 +248,18 @@ public class cSearchTable
       lsSearchFields.add(new eSearchField(eDocument.TAG_Hash, sHash));
     }
 
-    ArrayList<eDocument> lsResults = cIndex.searchAll(lsSearchFields, oUIController.getWholeWords(), oUIController.getCaseSensitive());    
+    String sIndex = oUIController.getIndex();
+    ArrayList<eDocument> lsResults;
+    if (sIndex.equals("All"))
+    {
+      lsResults = cIndex.searchAll(lsSearchFields, oUIController.getWholeWords(), oUIController.getCaseSensitive());
+    }
+    else
+    {
+      char cDriveLetter = sIndex.toCharArray()[0];
+      lsResults = cIndex.search(cDriveLetter, lsSearchFields, oUIController.getWholeWords(), oUIController.getCaseSensitive());
+    }
+    
     oUIController.setResults(lsResults);
     oUIController.setStatus("");
   }

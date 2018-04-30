@@ -70,7 +70,7 @@ public class cMainLayoutController implements Observer, Initializable
   @FXML
   private Label m_oStatusLabel;
   @FXML
-  private CheckBox m_oWholeWords;
+  private CheckBox m_chkWholeWords;
   @FXML
   private VBox m_oSearchBox;
   @FXML
@@ -84,7 +84,9 @@ public class cMainLayoutController implements Observer, Initializable
   @FXML
   private Label m_oIndexDirectoryLabel;
   @FXML
-  private ComboBox m_oIndexDirectories;
+  private ComboBox m_cmbSearchIndex;
+  @FXML
+  private ComboBox m_cmbIndexDirectories;
   @FXML
   private Label m_oIndexSizeLabel;
   @FXML
@@ -105,7 +107,6 @@ public class cMainLayoutController implements Observer, Initializable
 
   private cSearchTable m_oSearchTable;
   private cDriveMediator oMediator;
-
   private TableColumn[] lsResultHeader;
 
   @Override
@@ -168,7 +169,6 @@ public class cMainLayoutController implements Observer, Initializable
           HashMap oItems = (HashMap) m_oResultTable.getSelectionModel().getSelectedItem();
           String sPath = (String) oItems.get("Path");
           Desktop.getDesktop().open(new File(sPath));
-          System.out.println();
         }
         catch (IOException ex)
         {
@@ -341,7 +341,7 @@ public class cMainLayoutController implements Observer, Initializable
 
   public void loadIndexMetadata()
   {
-    cDrive oDrive = cDriveMediator.instance().getDrive(m_oIndexDirectories.getValue() + "");
+    cDrive oDrive = cDriveMediator.instance().getDrive(m_cmbIndexDirectories.getValue() + "");
     cIndex oIndex = oDrive.getIndex();
 
     File oDirectory = new File(oIndex.getIndexLocation());
@@ -382,17 +382,28 @@ public class cMainLayoutController implements Observer, Initializable
   {
     Platform.runLater(() ->
     {
+      int iSelectedSearchIndex = Math.max(0, m_cmbSearchIndex.getSelectionModel().getSelectedIndex());
+      int iSelectedMetadataIndex = Math.max(0, m_cmbIndexDirectories.getSelectionModel().getSelectedIndex());
+      m_cmbIndexDirectories.getItems().clear();
       m_oDriveList.getItems().clear();
+      m_cmbSearchIndex.getItems().clear();
+      m_cmbSearchIndex.getItems().add("All");
+      
       cProgressPanelFx[] lsPanels = oMediator.listDrives();
       for (cProgressPanelFx oPanel : lsPanels)
       {
         m_oDriveList.getItems().add(oPanel.getParent());
-        m_oIndexDirectories.getItems().add(oPanel.getRoot());
+        m_cmbIndexDirectories.getItems().add(oPanel.getRoot());
+        m_cmbSearchIndex.getItems().add(oPanel.getRoot());
       }
 
-      if (m_oIndexDirectories.getItems().size() > 0)
+      if (m_cmbSearchIndex.getItems().size() > 0)
       {
-        m_oIndexDirectories.setValue(m_oIndexDirectories.getItems().get(0));
+        m_cmbSearchIndex.setValue(m_cmbSearchIndex.getItems().get(iSelectedSearchIndex));
+      }
+      if (m_cmbIndexDirectories.getItems().size() > 0)
+      {
+        m_cmbIndexDirectories.setValue(m_cmbIndexDirectories.getItems().get(iSelectedMetadataIndex));
       }
     });
   }
@@ -447,7 +458,7 @@ public class cMainLayoutController implements Observer, Initializable
 
   public boolean getWholeWords()
   {
-    return m_oWholeWords.isSelected();
+    return m_chkWholeWords.isSelected();
   }
 
   public boolean getCaseSensitive()
@@ -458,5 +469,10 @@ public class cMainLayoutController implements Observer, Initializable
   public void setStatus(String sStatus)
   {
     update(null, sStatus);
+  }
+
+  public String getIndex()
+  {
+    return m_cmbSearchIndex.getValue()+"";
   }
 }

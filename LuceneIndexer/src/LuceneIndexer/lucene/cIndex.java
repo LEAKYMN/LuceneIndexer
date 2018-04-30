@@ -25,6 +25,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.TreeMap;
 
 /**
  *
@@ -32,27 +33,58 @@ import java.util.Iterator;
  */
 public class cIndex
 {
-  private static ArrayList<cIndex> m_lsIndexes = new ArrayList();
+  private static TreeMap<Character, cIndex> m_lsIndexes = new TreeMap();
   private cLuceneIndexWriter m_oLuceneIndexWriter = null;
   private cLuceneIndexReader m_oLuceneIndexReader = null;
   
   private File m_oDrive = null;
   private cDrive m_oDriveScanner;
-  private final String m_sName;
+  private final char m_cDriveLetter;
   private Path m_oPath;
+  
+  public static ArrayList<eDocument> search(char _Index, ArrayList<eSearchField> lsSearchFields, 
+          boolean wholeWords, boolean caseSensitive)
+  {
+    ArrayList<eDocument> lsResults = new ArrayList<>();
+    cIndex oIndex = m_lsIndexes.get(_Index);
+    lsResults.addAll(oIndex.search(lsSearchFields, wholeWords, caseSensitive));
+    return lsResults;
+  }
+  
+  public static ArrayList<eDocument> searchAll(ArrayList<eSearchField> lsSearchFields, 
+          boolean wholeWords, boolean caseSensitive)
+  {
+    ArrayList<eDocument> lsResults = new ArrayList<>();
+    Iterator<cIndex> oIterator = m_lsIndexes.values().iterator();
+    oIterator.forEachRemaining(oIndex -> 
+    {
+      lsResults.addAll(oIndex.search(lsSearchFields, wholeWords, caseSensitive));
+    });
+    return lsResults;
+  }
+  
+  public static void closeIndexWriters()
+  {
+    Iterator<cIndex> oIterator = m_lsIndexes.values().iterator();
+    oIterator.forEachRemaining(oIndex -> 
+    {
+      oIndex.closeIndexWriter();
+    });
+  }
   
   public cIndex(File oDrive, cDrive oDriveScanner)
   {
     m_oDrive = oDrive;
     m_oDriveScanner = oDriveScanner;
-    m_sName = m_oDrive.getPath().substring(0,1);
+    String sDriveLetter = m_oDrive.getPath().substring(0,1);
+    m_cDriveLetter = sDriveLetter.toCharArray()[0];
     File oFile = new File(cConfig.instance().getIndexLocation());
-    m_oPath = Paths.get(oFile.getPath(), m_sName);
+    m_oPath = Paths.get(oFile.getPath(), sDriveLetter);
     System.out.println("Index path set to: " + m_oPath.toFile().getAbsolutePath());
     m_oLuceneIndexWriter = new cLuceneIndexWriter(this);
     m_oLuceneIndexReader = new cLuceneIndexReader(this);
     m_oLuceneIndexReader.open();
-    m_lsIndexes.add(this);
+    m_lsIndexes.put(m_cDriveLetter, this);
   }
   
   public boolean indexFile(File oFile, String sFileHash)
@@ -63,17 +95,6 @@ public class cIndex
   public boolean deleteFile(File oFile)
   {
     return m_oLuceneIndexWriter.deleteFile(oFile);
-  }
-  
-  public static ArrayList<eDocument> searchAll(ArrayList<eSearchField> lsSearchFields, 
-          boolean wholeWords, boolean caseSensitive)
-  {
-    ArrayList<eDocument> lsResults = new ArrayList<>();
-    for (cIndex oIndex: m_lsIndexes)
-    {
-      lsResults.addAll(oIndex.search(lsSearchFields, wholeWords, caseSensitive));
-    }
-    return lsResults;
   }
 
   public ArrayList<eDocument> search(ArrayList<eSearchField> lsSearchFields, 
@@ -111,17 +132,9 @@ public class cIndex
   {
     m_oLuceneIndexWriter.close();
   }
-  
-  public static void closeIndexWriters()
-  {
-    for (cIndex oIndex: m_lsIndexes)
-    {
-      oIndex.closeIndexWriter();
-    }
-  }
 
-  public String getIndexName()
+  public char getIndexName()
   {
-    return m_sName;
+    return m_cDriveLetter;
   }
 }
