@@ -49,7 +49,9 @@
                 <Tab fx:id="m_oDuplicationTab" text="Duplicates">
                     <AnchorPane id="DuplicationAnchorPane" prefHeight="600" prefWidth="800">
                         <children>
-                            <Label fx:id="m_FindDuplicatesLabel" AnchorPane.topAnchor="7" AnchorPane.rightAnchor="110" text="Find Duplicates: " />
+                            <Label fx:id="m_FindDuplicatesLabel" AnchorPane.topAnchor="7" AnchorPane.leftAnchor="2" text="Find Duplicates: " />
+                            <Label fx:id="m_lblDuplicateIndex" AnchorPane.topAnchor="7" AnchorPane.rightAnchor="200" text="Index: " />
+                            <ComboBox fx:id="m_cmbDuplicateIndex" AnchorPane.topAnchor="2" AnchorPane.rightAnchor="110" prefWidth="80" layoutY="2" />
                             <Button fx:id="m_oDuplicatesButton" minWidth="70" AnchorPane.topAnchor="2" AnchorPane.rightAnchor="2.0" text="Find Duplicates" onAction="#handleFindDuplicates" />
                             <TableView fx:id="m_oDuplicatesTable" editable="false" AnchorPane.leftAnchor="2" AnchorPane.topAnchor="30" AnchorPane.rightAnchor="2.0" AnchorPane.bottomAnchor="30.0" />
                         </children>

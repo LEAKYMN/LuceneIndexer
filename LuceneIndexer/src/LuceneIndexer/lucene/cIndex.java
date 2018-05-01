@@ -18,12 +18,11 @@ package LuceneIndexer.lucene;
 
 import LuceneIndexer.cConfig;
 import LuceneIndexer.drives.cDrive;
-import LuceneIndexer.injection.cInjector;
-import LuceneIndexer.ui.fx.cMainLayoutController;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.TreeMap;
 
@@ -62,12 +61,19 @@ public class cIndex
     return lsResults;
   }
   
+  public static HashMap<String, ArrayList<eDocument>> findDuplicates(char _Index)
+  {
+    cIndex oIndex = m_lsIndexes.get(_Index);
+    return oIndex.findDuplicateDocuments();
+  }
+  
   public static void closeIndexs()
   {
     Iterator<cIndex> oIterator = m_lsIndexes.values().iterator();
     oIterator.forEachRemaining(oIndex -> 
     {
       oIndex.close();
+      oIndex.terminate();
     });
   }
   
@@ -91,16 +97,27 @@ public class cIndex
   
   public boolean deleteFile(File oFile)
   {
-    return m_oLuceneIndexWriter.deleteFile(oFile);
+    m_oLuceneIndexWriter.open();
+    boolean deleteFile = m_oLuceneIndexWriter.deleteFile(oFile);
+    m_oLuceneIndexWriter.close();
+    return deleteFile;
   }
 
   public ArrayList<eDocument> search(ArrayList<eSearchField> lsSearchFields, 
           boolean wholeWords, boolean caseSensitive)
   {
     m_oLuceneIndexReader.open();
-    ArrayList<eDocument> lsResults = m_oLuceneIndexReader.search(lsSearchFields, wholeWords, caseSensitive);
+    ArrayList<eDocument> lsResults = m_oLuceneIndexReader.search(lsSearchFields, wholeWords, caseSensitive, false);
     m_oLuceneIndexReader.close();
     return lsResults;
+  }
+  
+  public HashMap<String, ArrayList<eDocument>> findDuplicateDocuments()
+  {
+    m_oLuceneIndexReader.open();
+    HashMap<String, ArrayList<eDocument>> lsDocuments = m_oLuceneIndexReader.getDuplicateDocuments();
+    m_oLuceneIndexReader.close();
+    return lsDocuments;
   }
   
   public int getNumberOfDocuments()
@@ -140,5 +157,10 @@ public class cIndex
   public char getIndexName()
   {
     return m_cDriveLetter;
+  }
+  
+  public void terminate()
+  {
+    m_oLuceneIndexReader.terminate();
   }
 }

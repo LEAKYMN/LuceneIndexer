@@ -19,12 +19,13 @@ package LuceneIndexer.lucene;
 import LuceneIndexer.cConfig;
 import LuceneIndexer.ui.fx.cMainLayoutController;
 import LuceneIndexer.injection.cInjector;
-import LuceneIndexer.drives.cDrive;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Observable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -51,15 +52,54 @@ import org.apache.lucene.store.NoLockFactory;
  */
 public class cLuceneIndexReader extends Observable
 {
-
+  private long lDuplicateSearch = 0;
+  private long lMaxDocs = 0;
+  private DecimalFormat m_oDecimalFormat = new DecimalFormat("#.######");
   private IndexReader m_oIndexReader = null;
   private boolean m_bIsOpen = false;
   private cIndex m_oIndex;
-
+  private Thread tProgressThread;
+  private boolean m_bKeepAlive = true;
+  private volatile boolean m_bDuplicationSearch = false; 
+  private final Object oDuplicateLock = new Object();
   public cLuceneIndexReader(cIndex oIndex)
   {
     m_oIndex = oIndex;
     addObserver(cInjector.getInjector().getInstance(cMainLayoutController.class));
+    
+    tProgressThread = new Thread(()-> 
+    {
+      while (m_bKeepAlive)
+      {
+        if (!m_bDuplicationSearch)
+        {
+          synchronized (oDuplicateLock)
+          {
+            try
+            {
+              System.out.println("Entering wait state");
+              oDuplicateLock.wait();
+            }
+            catch (InterruptedException ex)
+            { }
+          }
+        }
+        
+        // m_oDecimalFormat.format(lDuplicateSearch/(lMaxDocs/100*100f))
+        System.out.println("lDuplicateSearch: " + lDuplicateSearch + " (lMaxDocs) " + lMaxDocs);
+        String sStatus = "Looking for duplicates: " + " " + lDuplicateSearch/(lMaxDocs/100*100f)*100  + " %";
+        setStatus(sStatus);
+        
+        try
+        {
+          Thread.sleep(500);
+        }
+        catch (InterruptedException ex)
+        { }
+      }
+    });
+    tProgressThread.setName("ProgressThread");
+    tProgressThread.start();
   }
 
   public boolean isOpen()
@@ -130,10 +170,56 @@ public class cLuceneIndexReader extends Observable
     }
     return lsReturn;
   }
+  
+  public HashMap<String, ArrayList<eDocument>> getDuplicateDocuments()
+  {
+    m_bDuplicationSearch = true;
+    synchronized (oDuplicateLock)
+    {
+      oDuplicateLock.notify();
+    }
+    HashMap<String, ArrayList<eDocument>> oReturn = new HashMap();
+    if (m_oIndexReader != null)
+    {
+      lDuplicateSearch = 0;
+      lMaxDocs = m_oIndexReader.maxDoc();
+      for (int i = 0; i < lMaxDocs; i++)
+      {
+        if (!m_bKeepAlive)
+        {
+          break;
+        }
+        try
+        {
+          Document oDocument = m_oIndexReader.document(i);
+          eDocument eDoc = eDocument.from(oDocument);
+          if (!oReturn.containsKey(eDoc.sFileHash) && eDoc.sFileHash != null )
+          {
+            eSearchField oSearchField = new eSearchField(eDocument.TAG_Hash, eDoc.sFileHash);
+            ArrayList<eSearchField> lsSearchFields = new ArrayList<>(Arrays.asList(oSearchField));
 
-  public ArrayList<eDocument> search(ArrayList<eSearchField> lsSearchFields, boolean bWholeWords, boolean bCaseSensitive)
+            ArrayList<eDocument> oDocs = search(lsSearchFields, true, false, true);
+            if (oDocs.size() > 1)
+            {
+              ArrayList<eDocument> lsReturn = oDocs;
+              oReturn.put(eDoc.sFileHash, lsReturn);
+            }
+          }
+        }
+        catch (IOException ex)
+        {
+          Logger.getLogger(cLuceneIndexReader.class.getName()).log(Level.SEVERE, null, ex);
+        }
+      }
+    }
+    m_bDuplicationSearch = false;
+    return oReturn;
+  }
+
+  public ArrayList<eDocument> search(ArrayList<eSearchField> lsSearchFields, boolean bWholeWords, boolean bCaseSensitive, boolean bLookingForDuplicates)
   {
     ArrayList<eDocument> lsResults = new ArrayList();
+    
     if (m_oIndexReader != null)
     {
       try
@@ -198,12 +284,23 @@ public class cLuceneIndexReader extends Observable
         }
 
         TopDocs oTopDocs = oSearcher.search(oQuery, Integer.MAX_VALUE);
-        String sStatus = "Searching Index " + m_oIndex.getIndexName() + " returned " + oTopDocs.totalHits + " results (Query: " + oQuery + ")";
-        System.out.println(sStatus);
-        setStatus(sStatus);
-        int iMax = Math.min(1000, oTopDocs.totalHits);
-        for (int i = 0; i < iMax; i++)
+        if (!bLookingForDuplicates)
         {
+          String sStatus = "Searching Index " + m_oIndex.getIndexName() + " returned " + oTopDocs.totalHits + " results (Query: " + oQuery + ")";
+          System.out.println(sStatus);
+          setStatus(sStatus);
+        }
+        else
+        {
+          lDuplicateSearch += oTopDocs.totalHits;
+        }
+        //int iMax = Math.min(1000, oTopDocs.totalHits);
+        for (int i = 0; i < oTopDocs.totalHits; i++)
+        {
+          if (!m_bKeepAlive)
+          {
+            break;
+          }
           Document oDocument = oSearcher.doc(oTopDocs.scoreDocs[i].doc);
           eDocument eDoc = eDocument.from(oDocument);
           if (new File(eDoc.sFileAbsolutePath).exists())
@@ -213,10 +310,10 @@ public class cLuceneIndexReader extends Observable
           else
           {
             m_oIndex.deleteFile(new File(eDoc.sFileAbsolutePath));
-            if (iMax + 1 < oTopDocs.totalHits)
-            {
-              iMax++;
-            }
+//            if (iMax + 1 < oTopDocs.totalHits)
+//            {
+//              iMax++;
+//            }
           }
         }
       }
@@ -253,5 +350,10 @@ public class cLuceneIndexReader extends Observable
   {
     setChanged();
     notifyObservers(sStatus);
+  }
+  
+  public void terminate()
+  {
+    m_bKeepAlive = false;
   }
 }
