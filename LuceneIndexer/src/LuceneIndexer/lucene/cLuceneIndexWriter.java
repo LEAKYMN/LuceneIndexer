@@ -56,12 +56,10 @@ public class cLuceneIndexWriter extends Observable
     m_oIndex = oIndex;
   }
   
-  private void initialize()
+  public void open()
   {
     //addObserver(cDriveIndexUI.instance());
-    String sLocation = cConfig.instance().getIndexLocation();
     FSDirectory m_oIndexDirectory;
-
     try 
     {
       Path oPath = new File(m_oIndex.getIndexLocation()).toPath();
@@ -87,11 +85,6 @@ public class cLuceneIndexWriter extends Observable
     {
       synchronized (m_oLock)
       {
-        if (m_oIndexWriter == null)
-        {
-          initialize();
-        }
-
         Document oDocument = new Document();
 
         // TO Stroe fields with positioning information
@@ -138,11 +131,6 @@ public class cLuceneIndexWriter extends Observable
       {
         synchronized (m_oLock)
         {
-          if (m_oIndexWriter == null)
-          {
-            initialize();
-          }
-          
           Term term = new Term(eDocument.TAG_ID, new BytesRef(oFile.getAbsolutePath()));
 
           System.out.println("Deleting file from index: " + term.toString());
@@ -155,13 +143,6 @@ public class cLuceneIndexWriter extends Observable
       {
         bResult = false;
         Logger.getLogger(cLuceneIndexWriter.class.getName()).log(Level.SEVERE, null, ex);
-      }
-      finally
-      {
-        if (m_oIndexWriter != null)
-        {
-          close();
-        }
       }
     }
     return bResult;

@@ -38,7 +38,6 @@ public class cIndex
   private cLuceneIndexReader m_oLuceneIndexReader = null;
   
   private File m_oDrive = null;
-  private cDrive m_oDriveScanner;
   private final char m_cDriveLetter;
   private Path m_oPath;
   
@@ -63,19 +62,18 @@ public class cIndex
     return lsResults;
   }
   
-  public static void closeIndexWriters()
+  public static void closeIndexs()
   {
     Iterator<cIndex> oIterator = m_lsIndexes.values().iterator();
     oIterator.forEachRemaining(oIndex -> 
     {
-      oIndex.closeIndexWriter();
+      oIndex.close();
     });
   }
   
   public cIndex(File oDrive, cDrive oDriveScanner)
   {
     m_oDrive = oDrive;
-    m_oDriveScanner = oDriveScanner;
     String sDriveLetter = m_oDrive.getPath().substring(0,1);
     m_cDriveLetter = sDriveLetter.toCharArray()[0];
     File oFile = new File(cConfig.instance().getIndexLocation());
@@ -83,7 +81,6 @@ public class cIndex
     System.out.println("Index path set to: " + m_oPath.toFile().getAbsolutePath());
     m_oLuceneIndexWriter = new cLuceneIndexWriter(this);
     m_oLuceneIndexReader = new cLuceneIndexReader(this);
-    m_oLuceneIndexReader.open();
     m_lsIndexes.put(m_cDriveLetter, this);
   }
   
@@ -99,28 +96,40 @@ public class cIndex
 
   public ArrayList<eDocument> search(ArrayList<eSearchField> lsSearchFields, 
           boolean wholeWords, boolean caseSensitive)
-  { 
-    return m_oLuceneIndexReader.search(lsSearchFields, wholeWords, caseSensitive);
+  {
+    m_oLuceneIndexReader.open();
+    ArrayList<eDocument> lsResults = m_oLuceneIndexReader.search(lsSearchFields, wholeWords, caseSensitive);
+    m_oLuceneIndexReader.close();
+    return lsResults;
   }
   
-  public void closeIndexWriter()
-  {
-    m_oLuceneIndexWriter.close();
-  }
-
-  public void commitIndexWriter()
-  {
-    m_oLuceneIndexWriter.commit();
-  }
-
   public int getNumberOfDocuments()
   {
-    return m_oLuceneIndexReader.getNumberOfDocuments();
+    m_oLuceneIndexReader.open();
+    int numberOfDocuments = m_oLuceneIndexReader.getNumberOfDocuments();
+    m_oLuceneIndexReader.close();
+    return numberOfDocuments;
   }
 
   public ArrayList<eDocument> getTopNDocuments(int n)
   {
-    return m_oLuceneIndexReader.getTopNDocuments(n);
+    m_oLuceneIndexReader.open();
+    ArrayList<eDocument> lsResults = m_oLuceneIndexReader.getTopNDocuments(n);
+    m_oLuceneIndexReader.close();
+    return lsResults;
+  }
+  
+  public void openWriter()
+  {
+    m_oLuceneIndexWriter.open();
+  }
+  
+  public void close()
+  {
+    m_oLuceneIndexWriter.commit();
+    m_oLuceneIndexWriter.close();
+
+    m_oLuceneIndexReader.close();
   }
 
   public String getIndexLocation()
@@ -128,11 +137,6 @@ public class cIndex
     return m_oPath.toString();
   }
   
-  public void close()
-  {
-    m_oLuceneIndexWriter.close();
-  }
-
   public char getIndexName()
   {
     return m_cDriveLetter;

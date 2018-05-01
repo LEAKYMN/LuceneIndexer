@@ -15,7 +15,7 @@
                         <children>
                             <Label fx:id="m_lblSearchLabel" layoutX="4" layoutY="7" text="Search: " />
                             <CheckBox fx:id="m_chkWholeWords" AnchorPane.topAnchor="7" AnchorPane.rightAnchor="270" text="Whole Words Only"/>
-                            <Label fx:id="m_lblSearchIndex" AnchorPane.topAnchor="7" AnchorPane.rightAnchor="190" text="Search Index: " />
+                            <Label fx:id="m_lblSearchIndex" AnchorPane.topAnchor="7" AnchorPane.rightAnchor="190" text="Index: " />
                             <ComboBox fx:id="m_cmbSearchIndex" AnchorPane.topAnchor="2" AnchorPane.rightAnchor="110" prefWidth="80" layoutY="2" />
                             <Button fx:id="m_btnSearchButton" minWidth="100" AnchorPane.topAnchor="2" AnchorPane.rightAnchor="2" text="Search" onAction="#handleSearch" />
 
@@ -43,6 +43,15 @@
                             <Button fx:id="m_oDeleteIndexButton" minWidth="100" AnchorPane.topAnchor="23" AnchorPane.rightAnchor="2.0" text="Delete Index" onAction="#handleDeleteIndex" />
                             <Button fx:id="m_oRefreshButton" minWidth="100" AnchorPane.topAnchor="50" AnchorPane.rightAnchor="2.0" text="Refresh" onAction="#handleRefresh" />
                             <TableView fx:id="m_oTotDocsTable" editable="false" AnchorPane.leftAnchor="2" AnchorPane.topAnchor="80" AnchorPane.rightAnchor="2.0" AnchorPane.bottomAnchor="30.0" />
+                        </children>
+                    </AnchorPane>
+                </Tab>
+                <Tab fx:id="m_oDuplicationTab" text="Duplicates">
+                    <AnchorPane id="DuplicationAnchorPane" prefHeight="600" prefWidth="800">
+                        <children>
+                            <Label fx:id="m_FindDuplicatesLabel" AnchorPane.topAnchor="7" AnchorPane.rightAnchor="110" text="Find Duplicates: " />
+                            <Button fx:id="m_oDuplicatesButton" minWidth="70" AnchorPane.topAnchor="2" AnchorPane.rightAnchor="2.0" text="Find Duplicates" onAction="#handleFindDuplicates" />
+                            <TableView fx:id="m_oDuplicatesTable" editable="false" AnchorPane.leftAnchor="2" AnchorPane.topAnchor="30" AnchorPane.rightAnchor="2.0" AnchorPane.bottomAnchor="30.0" />
                         </children>
                     </AnchorPane>
                 </Tab>

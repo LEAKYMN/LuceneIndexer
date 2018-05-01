@@ -112,7 +112,7 @@ public class LuceneIndexerFX extends Application
     {
       cLinux.unmountMountedDrives();
     }
-    cIndex.closeIndexWriters();
+    cIndex.closeIndexs();
     System.exit(0);
   }
   

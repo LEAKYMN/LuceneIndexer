@@ -104,6 +104,8 @@ public class cMainLayoutController implements Observer, Initializable
   private Tab m_oDrives;
   @FXML
   private Tab m_oIndex;
+  @FXML
+  private TableView m_oDuplicatesTable;  
 
   private cSearchTable m_oSearchTable;
   private cDriveMediator oMediator;
@@ -148,10 +150,16 @@ public class cMainLayoutController implements Observer, Initializable
       oResultColumn.setCellValueFactory(new MapValueFactory(oResultColumn.getText()));
       oResultColumn.setMinWidth(dColumnWidth);
       m_oResultTable.getColumns().add(oResultColumn);
+      
       TableColumn<Map, String> oIndexColumn = new TableColumn<>(oResultColumn.getText());
       oIndexColumn.setCellValueFactory(new MapValueFactory(oResultColumn.getText()));
       oIndexColumn.setMinWidth(dColumnWidth);
       m_oTotDocsTable.getColumns().add(oIndexColumn);
+      
+      TableColumn<Map, String> oDuplicateTableColumn = new TableColumn<>(oResultColumn.getText());
+      oDuplicateTableColumn.setCellValueFactory(new MapValueFactory(oDuplicateTableColumn.getText()));
+      oDuplicateTableColumn.setMinWidth(dColumnWidth);
+      m_oDuplicatesTable.getColumns().add(oDuplicateTableColumn);
     }
 
     m_oSearchTable = new cSearchTable(dColumnWidth);
@@ -326,6 +334,15 @@ public class cMainLayoutController implements Observer, Initializable
     }, "handleRefresh").start();
   }
 
+  @FXML 
+  private void handleFindDuplicates(ActionEvent event)
+  {
+    new Thread(() ->
+    {
+      findDuplicates();
+    }, "handleFindDuplicates").start();
+  }
+  
   @Override
   public void update(Observable o, Object arg)
   {
@@ -339,6 +356,11 @@ public class cMainLayoutController implements Observer, Initializable
     displayDrives();
   }
 
+  public void findDuplicates()
+  {
+    
+  }
+  
   public void loadIndexMetadata()
   {
     cDrive oDrive = cDriveMediator.instance().getDrive(m_cmbIndexDirectories.getValue() + "");

@@ -75,9 +75,7 @@ public class cDrive
               m_oProgressLock.wait();
             }
             catch (InterruptedException ex)
-            {
-              Logger.getLogger(cDrive.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            { }
           }
         }
         else
@@ -141,6 +139,7 @@ public class cDrive
         cDriveMediator.instance().setStatus("Scanning... (See Drive tab for detail)");
         m_oStatusPanel.resetProgress();
         m_oStatusPanel.setStatus("Scanning: " + m_oRootFile.getAbsolutePath());
+        m_oIndex.openWriter();
         scanDirectory(m_oRootFile, m_oStatusPanel);
       }
       finally

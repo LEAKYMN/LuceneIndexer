@@ -651,7 +651,10 @@ public class cCryptographer
       {
         Logger.getLogger(cCryptographer.class.getName()).log(Level.WARNING, "Cannot access file, it is in use: ''{0}''", oFile.getAbsolutePath());
       }
-      else
+      else if (ex.getMessage().contains("Access is denied"))
+      {
+        Logger.getLogger(cCryptographer.class.getName()).log(Level.WARNING, "Cannot access file, Access Denied: ''{0}''", oFile.getAbsolutePath());
+      }
       {
         Logger.getLogger(cCryptographer.class.getName()).log(Level.SEVERE, null, ex);
       }

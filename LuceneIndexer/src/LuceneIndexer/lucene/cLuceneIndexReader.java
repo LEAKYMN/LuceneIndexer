@@ -45,28 +45,28 @@ import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.store.NoLockFactory;
 
-
 /**
  *
  * @author Philip M. Trenwith
  */
 public class cLuceneIndexReader extends Observable
 {
+
   private IndexReader m_oIndexReader = null;
   private boolean m_bIsOpen = false;
   private cIndex m_oIndex;
-  
+
   public cLuceneIndexReader(cIndex oIndex)
   {
     m_oIndex = oIndex;
     addObserver(cInjector.getInjector().getInstance(cMainLayoutController.class));
   }
-  
+
   public boolean isOpen()
   {
     return m_bIsOpen;
   }
-  
+
   public boolean open()
   {
     try
@@ -77,7 +77,7 @@ public class cLuceneIndexReader extends Observable
       {
         oFile.mkdirs();
       }
-      
+
       Path oPath = new File(m_oIndex.getIndexLocation()).toPath();
       m_oIndexReader = DirectoryReader.open(FSDirectory.open(oPath, NoLockFactory.INSTANCE));
       return true;
@@ -96,26 +96,26 @@ public class cLuceneIndexReader extends Observable
     }
     return false;
   }
-  
+
   public int getNumberOfDocuments()
   {
     int iReturn = -1;
-  
+
     if (m_oIndexReader != null)
     {
       iReturn = m_oIndexReader.maxDoc();
     }
     return iReturn;
   }
-  
+
   public ArrayList<eDocument> getTopNDocuments(int n)
   {
     ArrayList<eDocument> lsReturn = new ArrayList();
     if (m_oIndexReader != null)
     {
       int iCeiling = Math.min(m_oIndexReader.maxDoc(), n);
-      for (int i=0; i<iCeiling; i++) 
-      {        
+      for (int i = 0; i < iCeiling; i++)
+      {
         try
         {
           Document oDocument = m_oIndexReader.document(i);
@@ -130,18 +130,13 @@ public class cLuceneIndexReader extends Observable
     }
     return lsReturn;
   }
-  
+
   public ArrayList<eDocument> search(ArrayList<eSearchField> lsSearchFields, boolean bWholeWords, boolean bCaseSensitive)
   {
-    if (m_oIndexReader == null)
-    {
-      open();
-    }
-    
     ArrayList<eDocument> lsResults = new ArrayList();
     if (m_oIndexReader != null)
     {
-      try 
+      try
       {
         Query oQuery = null;
         int iFieldLength = lsSearchFields.size();
@@ -149,22 +144,22 @@ public class cLuceneIndexReader extends Observable
         //TermQuery query = new TermQuery(new Term(sField, sText));
         if (bWholeWords)
         {
-            BooleanQuery.Builder builder1 = new BooleanQuery.Builder();
-            for (int i=0; i<iFieldLength; i++)
+          BooleanQuery.Builder builder1 = new BooleanQuery.Builder();
+          for (int i = 0; i < iFieldLength; i++)
+          {
+            eSearchField oSearchField = lsSearchFields.get(i);
+            String[] lsSplit = oSearchField.getValue().split(" ");
+            PhraseQuery.Builder builder = new PhraseQuery.Builder();
+            for (int j = 0; j < lsSplit.length; j++)
             {
-                eSearchField oSearchField = lsSearchFields.get(i);
-                String[] lsSplit = oSearchField.getValue().split(" ");
-                PhraseQuery.Builder builder = new PhraseQuery.Builder();
-                for (int j=0; j<lsSplit.length; j++)
-                {
-                    builder.add(new Term(oSearchField.getField(), lsSplit[j]), j);
-                }
-                oQuery = builder.build();
-
-                builder1.add(oQuery, BooleanClause.Occur.MUST);
+              builder.add(new Term(oSearchField.getField(), lsSplit[j]), j);
             }
-            oQuery = builder1.build();
-          
+            oQuery = builder.build();
+
+            builder1.add(oQuery, BooleanClause.Occur.MUST);
+          }
+          oQuery = builder1.build();
+
 //          TopScoreDocCollector collector = TopScoreDocCollector.create(100);
 //          String sLocation = cConfig.instance().getIndexLocation();
 //          File oFile = new File(sLocation);
@@ -182,32 +177,32 @@ public class cLuceneIndexReader extends Observable
         }
         else
         {
-            String sQuery = "";
-            MultiFieldQueryParser oMultiFieldQueryParser = null;
-            String[] lsFields = new String[iFieldLength];
-            for (int i=0; i<iFieldLength; i++)
+          String sQuery = "";
+          MultiFieldQueryParser oMultiFieldQueryParser = null;
+          String[] lsFields = new String[iFieldLength];
+          for (int i = 0; i < iFieldLength; i++)
+          {
+            eSearchField oSearchField = lsSearchFields.get(i);
+            lsFields[i] = oSearchField.getField();
+            if (i == iFieldLength - 1)
             {
-              eSearchField oSearchField = lsSearchFields.get(i);
-              lsFields[i] = oSearchField.getField();
-              if (i == iFieldLength-1)
-              {
-                sQuery += oSearchField.getField() + ":" + oSearchField.getValue();
-              }
-              else
-              {
-                sQuery += oSearchField.getField() + ":" + oSearchField.getValue() + " AND ";
-              }
+              sQuery += oSearchField.getField() + ":" + oSearchField.getValue();
             }
-            oMultiFieldQueryParser = new MultiFieldQueryParser(lsFields, new StandardAnalyzer(CharArraySet.EMPTY_SET));
-            oQuery = oMultiFieldQueryParser.parse(sQuery);
+            else
+            {
+              sQuery += oSearchField.getField() + ":" + oSearchField.getValue() + " AND ";
+            }
+          }
+          oMultiFieldQueryParser = new MultiFieldQueryParser(lsFields, new StandardAnalyzer(CharArraySet.EMPTY_SET));
+          oQuery = oMultiFieldQueryParser.parse(sQuery);
         }
-         
+
         TopDocs oTopDocs = oSearcher.search(oQuery, Integer.MAX_VALUE);
-        String sStatus = "Searching Index " + m_oIndex.getIndexName() + " returned " + oTopDocs.totalHits + " results (Query: " + oQuery +")";
+        String sStatus = "Searching Index " + m_oIndex.getIndexName() + " returned " + oTopDocs.totalHits + " results (Query: " + oQuery + ")";
         System.out.println(sStatus);
         setStatus(sStatus);
         int iMax = Math.min(1000, oTopDocs.totalHits);
-        for (int i=0; i<iMax; i++)
+        for (int i = 0; i < iMax; i++)
         {
           Document oDocument = oSearcher.doc(oTopDocs.scoreDocs[i].doc);
           eDocument eDoc = eDocument.from(oDocument);
@@ -218,20 +213,17 @@ public class cLuceneIndexReader extends Observable
           else
           {
             m_oIndex.deleteFile(new File(eDoc.sFileAbsolutePath));
-            if (iMax+1 < oTopDocs.totalHits)
+            if (iMax + 1 < oTopDocs.totalHits)
             {
               iMax++;
             }
           }
         }
       }
-      catch (Exception ex) 
+      catch (Exception ex)
       {
         Logger.getLogger(cLuceneIndexReader.class.getName()).log(Level.SEVERE, null, ex);
-      }
-      finally 
-      {
-        close();
+        ex.printStackTrace();
       }
     }
     else
@@ -240,7 +232,7 @@ public class cLuceneIndexReader extends Observable
     }
     return lsResults;
   }
-  
+
   public void close()
   {
     try
@@ -256,7 +248,7 @@ public class cLuceneIndexReader extends Observable
       Logger.getLogger(cLuceneIndexReader.class.getName()).log(Level.SEVERE, null, ex);
     }
   }
-  
+
   public void setStatus(String sStatus)
   {
     setChanged();
