@@ -300,8 +300,10 @@ public class cMainLayoutController implements Observer, Initializable
     });
 
     // Add MenuItem to ContextMenu
-    m_oSearchResultsContextMenu.getItems().addAll(oOpenLocation, oPlayFile);
+    m_oSearchResultsContextMenu.getItems().addAll(oOpenLocation, oPlayFile, oDeleteFile);
     m_oResultTable.setContextMenu(m_oSearchResultsContextMenu);
+    m_oDuplicatesTable.setContextMenu(m_oSearchResultsContextMenu);
+    
     oMediator = cDriveMediator.instance();
 
     displayDrives();

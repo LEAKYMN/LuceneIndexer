@@ -47,10 +47,10 @@ public class cDrive
   private ExecutorService m_oExecutorService;
   private Thread m_oProgressThread = null;
   private final Object m_oProgressLock = new Object();
-  private boolean bDone = true;
-  private boolean bCancel = false;
+  private boolean m_bDone = true;
+  private boolean m_bCancel = false;
   private int m_iTOTAL_THREADS = 50;
-  private AtomicInteger oAlive = new AtomicInteger(0);
+  private AtomicInteger m_oAlive = new AtomicInteger(0);
   private static SimpleDateFormat g_DF = new SimpleDateFormat("HH:mm:ss");
   private long m_lScanStartTime = 0;
   private long m_lScanStopTime = 0;
@@ -64,9 +64,9 @@ public class cDrive
     m_oIndex = new cIndex(m_oRootFile,this);
     m_oProgressThread = new Thread(() -> 
     {
-      while (!bCancel)
+      while (!m_bCancel)
       {
-        if (bDone)
+        if (m_bDone)
         {
           synchronized (m_oProgressLock)
           {
@@ -122,8 +122,8 @@ public class cDrive
   
   public void scanDrive()
   {
-    bCancel = false;
-    bDone = false;
+    m_bCancel = false;
+    m_bDone = false;
     synchronized (m_oProgressLock)
     {
       m_oProgressLock.notify();
@@ -144,7 +144,7 @@ public class cDrive
       }
       finally
       {
-        while(oAlive.get() > 0)
+        while(m_oAlive.get() > 0)
         {
           synchronized (m_oLOCK)
           {
@@ -157,10 +157,10 @@ public class cDrive
           }
         }
 
-        if (oAlive.get() <=0)
+        if (m_oAlive.get() <=0)
         {
           String sStatus;
-          if (bCancel)
+          if (m_bCancel)
           {
             sStatus = "cancelled";
             m_oStatusPanel.cancel();
@@ -171,9 +171,9 @@ public class cDrive
             m_oStatusPanel.complete();
           }
 
-          System.out.println("Scanning drive: '" + m_oRootFile.getAbsolutePath() + "' " + sStatus + " (" + oAlive.get() + ")");
+          System.out.println("Scanning drive: '" + m_oRootFile.getAbsolutePath() + "' " + sStatus + " (" + m_oAlive.get() + ")");
         
-          bDone = true;
+          m_bDone = true;
           m_oIndex.close();
           m_lScanStopTime = new GregorianCalendar().getTimeInMillis();
           cInjector.getInjector().getInstance(cMainLayoutController.class).scanComplete();
@@ -194,10 +194,10 @@ public class cDrive
     {
       for (String sFile: list)
       {
-        oAlive.getAndIncrement();
+        m_oAlive.getAndIncrement();
         m_oExecutorService.submit(() -> 
         {
-          if (bCancel)
+          if (m_bCancel)
           {
             try
             {
@@ -239,7 +239,7 @@ public class cDrive
               }
             }
           }
-          oAlive.decrementAndGet();
+          m_oAlive.decrementAndGet();
           synchronized (m_oLOCK)
           {
             m_oLOCK.notify();
@@ -298,17 +298,17 @@ public class cDrive
   
   public void stopScan()
   {
-    if (!bDone)
+    if (!m_bDone)
     {
       System.out.println("Stopping Scan : '" + m_oRootFile.getAbsolutePath() + "'");
     }
-    bCancel = true;
+    m_bCancel = true;
     m_oProgressThread.interrupt();
   }
 
   public boolean isDone()
   {
-    return bDone;
+    return m_bDone;
   }
 
   public cIndex getIndex()

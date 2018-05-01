@@ -35,7 +35,8 @@ public class cIndex
   private static TreeMap<Character, cIndex> m_lsIndexes = new TreeMap();
   private cLuceneIndexWriter m_oLuceneIndexWriter = null;
   private cLuceneIndexReader m_oLuceneIndexReader = null;
-  
+  private final Object oWRITE_LOCK = new Object();
+  private final Object oREAD_LOCK = new Object();
   private File m_oDrive = null;
   private final char m_cDriveLetter;
   private Path m_oPath;
@@ -92,61 +93,92 @@ public class cIndex
   
   public boolean indexFile(File oFile, String sFileHash)
   {
-    return m_oLuceneIndexWriter.indexFile(oFile, sFileHash);
+    synchronized (oWRITE_LOCK)
+    {
+      return m_oLuceneIndexWriter.indexFile(oFile, sFileHash);
+    }
   }
   
   public boolean deleteFile(File oFile)
   {
-    m_oLuceneIndexWriter.open();
-    boolean deleteFile = m_oLuceneIndexWriter.deleteFile(oFile);
-    m_oLuceneIndexWriter.close();
+    boolean deleteFile;
+    synchronized (oWRITE_LOCK)
+    {
+      m_oLuceneIndexWriter.open();
+      deleteFile = m_oLuceneIndexWriter.deleteFile(oFile);
+      m_oLuceneIndexWriter.close();
+    }
     return deleteFile;
   }
 
   public ArrayList<eDocument> search(ArrayList<eSearchField> lsSearchFields, 
           boolean wholeWords, boolean caseSensitive)
   {
-    m_oLuceneIndexReader.open();
-    ArrayList<eDocument> lsResults = m_oLuceneIndexReader.search(lsSearchFields, wholeWords, caseSensitive, false);
-    m_oLuceneIndexReader.close();
+    ArrayList<eDocument> lsResults;
+    synchronized (oREAD_LOCK)
+    {
+      m_oLuceneIndexReader.open();
+      lsResults = m_oLuceneIndexReader.search(lsSearchFields, wholeWords, caseSensitive, false);
+      m_oLuceneIndexReader.close();
+    }
     return lsResults;
   }
   
   public HashMap<String, ArrayList<eDocument>> findDuplicateDocuments()
   {
-    m_oLuceneIndexReader.open();
-    HashMap<String, ArrayList<eDocument>> lsDocuments = m_oLuceneIndexReader.getDuplicateDocuments();
-    m_oLuceneIndexReader.close();
+    HashMap<String, ArrayList<eDocument>> lsDocuments;
+    synchronized (oREAD_LOCK)
+    {
+      m_oLuceneIndexReader.open();
+      lsDocuments = m_oLuceneIndexReader.getDuplicateDocuments();
+      m_oLuceneIndexReader.close();
+    }
     return lsDocuments;
   }
   
   public int getNumberOfDocuments()
   {
-    m_oLuceneIndexReader.open();
-    int numberOfDocuments = m_oLuceneIndexReader.getNumberOfDocuments();
-    m_oLuceneIndexReader.close();
+    int numberOfDocuments;
+    synchronized (oREAD_LOCK)
+    {
+      m_oLuceneIndexReader.open();
+      numberOfDocuments = m_oLuceneIndexReader.getNumberOfDocuments();
+      m_oLuceneIndexReader.close();
+    }
     return numberOfDocuments;
   }
 
   public ArrayList<eDocument> getTopNDocuments(int n)
   {
-    m_oLuceneIndexReader.open();
-    ArrayList<eDocument> lsResults = m_oLuceneIndexReader.getTopNDocuments(n);
-    m_oLuceneIndexReader.close();
+    ArrayList<eDocument> lsResults;
+    synchronized (oREAD_LOCK)
+    {
+      m_oLuceneIndexReader.open();
+      lsResults = m_oLuceneIndexReader.getTopNDocuments(n);
+      m_oLuceneIndexReader.close();
+    }
     return lsResults;
   }
   
   public void openWriter()
   {
-    m_oLuceneIndexWriter.open();
+    synchronized (oWRITE_LOCK)
+    {
+      m_oLuceneIndexWriter.open();
+    }
   }
   
   public void close()
   {
-    m_oLuceneIndexWriter.commit();
-    m_oLuceneIndexWriter.close();
-
-    m_oLuceneIndexReader.close();
+    synchronized (oWRITE_LOCK)
+    {
+      m_oLuceneIndexWriter.commit();
+      m_oLuceneIndexWriter.close();
+    }
+    synchronized (oREAD_LOCK)
+    {
+      m_oLuceneIndexReader.close();
+    }
   }
 
   public String getIndexLocation()
@@ -161,6 +193,9 @@ public class cIndex
   
   public void terminate()
   {
-    m_oLuceneIndexReader.terminate();
+    synchronized (oREAD_LOCK)
+    {
+      m_oLuceneIndexReader.terminate();
+    }
   }
 }

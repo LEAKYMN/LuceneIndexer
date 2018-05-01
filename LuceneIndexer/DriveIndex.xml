@@ -4,7 +4,7 @@
 	<Location>index</Location>
 	<HashDocuments>true</HashDocuments>
 	<HashFirstBlockOnly>true</HashFirstBlockOnly>
-	<ScanThreads>10</ScanThreads>
+	<ScanThreads>3</ScanThreads>
 </Index>
 <Drives>
 	<Type Scan="true">Local Disk</Type>
