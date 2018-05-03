@@ -41,6 +41,12 @@ public class cIndex
   private final char m_cDriveLetter;
   private Path m_oPath;
   
+  public static boolean deleteFile(char _Index, File oFile)
+  {
+    cIndex oIndex = m_lsIndexes.get(_Index);
+    return oIndex.deleteFile(oFile);
+  }
+  
   public static ArrayList<eDocument> search(char _Index, ArrayList<eSearchField> lsSearchFields, 
           boolean wholeWords, boolean caseSensitive)
   {

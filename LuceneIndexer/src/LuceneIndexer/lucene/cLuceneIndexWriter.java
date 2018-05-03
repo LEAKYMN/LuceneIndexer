@@ -20,7 +20,6 @@ import LuceneIndexer.cConfig;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.Observable;
 import java.util.logging.Level;
@@ -100,7 +99,7 @@ public class cLuceneIndexWriter extends Observable
     //      oDocument.add(new Field(sField, sValue, fieldType));
 
           //oDocument.add(new Field(eDocument.TAG_ID, oFile.getAbsolutePath(), new FieldType(TextField.TYPE_STORED)));
-          oDocument.add(new StringField(eDocument.TAG_ID, oFile.getPath(), Field.Store.YES));
+          oDocument.add(new StringField(eDocument.TAG_ID, new BytesRef(oFile.getAbsolutePath()), Field.Store.YES));
 
           oDocument.add(new Field(eDocument.TAG_Path, oFile.getParentFile().getAbsolutePath(), new FieldType(TextField.TYPE_STORED)));
           oDocument.add(new Field(eDocument.TAG_Filename, FilenameUtils.getBaseName(oFile.getName()), new FieldType(TextField.TYPE_STORED)));
@@ -113,7 +112,7 @@ public class cLuceneIndexWriter extends Observable
             oDocument.add(new Field(eDocument.TAG_Hash, sFileHash, new FieldType(TextField.TYPE_STORED)));
           }
 
-          m_oIndexWriter.updateDocument(new Term(eDocument.TAG_ID, oFile.getAbsolutePath()), oDocument);
+          m_oIndexWriter.updateDocument(new Term(eDocument.TAG_ID, new BytesRef(oFile.getAbsolutePath())), oDocument);
           bResult = true;
         }
       }

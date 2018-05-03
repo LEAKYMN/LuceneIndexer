@@ -233,7 +233,28 @@ public class cMainLayoutController implements Observer, Initializable
       public void handle(ActionEvent event)
       {
         HashMap oItems = (HashMap) m_oResultTable.getSelectionModel().getSelectedItem();
-        handleContextMenuDeleteFile(oItems);
+        String sPath = (String) oItems.get("Path");
+        String sFilename = (String) oItems.get("Filename");
+        String sAbsolutePath = sPath + File.separator + sFilename;
+        Object sExtension = oItems.get("Extension");
+        if (sExtension != null && !(sExtension + "").isEmpty())
+        {
+          sAbsolutePath += "." + sExtension;
+        }
+        String sMessage = "Are you sure you want to delete '" + sAbsolutePath + "'?";
+          
+        cConfirmDialog oConfirmDialog = new cConfirmDialog(LuceneIndexerFX.m_oStage, sMessage);
+        oConfirmDialog.showAndWait();
+        if (oConfirmDialog.getResult() == cConfirmDialog.YES)
+        {
+          handleContextMenuDeleteFile(oItems);
+          
+          char cDriveLetter = (m_cmbSearchIndex.getValue() + "").toCharArray()[0];
+          if (cIndex.deleteFile(cDriveLetter, new File(sAbsolutePath)))
+          {
+            m_oResultTable.getItems().remove(oItems);
+          }
+        }
       }
     });
 
@@ -270,7 +291,29 @@ public class cMainLayoutController implements Observer, Initializable
       public void handle(ActionEvent event)
       {
         HashMap oItems = (HashMap) m_oTotDocsTable.getSelectionModel().getSelectedItem();
-        handleContextMenuDeleteFile(oItems);
+       
+        String sPath = (String) oItems.get("Path");
+        String sFilename = (String) oItems.get("Filename");
+        String sAbsolutePath = sPath + File.separator + sFilename;
+        Object sExtension = oItems.get("Extension");
+        if (sExtension != null && !(sExtension + "").isEmpty())
+        {
+          sAbsolutePath += "." + sExtension;
+        }
+        String sMessage = "Are you sure you want to delete '" + sAbsolutePath + "'?";
+          
+        cConfirmDialog oConfirmDialog = new cConfirmDialog(LuceneIndexerFX.m_oStage, sMessage);
+        oConfirmDialog.showAndWait();
+        if (oConfirmDialog.getResult() == cConfirmDialog.YES)
+        {
+          handleContextMenuDeleteFile(oItems);
+          
+          char cDriveLetter = (m_cmbIndexDirectories.getValue() + "").toCharArray()[0];
+          if (cIndex.deleteFile(cDriveLetter, new File(sAbsolutePath)))
+          {
+            m_oTotDocsTable.getItems().remove(oItems);
+          }
+        }
       }
     });
 
