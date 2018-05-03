@@ -81,7 +81,7 @@ public class cDrive
         }
         else
         {
-          if (m_oStatusPanel != null && new GregorianCalendar().getTimeInMillis() - m_oStatusPanel.getLastStatusUpdateTime() > 1000)
+          if (m_oStatusPanel != null)
           {
             m_oStatusPanel.setStatus("Scanning: " + m_sLatestIndexedFile);
           }
@@ -159,6 +159,9 @@ public class cDrive
         if (m_oAlive.get() <=0)
         {
           String sStatus;
+          m_lScanStopTime = new GregorianCalendar().getTimeInMillis();
+          m_lScanDuration = m_lScanStopTime-m_lScanStartTime;
+          
           if (m_bCancel)
           {
             sStatus = "cancelled";
@@ -174,8 +177,6 @@ public class cDrive
         
           m_bDone = true;
           m_oIndex.close();
-          m_lScanStopTime = new GregorianCalendar().getTimeInMillis();
-          m_lScanDuration = m_lScanStopTime-m_lScanStartTime;
           cInjector.getInjector().getInstance(cMainLayoutController.class).scanComplete();
           m_oStatusPanel.setStatus("Scan Complete. Running Time: " + g_DF.format(new Date(m_lScanDuration)));
         }

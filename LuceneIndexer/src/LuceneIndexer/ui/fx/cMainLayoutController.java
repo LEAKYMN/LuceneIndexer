@@ -44,6 +44,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
@@ -127,6 +128,7 @@ public class cMainLayoutController implements Observer, Initializable
     m_oDrives.setClosable(false);
     m_oIndex.setClosable(false);
     m_oDuplicationTab.setClosable(false);
+    m_oDuplicatesTable.getSelectionModel().setSelectionMode(javafx.scene.control.SelectionMode.MULTIPLE);
     TableColumn<String, Long> oSizeColumn = new TableColumn<>(eDocument.TAG_Size);
     PropertyValueFactory<String, Long> propertyValueFactory = new PropertyValueFactory<String, Long>(eDocument.TAG_Size);
     new Callback<TableColumn<String, Long>, TableCell<String, Long>>()
@@ -304,8 +306,13 @@ public class cMainLayoutController implements Observer, Initializable
       @Override
       public void handle(ActionEvent event)
       {
-        HashMap oItems = (HashMap) m_oDuplicatesTable.getSelectionModel().getSelectedItem();
-        handleContextMenuDeleteFile(oItems);
+        //HashMap oItems = (HashMap)
+        ObservableList oObservableList = m_oDuplicatesTable.getSelectionModel().getSelectedItems();
+        oObservableList.forEach(oList ->
+        {
+          HashMap oItems = (HashMap)oList;
+          handleContextMenuDeleteFile(oItems);
+        });
       }
     });
     
@@ -322,7 +329,7 @@ public class cMainLayoutController implements Observer, Initializable
 
     // Add MenuItem to ContextMenu
     ContextMenu oDuplicatesContextMenu = new ContextMenu();
-    oDuplicatesContextMenu.getItems().addAll(oOpenLocationDuplicates, oPlayFileDuplicates, oDeleteFileDuplicates);
+    oDuplicatesContextMenu.getItems().addAll(oOpenLocationDuplicates, oPlayFileDuplicates, oDeleteFileDuplicates, oMarkFileDuplicates);
     m_oDuplicatesTable.setContextMenu(oDuplicatesContextMenu);
 
     oMediator = cDriveMediator.instance();

@@ -647,7 +647,7 @@ public class cCryptographer
     }
     catch (Exception ex)
     {
-      if (ex.getMessage().contains("used by another process"))
+      if (ex.getMessage().contains("used by another process") || ex.getMessage().contains("The process cannot access the file because another process has locked a portion of the file"))
       {
         Logger.getLogger(cCryptographer.class.getName()).log(Level.WARNING, "Cannot access file, it is in use: ''{0}''", oFile.getAbsolutePath());
       }
@@ -655,6 +655,8 @@ public class cCryptographer
       {
         Logger.getLogger(cCryptographer.class.getName()).log(Level.WARNING, "Cannot access file, Access Denied: ''{0}''", oFile.getAbsolutePath());
       }
+      else if (ex.getMessage().contains("The system cannot find the file specified"))
+      {}
       else
       {
         Logger.getLogger(cCryptographer.class.getName()).log(Level.SEVERE, null, ex);

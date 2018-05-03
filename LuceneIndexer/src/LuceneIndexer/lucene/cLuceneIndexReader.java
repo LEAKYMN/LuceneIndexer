@@ -70,6 +70,7 @@ public class cLuceneIndexReader extends Observable
   private boolean m_bCancel = false;
   private volatile boolean m_bDuplicationSearchInProgress = false; 
   private final Object m_oDuplicateLock = new Object();
+  
   public cLuceneIndexReader(cIndex oIndex)
   {
     m_oIndex = oIndex;
@@ -85,7 +86,6 @@ public class cLuceneIndexReader extends Observable
           {
             try
             {
-              System.out.println("Entering wait state");
               m_oDuplicateLock.wait();
             }
             catch (InterruptedException ex)
