@@ -308,11 +308,34 @@ public class cMainLayoutController implements Observer, Initializable
       {
         //HashMap oItems = (HashMap)
         ObservableList oObservableList = m_oDuplicatesTable.getSelectionModel().getSelectedItems();
-        oObservableList.forEach(oList ->
+        if (oObservableList != null && !oObservableList.isEmpty())
         {
-          HashMap oItems = (HashMap)oList;
-          handleContextMenuDeleteFile(oItems);
-        });
+          String sMessage = "Are you sure you want to delete " + oObservableList.size() + " items?";
+          if (oObservableList.size() == 1)
+          {
+            HashMap oItems = (HashMap) oObservableList.get(0);
+            String sPath = (String) oItems.get("Path");
+            String sFilename = (String) oItems.get("Filename");
+            String sAbsolutePath = sPath + File.separator + sFilename;
+            Object sExtension = oItems.get("Extension");
+            if (sExtension != null && !(sExtension + "").isEmpty())
+            {
+              sAbsolutePath += "." + sExtension;
+            }
+            sMessage = "Are you sure you want to delete '" + sAbsolutePath + "'?";
+          }
+          cConfirmDialog oConfirmDialog = new cConfirmDialog(LuceneIndexerFX.m_oStage, sMessage);
+          oConfirmDialog.showAndWait();
+          if (oConfirmDialog.getResult() == cConfirmDialog.YES)
+          {
+            oObservableList.forEach(oList ->
+            {
+              HashMap oItems = (HashMap)oList;
+              handleContextMenuDeleteFile(oItems);
+              m_oDuplicatesTable.getItems().remove(oItems);
+            });
+          }
+        }
       }
     });
     
@@ -703,15 +726,11 @@ public class cMainLayoutController implements Observer, Initializable
         sAbsolutePath += "." + sExtension;
       }
       File oFile = new File(sAbsolutePath);
-      cConfirmDialog oConfirmDialog = new cConfirmDialog(LuceneIndexerFX.m_oStage, "Are you sure you want to delete '" + sAbsolutePath + "'?");
-      if (oConfirmDialog.getResult() == cConfirmDialog.YES)
+      oFile.delete();
+      File oDirectory = new File(sPath);
+      if (oDirectory.list().length == 0)
       {
-        oFile.delete();
-        File oDirectory = new File(sPath);
-        if (oDirectory.list().length == 0)
-        {
-          oDirectory.delete();
-        }
+        oDirectory.delete();
       }
     }
   }
