@@ -62,6 +62,12 @@ public class cIndex
     return lsResults;
   }
   
+  public static void cancelDuplicationSearch(char _Index)
+  {
+    cIndex oIndex = m_lsIndexes.get(_Index);
+    oIndex.cancelDuplicationSearch();
+  }
+  
   public static HashMap<String, ArrayList<eDocument>> findDuplicates(char _Index)
   {
     cIndex oIndex = m_lsIndexes.get(_Index);
@@ -114,14 +120,22 @@ public class cIndex
   public ArrayList<eDocument> search(ArrayList<eSearchField> lsSearchFields, 
           boolean wholeWords, boolean caseSensitive)
   {
-    ArrayList<eDocument> lsResults;
-    synchronized (oREAD_LOCK)
+    ArrayList<eDocument> lsResults = new ArrayList();
+    if (!lsSearchFields.isEmpty())
     {
-      m_oLuceneIndexReader.open();
-      lsResults = m_oLuceneIndexReader.search(lsSearchFields, wholeWords, caseSensitive, false);
-      m_oLuceneIndexReader.close();
+      synchronized (oREAD_LOCK)
+      {
+        m_oLuceneIndexReader.open();
+        lsResults = m_oLuceneIndexReader.search(lsSearchFields, wholeWords, caseSensitive, false);
+        m_oLuceneIndexReader.close();
+      }
     }
     return lsResults;
+  }
+  
+  public void cancelDuplicationSearch()
+  {
+    m_oLuceneIndexReader.cancelDuplicationSearch();
   }
   
   public HashMap<String, ArrayList<eDocument>> findDuplicateDocuments()

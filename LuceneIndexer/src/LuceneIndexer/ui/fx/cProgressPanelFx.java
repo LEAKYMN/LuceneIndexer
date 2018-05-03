@@ -16,6 +16,7 @@
  */
 package LuceneIndexer.ui.fx;
 
+import LuceneIndexer.drives.cDrive;
 import LuceneIndexer.persistance.cMetadata;
 import LuceneIndexer.drives.folderwatcher.cFolderWatcher;
 import java.io.File;
@@ -37,29 +38,30 @@ import javafx.stage.Stage;
  */
 public class cProgressPanelFx extends Application
 {
-  private static HashMap<String, cProgressPanelFx> oDrives = new HashMap();
+  private static HashMap<String, cProgressPanelFx> m_oProgressPanels = new HashMap();
   private cProgressPanelController oProgressPanelController;
   private cFolderWatcher oFolderWatcher;
   private Parent oRoot;
   private Scene oScene;
   private File oDriveRoot;
+  private cDrive m_oDrive;
   private long m_oLastStatusChangeTimestamp = -1;
   
-  public static cProgressPanelFx get(String sRoot)
+  public static cProgressPanelFx get(String sRoot, cDrive oDrive)
   {
-    cProgressPanelFx oReturn = oDrives.get(sRoot);
+    cProgressPanelFx oReturn = m_oProgressPanels.get(sRoot);
     if (oReturn == null)
     {
       File oFile = new File(sRoot);
-      oReturn = new cProgressPanelFx(oFile);
-      oDrives.put(oFile.getAbsolutePath(), oReturn);
+      oReturn = new cProgressPanelFx(oFile, oDrive);
+      m_oProgressPanels.put(oFile.getAbsolutePath(), oReturn);
     }
     return oReturn;
   }
   
   public static cProgressPanelFx[] getAll()
   {
-    Collection<cProgressPanelFx> lsDrives = oDrives.values();
+    Collection<cProgressPanelFx> lsDrives = m_oProgressPanels.values();
     cProgressPanelFx[] oReturn = new cProgressPanelFx[0];
     if (lsDrives != null)
     {
@@ -70,7 +72,7 @@ public class cProgressPanelFx extends Application
   
   public static void terminateAll()
   {
-    Collection<cProgressPanelFx> lsPanels = oDrives.values();
+    Collection<cProgressPanelFx> lsPanels = m_oProgressPanels.values();
     Iterator<cProgressPanelFx> oIterator = lsPanels.iterator();
     while (oIterator.hasNext())
     {
@@ -87,12 +89,13 @@ public class cProgressPanelFx extends Application
     }
   }
   
-  private cProgressPanelFx(File oRoot)
+  private cProgressPanelFx(File oRoot, cDrive oDrive)
   {
     try
     {
+      m_oDrive = oDrive;
       oDriveRoot = oRoot;
-      oDrives.put(oDriveRoot.getAbsolutePath(), this);
+      m_oProgressPanels.put(oDriveRoot.getAbsolutePath(), this);
       start(null);
     }
     catch (Exception ex)
@@ -109,7 +112,7 @@ public class cProgressPanelFx extends Application
     oScene = new Scene(oRoot);
        
     oProgressPanelController = oLoader.<cProgressPanelController>getController();
-    oProgressPanelController.postInitialize(oDriveRoot);
+    oProgressPanelController.postInitialize(oDriveRoot, m_oDrive);
   }
   
   public Parent getParent()

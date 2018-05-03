@@ -53,7 +53,8 @@ public class cDrive
   private AtomicInteger m_oAlive = new AtomicInteger(0);
   private static SimpleDateFormat g_DF = new SimpleDateFormat("HH:mm:ss");
   private long m_lScanStartTime = 0;
-  private long m_lScanStopTime = 0;
+  private long m_lScanStopTime = -10000;
+  private long m_lScanDuration = 0;
   private cProgressPanelFx m_oStatusPanel;
   private String m_sLatestIndexedFile = "";
   
@@ -89,9 +90,7 @@ public class cDrive
             Thread.sleep(100);
           }
           catch (InterruptedException ex)
-          {
-            Logger.getLogger(cDrive.class.getName()).log(Level.SEVERE, null, ex);
-          }
+          { }
         }
       }
     });
@@ -132,7 +131,7 @@ public class cDrive
     Thread thread = new Thread(() -> 
     {
       m_lScanStartTime = new GregorianCalendar().getTimeInMillis();
-      m_oStatusPanel = cProgressPanelFx.get(m_oRootFile.getAbsolutePath());
+      m_oStatusPanel = cProgressPanelFx.get(m_oRootFile.getAbsolutePath(), this);
       try
       {
         System.out.println("Scanning drive: '" + m_oRootFile.getAbsolutePath() + "'");
@@ -176,8 +175,9 @@ public class cDrive
           m_bDone = true;
           m_oIndex.close();
           m_lScanStopTime = new GregorianCalendar().getTimeInMillis();
+          m_lScanDuration = m_lScanStopTime-m_lScanStartTime;
           cInjector.getInjector().getInstance(cMainLayoutController.class).scanComplete();
-          m_oStatusPanel.setStatus("Scan Complete. Running Time: " + g_DF.format(new Date(m_lScanStopTime-m_lScanStartTime)));
+          m_oStatusPanel.setStatus("Scan Complete. Running Time: " + g_DF.format(new Date(m_lScanDuration)));
         }
       }
     });
@@ -314,5 +314,15 @@ public class cDrive
   public cIndex getIndex()
   {
     return m_oIndex;
+  }
+  
+  public long getLastScanTime()
+  {
+    return m_lScanStopTime;
+  }
+  
+  public String getLastScanDuration()
+  {
+    return g_DF.format(new Date(m_lScanDuration));
   }
 }

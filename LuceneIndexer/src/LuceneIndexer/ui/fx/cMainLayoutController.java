@@ -63,12 +63,10 @@ import org.apache.commons.io.FileUtils;
  *
  * @author Philip Trenwith
  */
-
-
 public class cMainLayoutController implements Observer, Initializable
 {
+
   private final DecimalFormat oNumberFormat = new DecimalFormat("###,###,###,###");
-  private ContextMenu m_oSearchResultsContextMenu = new ContextMenu();
 
   @FXML
   private AnchorPane m_oMainAnchorPane;
@@ -155,7 +153,7 @@ public class cMainLayoutController implements Observer, Initializable
         };
       }
     };
-    
+
     if (cConfig.instance().getHashDocuments())
     {
       lsResultHeader = new TableColumn[]
@@ -189,7 +187,7 @@ public class cMainLayoutController implements Observer, Initializable
       oResultColumn.setCellValueFactory(new MapValueFactory(oResultColumn.getText()));
       oResultColumn.setMinWidth(dColumnWidth);
       m_oResultTable.getColumns().add(oResultColumn);
-      
+
       TableColumn<Map, String> oIndexColumn = new TableColumn<>(oResultColumn.getText());
       oIndexColumn.setCellValueFactory(new MapValueFactory(oResultColumn.getText()));
       oIndexColumn.setMinWidth(dColumnWidth);
@@ -205,105 +203,128 @@ public class cMainLayoutController implements Observer, Initializable
     TableView oTable = m_oSearchTable.getTable();
     m_oSearchBox.getChildren().addAll(oTable);
 
-    MenuItem oOpenLocation = new MenuItem("Open File Location");
-    oOpenLocation.setOnAction(new EventHandler<ActionEvent>()
+    MenuItem oOpenLocationResults = new MenuItem("Open File Location");
+    oOpenLocationResults.setOnAction(new EventHandler<ActionEvent>()
     {
       @Override
       public void handle(ActionEvent event)
       {
-        try
-        {
-          HashMap oItems = (HashMap) m_oResultTable.getSelectionModel().getSelectedItem();
-          String sPath = (String) oItems.get("Path");
-          Desktop.getDesktop().open(new File(sPath));
-        }
-        catch (IOException ex)
-        {
-          Logger.getLogger(cMainLayoutController.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        HashMap oItems = (HashMap) m_oResultTable.getSelectionModel().getSelectedItem();
+        handleContextMenuOpenLocation(oItems);
       }
     });
-    MenuItem oPlayFile = new MenuItem("Open/Play File");
-    oPlayFile.setOnAction(new EventHandler<ActionEvent>()
+    MenuItem oPlayFileResults = new MenuItem("Open/Play File");
+    oPlayFileResults.setOnAction(new EventHandler<ActionEvent>()
     {
       @Override
       public void handle(ActionEvent event)
       {
-        try
-        {
-          HashMap oItems = (HashMap) m_oResultTable.getSelectionModel().getSelectedItem();
+        HashMap oItems = (HashMap) m_oResultTable.getSelectionModel().getSelectedItem();
+        handleContextMenuOpenFile(oItems);
+      }
+    });
 
-          String sPath = (String) oItems.get("Path");
-          String sFilename = (String) oItems.get("Filename");
-          String sAbsolutePath = sPath + File.separator + sFilename;
-          Object sExtension = oItems.get("Extension");
-          if (sExtension != null && !(sExtension + "").isEmpty())
-          {
-            sAbsolutePath += "." + sExtension;
-          }
-          Desktop.getDesktop().open(new File(sAbsolutePath));
-          System.out.println();
-        }
-        catch (IOException ex)
-        {
-//          if (ex.getMessage().contains("No application is associated"))
-//          {
-//            try
-//            {
-//              final String cmd = String.format("cmd.exe /C start %s", "\"" + new File(sAbsolutePath).getAbsolutePath() + "\"");
-//              Runtime.getRuntime().exec(cmd);
-//            }
-//            catch (final Throwable t)
-//            {
-//              t.printStackTrace();
-//            }
-//          }
-          Logger.getLogger(cMainLayoutController.class.getName()).log(Level.SEVERE, null, ex);
-        }
-      }
-    });
-    
-    MenuItem oDeleteFile = new MenuItem("Delete File");
-    oDeleteFile.setOnAction(new EventHandler<ActionEvent>()
+    MenuItem oDeleteFileResults = new MenuItem("Delete File");
+    oDeleteFileResults.setOnAction(new EventHandler<ActionEvent>()
     {
       @Override
       public void handle(ActionEvent event)
       {
-        try
-        {
-          HashMap oItems = (HashMap) m_oResultTable.getSelectionModel().getSelectedItem();
-          String sPath = (String) oItems.get("Path");
-          String sFilename = (String) oItems.get("Filename");
-          String sAbsolutePath = sPath + File.separator + sFilename;
-          Object sExtension = oItems.get("Extension");
-          if (sExtension != null && !(sExtension + "").isEmpty())
-          {
-            sAbsolutePath += "." + sExtension;
-          }
-          File oFile = new File(sAbsolutePath);
-          cConfirmDialog oConfirmDialog = new cConfirmDialog(LuceneIndexerFX.m_oStage, "Are you sure you want to delete '" + sAbsolutePath + "'?");
-          if (oConfirmDialog.getResult() == cConfirmDialog.YES)
-          {
-            oFile.delete();
-            File oDirectory = new File(sPath);
-            if (oDirectory.list().length == 0)
-            {
-              oDirectory.delete();
-            }
-          }
-        }
-        catch (Exception ex)
-        {
-          Logger.getLogger(cMainLayoutController.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        HashMap oItems = (HashMap) m_oResultTable.getSelectionModel().getSelectedItem();
+        handleContextMenuDeleteFile(oItems);
       }
     });
 
     // Add MenuItem to ContextMenu
-    m_oSearchResultsContextMenu.getItems().addAll(oOpenLocation, oPlayFile, oDeleteFile);
-    m_oResultTable.setContextMenu(m_oSearchResultsContextMenu);
-    m_oDuplicatesTable.setContextMenu(m_oSearchResultsContextMenu);
+    ContextMenu oSearchResultsContextMenu = new ContextMenu();
+    oSearchResultsContextMenu.getItems().addAll(oOpenLocationResults, oPlayFileResults, oDeleteFileResults);
+    m_oResultTable.setContextMenu(oSearchResultsContextMenu);
     
+    MenuItem oOpenLocationIndex = new MenuItem("Open File Location");
+    oOpenLocationIndex.setOnAction(new EventHandler<ActionEvent>()
+    {
+      @Override
+      public void handle(ActionEvent event)
+      {
+        HashMap oItems = (HashMap) m_oTotDocsTable.getSelectionModel().getSelectedItem();
+        handleContextMenuOpenLocation(oItems);
+      }
+    });
+    MenuItem oPlayFileIndex = new MenuItem("Open/Play File");
+    oPlayFileIndex.setOnAction(new EventHandler<ActionEvent>()
+    {
+      @Override
+      public void handle(ActionEvent event)
+      {
+        HashMap oItems = (HashMap) m_oTotDocsTable.getSelectionModel().getSelectedItem();
+        handleContextMenuOpenFile(oItems);
+      }
+    });
+
+    MenuItem oDeleteFileIndex = new MenuItem("Delete File");
+    oDeleteFileIndex.setOnAction(new EventHandler<ActionEvent>()
+    {
+      @Override
+      public void handle(ActionEvent event)
+      {
+        HashMap oItems = (HashMap) m_oTotDocsTable.getSelectionModel().getSelectedItem();
+        handleContextMenuDeleteFile(oItems);
+      }
+    });
+
+    // Add MenuItem to ContextMenu
+    ContextMenu oTopDocsContextMenu = new ContextMenu();
+    oTopDocsContextMenu.getItems().addAll(oOpenLocationIndex, oPlayFileIndex, oDeleteFileIndex);
+    m_oTotDocsTable.setContextMenu(oTopDocsContextMenu);
+    
+    MenuItem oOpenLocationDuplicates = new MenuItem("Open File Location");
+    oOpenLocationDuplicates.setOnAction(new EventHandler<ActionEvent>()
+    {
+      @Override
+      public void handle(ActionEvent event)
+      {
+        HashMap oItems = (HashMap) m_oDuplicatesTable.getSelectionModel().getSelectedItem();
+        handleContextMenuOpenLocation(oItems);
+      }
+    });
+    MenuItem oPlayFileDuplicates = new MenuItem("Open/Play File");
+    oPlayFileDuplicates.setOnAction(new EventHandler<ActionEvent>()
+    {
+      @Override
+      public void handle(ActionEvent event)
+      {
+        HashMap oItems = (HashMap) m_oDuplicatesTable.getSelectionModel().getSelectedItem();
+        handleContextMenuOpenFile(oItems);
+      }
+    });
+
+    MenuItem oDeleteFileDuplicates = new MenuItem("Delete File");
+    oDeleteFileDuplicates.setOnAction(new EventHandler<ActionEvent>()
+    {
+      @Override
+      public void handle(ActionEvent event)
+      {
+        HashMap oItems = (HashMap) m_oDuplicatesTable.getSelectionModel().getSelectedItem();
+        handleContextMenuDeleteFile(oItems);
+      }
+    });
+    
+    MenuItem oMarkFileDuplicates = new MenuItem("Mark");
+    oMarkFileDuplicates.setOnAction(new EventHandler<ActionEvent>()
+    {
+      @Override
+      public void handle(ActionEvent event)
+      {
+        HashMap oItems = (HashMap) m_oDuplicatesTable.getSelectionModel().getSelectedItem();
+        handleContextMenuMarkFile(oItems);
+      }
+    });
+
+    // Add MenuItem to ContextMenu
+    ContextMenu oDuplicatesContextMenu = new ContextMenu();
+    oDuplicatesContextMenu.getItems().addAll(oOpenLocationDuplicates, oPlayFileDuplicates, oDeleteFileDuplicates);
+    m_oDuplicatesTable.setContextMenu(oDuplicatesContextMenu);
+
     oMediator = cDriveMediator.instance();
 
     displayDrives();
@@ -413,17 +434,23 @@ public class cMainLayoutController implements Observer, Initializable
   @FXML
   private void handleFindDuplicates(ActionEvent event)
   {
-    m_oDuplicatesButton.setText("Please wait...");
-    m_oDuplicatesButton.setDisable(true);
-    new Thread(() ->
+    if (m_oDuplicatesButton.getText().equals("Find Duplicates"))
     {
-      findDuplicates();
-      Platform.runLater(()-> 
+      m_oDuplicatesButton.setText("Cancel?");
+      new Thread(() ->
       {
-        m_oDuplicatesButton.setText("Find Duplicates");
-        m_oDuplicatesButton.setDisable(false);
-      });
-    }, "handleFindDuplicates").start();
+        findDuplicates();
+        Platform.runLater(() ->
+        {
+          m_oDuplicatesButton.setText("Find Duplicates");
+        });
+      }, "handleFindDuplicates").start();
+    }
+    else if (m_oDuplicatesButton.getText().equals("Cancel?"))
+    {
+      m_oDuplicatesButton.setText("Find Duplicates");
+      cancelDuplicationSearch();
+    }
   }
 
   @Override
@@ -439,13 +466,19 @@ public class cMainLayoutController implements Observer, Initializable
     displayDrives();
   }
 
+  public void cancelDuplicationSearch()
+  {
+    char cDriveLetter = (m_cmbDuplicateIndex.getValue() + "").toCharArray()[0];
+    cIndex.cancelDuplicationSearch(cDriveLetter);
+  }
+  
   public void findDuplicates()
   {
     m_oDuplicatesTable.getItems().clear();
-    char cDriveLetter = (m_cmbDuplicateIndex.getValue()+"").toCharArray()[0];
+    char cDriveLetter = (m_cmbDuplicateIndex.getValue() + "").toCharArray()[0];
     HashMap<String, ArrayList<eDocument>> oDuplicates = cIndex.findDuplicates(cDriveLetter);
     Set<String> keySet = oDuplicates.keySet();
-    for (String sHash: keySet)
+    for (String sHash : keySet)
     {
       ArrayList<eDocument> lsDocs = oDuplicates.get(sHash);
       for (eDocument oDoc : lsDocs)
@@ -515,7 +548,7 @@ public class cMainLayoutController implements Observer, Initializable
       m_cmbDuplicateIndex.getItems().clear();
       m_cmbSearchIndex.getItems().clear();
       m_cmbIndexDirectories.getItems().clear();
-      
+
       //m_cmbDuplicateIndex.getItems().add("All");
       m_cmbSearchIndex.getItems().add("All");
 
@@ -530,7 +563,7 @@ public class cMainLayoutController implements Observer, Initializable
 
       if (m_cmbDuplicateIndex.getItems().size() > 0)
       {
-        m_cmbDuplicateIndex.setValue(m_cmbDuplicateIndex.getItems().get(iSelectedSearchIndex));
+        m_cmbDuplicateIndex.setValue(m_cmbDuplicateIndex.getItems().get(iSelectedDuplicateIndex));
       }
       if (m_cmbSearchIndex.getItems().size() > 0)
       {
@@ -609,5 +642,93 @@ public class cMainLayoutController implements Observer, Initializable
   public String getIndex()
   {
     return m_cmbSearchIndex.getValue() + "";
+  }
+
+  private void handleContextMenuOpenLocation(HashMap oItems)
+  {
+    if (oItems != null)
+    {
+      try
+      {
+        String sPath = (String) oItems.get("Path");
+        Desktop.getDesktop().open(new File(sPath));
+      }
+      catch (IOException ex)
+      {
+        Logger.getLogger(cMainLayoutController.class.getName()).log(Level.SEVERE, null, ex);
+      }
+    }
+  }
+
+  private void handleContextMenuOpenFile(HashMap oItems)
+  {
+    if (oItems != null)
+    {
+      try
+      {
+        String sPath = (String) oItems.get("Path");
+        String sFilename = (String) oItems.get("Filename");
+        String sAbsolutePath = sPath + File.separator + sFilename;
+        Object sExtension = oItems.get("Extension");
+        if (sExtension != null && !(sExtension + "").isEmpty())
+        {
+          sAbsolutePath += "." + sExtension;
+        }
+        Desktop.getDesktop().open(new File(sAbsolutePath));
+      }
+      catch (IOException ex)
+      {
+        Logger.getLogger(cMainLayoutController.class.getName()).log(Level.SEVERE, null, ex);
+      }
+    }
+  }
+
+  private void handleContextMenuDeleteFile(HashMap oItems)
+  {
+    if (oItems != null)
+    {
+      String sPath = (String) oItems.get("Path");
+      String sFilename = (String) oItems.get("Filename");
+      String sAbsolutePath = sPath + File.separator + sFilename;
+      Object sExtension = oItems.get("Extension");
+      if (sExtension != null && !(sExtension + "").isEmpty())
+      {
+        sAbsolutePath += "." + sExtension;
+      }
+      File oFile = new File(sAbsolutePath);
+      cConfirmDialog oConfirmDialog = new cConfirmDialog(LuceneIndexerFX.m_oStage, "Are you sure you want to delete '" + sAbsolutePath + "'?");
+      if (oConfirmDialog.getResult() == cConfirmDialog.YES)
+      {
+        oFile.delete();
+        File oDirectory = new File(sPath);
+        if (oDirectory.list().length == 0)
+        {
+          oDirectory.delete();
+        }
+      }
+    }
+  }
+  
+  private void handleContextMenuMarkFile(HashMap oItems)
+  {
+    if (oItems != null)
+    {
+      try
+      {
+        String sPath = (String) oItems.get("Path");
+        String sFilename = (String) oItems.get("Filename");
+        String sAbsolutePath = sPath + File.separator + sFilename;
+        Object sExtension = oItems.get("Extension");
+        if (sExtension != null && !(sExtension + "").isEmpty())
+        {
+          sAbsolutePath += "." + sExtension;
+        }
+        Desktop.getDesktop().open(new File(sAbsolutePath));
+      }
+      catch (IOException ex)
+      {
+        Logger.getLogger(cMainLayoutController.class.getName()).log(Level.SEVERE, null, ex);
+      }
+    }
   }
 }

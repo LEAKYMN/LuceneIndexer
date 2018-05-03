@@ -85,34 +85,37 @@ public class cLuceneIndexWriter extends Observable
     {
       synchronized (m_oLock)
       {
-        Document oDocument = new Document();
-
-        // TO Stroe fields with positioning information
-        //FieldType fieldType = new FieldType(TextField.TYPE_STORED);
-  //      fieldType.setIndexOptions(IndexOptions.DOCS_AND_FREQS_AND_POSITIONS_AND_OFFSETS );
-  //      fieldType.setStoreTermVectors(true);
-  //      fieldType.setStoreTermVectorPositions(true);
-  //      fieldType.setStoreTermVectorPayloads(true);
-  //      fieldType.setStoreTermVectorOffsets(true);
-  //      fieldType.setTokenized( true );
-  //      oDocument.add(new Field(sField, sValue, fieldType));
-
-        //oDocument.add(new Field(eDocument.TAG_ID, oFile.getAbsolutePath(), new FieldType(TextField.TYPE_STORED)));
-        oDocument.add(new StringField(eDocument.TAG_ID, oFile.getPath(), Field.Store.YES));
-        
-        oDocument.add(new Field(eDocument.TAG_Path, oFile.getParentFile().getAbsolutePath(), new FieldType(TextField.TYPE_STORED)));
-        oDocument.add(new Field(eDocument.TAG_Filename, FilenameUtils.getBaseName(oFile.getName()), new FieldType(TextField.TYPE_STORED)));
-        oDocument.add(new Field(eDocument.TAG_Extension, FilenameUtils.getExtension(oFile.getAbsolutePath()).toLowerCase(), new FieldType(TextField.TYPE_STORED)));
-        oDocument.add(new Field(eDocument.TAG_Category, cConfig.instance().getCategory(oFile), new FieldType(TextField.TYPE_STORED)));
-        oDocument.add(new Field(eDocument.TAG_Size, oFile.length()+"", new FieldType(TextField.TYPE_STORED)));
-
-        if (cConfig.instance().getHashDocuments())
+        if (m_oIndexWriter != null)
         {
-          oDocument.add(new Field(eDocument.TAG_Hash, sFileHash, new FieldType(TextField.TYPE_STORED)));
-        }
+          Document oDocument = new Document();
 
-        m_oIndexWriter.updateDocument(new Term(eDocument.TAG_ID, oFile.getAbsolutePath()), oDocument);
-        bResult = true;
+          // TO Stroe fields with positioning information
+          //FieldType fieldType = new FieldType(TextField.TYPE_STORED);
+    //      fieldType.setIndexOptions(IndexOptions.DOCS_AND_FREQS_AND_POSITIONS_AND_OFFSETS );
+    //      fieldType.setStoreTermVectors(true);
+    //      fieldType.setStoreTermVectorPositions(true);
+    //      fieldType.setStoreTermVectorPayloads(true);
+    //      fieldType.setStoreTermVectorOffsets(true);
+    //      fieldType.setTokenized( true );
+    //      oDocument.add(new Field(sField, sValue, fieldType));
+
+          //oDocument.add(new Field(eDocument.TAG_ID, oFile.getAbsolutePath(), new FieldType(TextField.TYPE_STORED)));
+          oDocument.add(new StringField(eDocument.TAG_ID, oFile.getPath(), Field.Store.YES));
+
+          oDocument.add(new Field(eDocument.TAG_Path, oFile.getParentFile().getAbsolutePath(), new FieldType(TextField.TYPE_STORED)));
+          oDocument.add(new Field(eDocument.TAG_Filename, FilenameUtils.getBaseName(oFile.getName()), new FieldType(TextField.TYPE_STORED)));
+          oDocument.add(new Field(eDocument.TAG_Extension, FilenameUtils.getExtension(oFile.getAbsolutePath()).toLowerCase(), new FieldType(TextField.TYPE_STORED)));
+          oDocument.add(new Field(eDocument.TAG_Category, cConfig.instance().getCategory(oFile), new FieldType(TextField.TYPE_STORED)));
+          oDocument.add(new Field(eDocument.TAG_Size, oFile.length()+"", new FieldType(TextField.TYPE_STORED)));
+
+          if (cConfig.instance().getHashDocuments())
+          {
+            oDocument.add(new Field(eDocument.TAG_Hash, sFileHash, new FieldType(TextField.TYPE_STORED)));
+          }
+
+          m_oIndexWriter.updateDocument(new Term(eDocument.TAG_ID, oFile.getAbsolutePath()), oDocument);
+          bResult = true;
+        }
       }
     }
     catch (IOException ex)
@@ -125,7 +128,7 @@ public class cLuceneIndexWriter extends Observable
   public boolean deleteFile(File oFile)
   {
     boolean bResult = false;
-    if (oFile != null)
+    if (oFile != null && m_oIndexWriter != null)
     {
       try
       {

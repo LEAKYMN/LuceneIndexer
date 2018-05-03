@@ -149,7 +149,7 @@ public class cDriveMediator extends Observable
     while (oIterator.hasNext())
     {
       cDrive oDriveScanner = oIterator.next();
-      cProgressPanelFx oPanel = cProgressPanelFx.get(oDriveScanner.getRoot());
+      cProgressPanelFx oPanel = cProgressPanelFx.get(oDriveScanner.getRoot(), oDriveScanner);
       oReturn[iCount++] = oPanel;
     }
     

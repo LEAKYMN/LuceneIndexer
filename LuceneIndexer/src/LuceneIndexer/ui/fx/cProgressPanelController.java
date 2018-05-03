@@ -16,6 +16,7 @@
  */
 package LuceneIndexer.ui.fx;
 
+import LuceneIndexer.drives.cDrive;
 import LuceneIndexer.injection.cInjector;
 import LuceneIndexer.persistance.cMetadata;
 import LuceneIndexer.drives.cDriveMediator;
@@ -50,6 +51,7 @@ import org.apache.commons.io.FileUtils;
 public class cProgressPanelController implements Initializable
 {
   private File m_oDriveRoot;
+  private cDrive m_oDrive;
   private cMetadata m_oMetadata;
   private long lTotalSize = 0;
   private long lUsedSize = 0;
@@ -95,7 +97,6 @@ public class cProgressPanelController implements Initializable
       {
         oMenuItemIndex.setText("Index Drive");
         oMenuItemIndex.setId("index");
-        m_oStatusLabel.setText("Idle");
         cDriveMediator.instance().stopScan();
         cancel();
       }
@@ -119,10 +120,10 @@ public class cProgressPanelController implements Initializable
     });
   }  
 
-  public void postInitialize(File oDriveRoot)
+  public void postInitialize(File oDriveRoot, cDrive oDrive)
   {
     m_oDriveRoot = oDriveRoot;
-    
+    m_oDrive = oDrive;
     m_oDrivePathLabel.setText("Drive: " + oDriveRoot.getAbsolutePath());
     String sMountPoint = oDriveRoot.getAbsolutePath();
     sMountPoint = sMountPoint.replaceAll("[^a-zA-Z0-9]", "");
@@ -213,10 +214,9 @@ public class cProgressPanelController implements Initializable
       setProgress(100);
       setStatus("Indexed");
 
-      Date time = new GregorianCalendar().getTime();
-      m_oLastScanLabel.setText("Last Scan: " + g_DF.format(time)); 
-      m_oMetadata.setPropertyValue("lastscan", g_DF.format(time), false);
-      m_oMetadata.setPropertyValue("status", "Indexed", false);
+      m_oLastScanLabel.setText("Last Scan: " + g_DF.format(m_oDrive.getLastScanTime())); 
+      m_oMetadata.setPropertyValue("lastscan", g_DF.format(m_oDrive.getLastScanTime()), false);
+      m_oMetadata.setPropertyValue("status", "Indexed, Scan Duration: " + m_oDrive.getLastScanDuration(), false);
       m_oMetadata.setPropertyValue("indexed", "100", true);
     });
   }
@@ -225,7 +225,7 @@ public class cProgressPanelController implements Initializable
   {
     setStatus("Idle");
     
-    m_oMetadata.setPropertyValue("status", "Idle", false);
+    //m_oMetadata.setPropertyValue("status", "Idle", false);
     m_oMetadata.setPropertyValue("indexed", ((int)getPercentage(oIndexedSize.get(),lUsedSize))+"", true);
   }
   
@@ -277,7 +277,6 @@ public class cProgressPanelController implements Initializable
     m_oDrivePathLabel.setText("Drive: " + m_oDriveRoot.getAbsolutePath());
     m_oUsedSpaceLabel.setText("Used Space: " + sUsedSpace);
     m_oTotalSpaceLabel.setText("Total: " + sTotalSpace);
-    m_oStatusLabel.setText("Status: Idle");
     if (getPercentage(lUsedSize, lTotalSize) > 85)
     {
       m_oUsedSpaceLabel.setStyle("-fx-text-fill: red ;");

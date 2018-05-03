@@ -66,8 +66,9 @@ public class cLuceneIndexReader extends Observable
   private boolean m_bIsOpen = false;
   private cIndex m_oIndex;
   private Thread m_tProgressThread;
-  private boolean m_bKeepAlive = true;
-  private volatile boolean m_bDuplicationSearch = false; 
+  private boolean m_bTerminate = false;
+  private boolean m_bCancel = false;
+  private volatile boolean m_bDuplicationSearchInProgress = false; 
   private final Object m_oDuplicateLock = new Object();
   public cLuceneIndexReader(cIndex oIndex)
   {
@@ -76,17 +77,14 @@ public class cLuceneIndexReader extends Observable
     
     m_tProgressThread = new Thread(()-> 
     {
-      while (m_bKeepAlive)
+      while (!m_bTerminate)
       {
-        if (!m_bDuplicationSearch)
+        if (!m_bDuplicationSearchInProgress)
         {
           synchronized (m_oDuplicateLock)
           {
             try
             {
-              System.out.println("lDuplicateSearch: " + m_lDuplicateSearch + " (lMaxDocs) " + m_lMaxDocs + " Alice: " + m_oAlive.get());
-              String sStatus = "Looking for duplicates: " + " " + m_lDuplicateSearch.get()/(m_lMaxDocs/100*100f)*100  + " %";
-              setStatus(sStatus);
               System.out.println("Entering wait state");
               m_oDuplicateLock.wait();
             }
@@ -94,9 +92,7 @@ public class cLuceneIndexReader extends Observable
             { }
           }
         }
-        
         // m_oDecimalFormat.format(lDuplicateSearch/(lMaxDocs/100*100f))
-        System.out.println("lDuplicateSearch: " + m_lDuplicateSearch + " (lMaxDocs) " + m_lMaxDocs + " Alice: " + m_oAlive.get());
         String sStatus = "Looking for duplicates: " + " " + m_lDuplicateSearch.get()/(m_lMaxDocs/100*100f)*100  + " %";
         setStatus(sStatus);
         
@@ -129,8 +125,11 @@ public class cLuceneIndexReader extends Observable
       }
 
       Path oPath = new File(m_oIndex.getIndexLocation()).toPath();
-      m_oIndexReader = DirectoryReader.open(FSDirectory.open(oPath, NoLockFactory.INSTANCE));
-      return true;
+      if (oPath.toFile().exists() && oPath.toFile().list().length != 0)
+      {
+        m_oIndexReader = DirectoryReader.open(FSDirectory.open(oPath, NoLockFactory.INSTANCE));
+        return true;
+      }
     }
     catch (Exception ex)
     {
@@ -181,9 +180,18 @@ public class cLuceneIndexReader extends Observable
     return lsReturn;
   }
   
+  public void cancelDuplicationSearch()
+  {
+    m_bCancel = true;
+    if (m_oExecutorService != null)
+    {
+      m_oExecutorService.shutdownNow();
+    }
+  }
+  
   public HashMap<String, ArrayList<eDocument>> getDuplicateDocuments()
   {
-    m_bDuplicationSearch = true;
+    m_bDuplicationSearchInProgress = true;
     synchronized (m_oDuplicateLock)
     {
       m_oDuplicateLock.notify();
@@ -206,7 +214,7 @@ public class cLuceneIndexReader extends Observable
       m_lMaxDocs = m_oIndexReader.maxDoc();
       for (int i = 0; i < m_lMaxDocs; i++)
       {
-        if (!m_bKeepAlive)
+        if (m_bTerminate || m_bCancel)
         {
           break;
         }
@@ -245,13 +253,19 @@ public class cLuceneIndexReader extends Observable
           }
         });        
       }
-      
+
       while (m_oAlive.get() > 0)
       {
-
+        try
+        {
+          Thread.sleep(500);
+        }
+        catch (InterruptedException ex)
+        { }
+        if (m_bCancel) break;
       }
     }
-    m_bDuplicationSearch = false;
+    m_bDuplicationSearchInProgress = false;
     return m_oDuplicateResults;
   }
 
@@ -337,7 +351,7 @@ public class cLuceneIndexReader extends Observable
         //int iMax = Math.min(1000, oTopDocs.totalHits);
         for (int i = 0; i < oTopDocs.totalHits; i++)
         {
-          if (!m_bKeepAlive)
+          if (m_bTerminate)
           {
             break;
           }
@@ -394,7 +408,7 @@ public class cLuceneIndexReader extends Observable
   
   public void terminate()
   {
-    m_bKeepAlive = false;
+    m_bTerminate = true;
     if (m_oExecutorService != null)
     {
       m_oExecutorService.shutdownNow();
