@@ -43,6 +43,7 @@ import java.util.logging.Logger;
  */
 public class cDrive
 {
+  private cCryptographer m_oCrypto;
   private cIndex m_oIndex;
   private final Object m_oLOCK = new Object();
   private File m_oRootFile;
@@ -97,6 +98,12 @@ public class cDrive
     });
     m_oProgressThread.setDaemon(true);
     m_oProgressThread.start();
+    
+    if (cConfig.instance().getHashDocuments())
+    {
+      m_oCrypto = new cCryptographer();
+    }
+    
     resetExecutor();
   }
   
@@ -229,8 +236,9 @@ public class cDrive
                 String sHash = "";
                 if (cConfig.instance().getHashDocuments())
                 {
-                  sHash = cCryptographer.hash(oChildFile);
+                  sHash = m_oCrypto.hash(oChildFile);
                 }
+                
                 boolean bSuccess = m_oIndex.indexFile(oChildFile, sHash);
                 oStatusPanel.appendIndexSize(oChildFile.getPath(), oChildFile.length());
               } 
@@ -323,8 +331,8 @@ public class cDrive
     return m_lScanStopTime;
   }
   
-  public String getLastScanDuration_Formatted()
+  public long getLastScanDuration()
   {
-    return g_TimeFormat.format(new Date(m_lScanDuration));
+    return m_lScanDuration;
   }
 }

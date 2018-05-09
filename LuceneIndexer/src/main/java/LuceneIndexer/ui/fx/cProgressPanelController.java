@@ -20,10 +20,15 @@ import LuceneIndexer.drives.cDrive;
 import LuceneIndexer.injection.cInjector;
 import LuceneIndexer.persistance.cMetadata;
 import LuceneIndexer.drives.cDriveMediator;
+import static LuceneIndexer.persistance.cMetadata.m_sKEY_DURATION;
+import static LuceneIndexer.persistance.cMetadata.m_sKEY_INDEXED;
+import static LuceneIndexer.persistance.cMetadata.m_sKEY_LAST_SCAN;
+import static LuceneIndexer.persistance.cMetadata.m_sKEY_STATUS;
 import java.io.File;
 import java.net.URL;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.ResourceBundle;
 import java.util.concurrent.atomic.AtomicLong;
 import javafx.application.Platform;
@@ -70,7 +75,7 @@ public class cProgressPanelController implements Initializable
   @FXML private Label m_oUsedSpaceLabel;
   @FXML private Label m_oTotalSpaceLabel;
   @FXML private Label m_oStatusLabel;
-  @FXML private ProgressBar m_oProgressNode;
+  @FXML private ProgressBar m_oProgressBar;
   @FXML private ProgressIndicator m_oProgressIndicator;
   
   /**
@@ -130,10 +135,10 @@ public class cProgressPanelController implements Initializable
     m_oMetadata = new cMetadata(sMountPoint+"");
     if (m_oMetadata.exists())
     {
-      m_oLastScanLabel.setText("Last Scan: " + ((m_oMetadata.getPropertyValue("lastscan")==null) ? "" : 
-              m_oMetadata.getPropertyValue("lastscan") + " " + " (Scan Duration: " + m_oDrive.getLastScanDuration_Formatted() + ")"));
-      m_oStatusLabel.setText("Status: " + m_oMetadata.getPropertyValue("status"));
-      double dProgress = Double.parseDouble(m_oMetadata.getPropertyValue("indexed"));
+      m_oLastScanLabel.setText("Last Scan: " + ((m_oMetadata.getPropertyValue(m_sKEY_LAST_SCAN)==null) ? "" : 
+              m_oMetadata.getPropertyValue(m_sKEY_LAST_SCAN) + " " + " (Scan Duration: " + g_TimeFormat.format(new Date(m_oDrive.getLastScanDuration())) + ")"));
+      m_oStatusLabel.setText("Status: " + m_oMetadata.getPropertyValue(m_sKEY_STATUS));
+      double dProgress = Double.parseDouble(m_oMetadata.getPropertyValue(m_sKEY_INDEXED));
       setProgress(dProgress);
     }
     else
@@ -215,10 +220,11 @@ public class cProgressPanelController implements Initializable
       setProgress(100);
       setStatus("Indexed");
 
-      m_oLastScanLabel.setText("Last Scan: " + g_DateAndTimeFormat.format(m_oDrive.getLastScanTime()) + " (Scan Duration: " + m_oDrive.getLastScanDuration_Formatted() + ")"); 
-      m_oMetadata.setPropertyValue("lastscan", g_DateAndTimeFormat.format(m_oDrive.getLastScanTime()), false);
-      m_oMetadata.setPropertyValue("status", "Indexed", false);
-      m_oMetadata.setPropertyValue("indexed", "100", true);
+      m_oLastScanLabel.setText("Last Scan: " + g_DateAndTimeFormat.format(m_oDrive.getLastScanTime()) + " (Scan Duration: " + g_TimeFormat.format(new Date(m_oDrive.getLastScanDuration())) + ")"); 
+      m_oMetadata.setPropertyValue(m_sKEY_LAST_SCAN, g_DateAndTimeFormat.format(m_oDrive.getLastScanTime()), false);
+      m_oMetadata.setPropertyValue(m_sKEY_STATUS, "Indexed", false);
+      m_oMetadata.setPropertyValue(m_sKEY_INDEXED, "100", false);
+      m_oMetadata.setPropertyValue(m_sKEY_DURATION, m_oDrive.getLastScanDuration()+"", true);
     });
   }
   
@@ -226,8 +232,8 @@ public class cProgressPanelController implements Initializable
   {
     setStatus("Idle");
     
-    //m_oMetadata.setPropertyValue("status", "Idle", false);
-    m_oMetadata.setPropertyValue("indexed", ((int)getPercentage(oIndexedSize.get(),lUsedSize))+"", true);
+    //m_oMetadata.setPropertyValue(m_sKEY_STATUS", "Idle", false);
+    m_oMetadata.setPropertyValue(m_sKEY_INDEXED, ((int)getPercentage(oIndexedSize.get(),lUsedSize))+"", true);
   }
   
   public void scan()
@@ -307,7 +313,7 @@ public class cProgressPanelController implements Initializable
   private void setProgress(double dProgress)
   {
     double d = dProgress/100f;
-    m_oProgressNode.setProgress(d);
+    m_oProgressBar.setProgress(d);
     m_oProgressIndicator.setProgress(d);
   }
 }

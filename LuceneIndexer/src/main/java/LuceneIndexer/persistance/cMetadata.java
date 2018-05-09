@@ -37,6 +37,11 @@ import java.util.logging.Logger;
  */
 public class cMetadata 
 {
+  public final static String m_sKEY_LAST_SCAN = "lastscan";
+  public final static String m_sKEY_STATUS    = "status";
+  public final static String m_sKEY_INDEXED   = "indexed";
+  public final static String m_sKEY_DURATION  = "duration";
+  
   private static SimpleDateFormat g_DF = new SimpleDateFormat("dd MMMMMM yyyy HH:mm:ss");
   private final Object m_oCommitLock = new Object();
   private Properties m_oProperties = new Properties();

@@ -54,6 +54,7 @@ public class cConfirmDialog extends Stage
   public cConfirmDialog(Stage owner, String msg)
   {
     setResizable(false);
+    setAlwaysOnTop(true);
     initModality(Modality.WINDOW_MODAL);
     initStyle(StageStyle.TRANSPARENT);
 
@@ -116,9 +117,10 @@ public class cConfirmDialog extends Stage
 
     int height = 100;
 
-    final Scene scene = new Scene(borderPane, width, height);
-    scene.setFill(Color.TRANSPARENT);
-    setScene(scene);
+    final Scene oScene = new Scene(borderPane, width, height);
+    oScene.setFill(Color.TRANSPARENT);
+    oScene.getStylesheets().add("/styles/Dialog.css");
+    setScene(oScene);
 
     // make sure this stage is centered on top of its owner
     if (owner != null)

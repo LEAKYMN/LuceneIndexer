@@ -24,6 +24,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
@@ -151,13 +152,13 @@ public class cConfig
       rootElement.appendChild(oIndex);
       Element oLocation = doc.createElement("Location");
       oIndex.appendChild(oLocation);
-      oLocation.setTextContent("/index");
+      oLocation.setTextContent("index");
       Element oHashDocuments = doc.createElement("HashDocuments");
       oIndex.appendChild(oHashDocuments);
-      oHashDocuments.setTextContent("false");
+      oHashDocuments.setTextContent("true");
       Element oHashFirstBlockOnly = doc.createElement("HashFirstBlockOnly");
       oIndex.appendChild(oHashFirstBlockOnly);
-      oHashFirstBlockOnly.setTextContent("false");
+      oHashFirstBlockOnly.setTextContent("true");
       Element oScanThreads = doc.createElement("ScanThreads");
       oIndex.appendChild(oScanThreads);
       oScanThreads.setTextContent("10");
@@ -179,24 +180,26 @@ public class cConfig
       Element oCategory = doc.createElement("Category");
       oCategories.appendChild(oCategory);
       oCategory.setAttribute("Name", "Document");
-      oCategory.setTextContent("txt,doc,docx,pdf");
+      oCategory.setTextContent("txt,doc,docx,pdf,xls,xlsx");
       Element oCategory1 = doc.createElement("Category");
       oCategories.appendChild(oCategory1);
       oCategory1.setAttribute("Name", "Video");
-      oCategory1.setTextContent("avi,mp4,mkv,flv");
+      oCategory1.setTextContent("avi,mp4,mkv,flv,wmv,mov");
       Element oCategory2 = doc.createElement("Category");
       oCategories.appendChild(oCategory2);
       oCategory2.setAttribute("Name", "Image");
-      oCategory2.setTextContent("jpeg,jpg,png");
+      oCategory2.setTextContent("jpeg,jpg,png,tiff,bmp");
       Element oCategory3 = doc.createElement("Category");
       oCategories.appendChild(oCategory3);
       oCategory3.setAttribute("Name", "Audio");
-      oCategory3.setTextContent("mp3,flac,m4a,wma,gp3");
+      oCategory3.setTextContent("mp3,flac,m4a,wma,gp3,wav");
       
       TransformerFactory transformerFactory = TransformerFactory.newInstance();
       Transformer transformer = transformerFactory.newTransformer();
       DOMSource source = new DOMSource(doc);
       StreamResult result = new StreamResult(m_oConfigFile);
+      transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+      transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
       transformer.transform(source, result);
     }
     catch (Exception ex)

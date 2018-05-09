@@ -69,15 +69,20 @@ import org.bouncycastle.x509.X509V3CertificateGenerator;
  */
 public class cCryptographer 
 {
-  private static String g_sCERTIFICATE_SIGNING_ALGORITHM = "SHA256WithRSAEncryption";
-  private static String g_sPBKDF2_ALGORITHM = "PBKDF2WithHmacSHA1";
-  private static String g_sAES_ALGORITHM = "AES/CTR/PKCS5Padding";
-  private static final String g_sINIT_VECTOR = "RandomInitVector";
-  private static final String g_sPROVIDER = "BC"; // Bouncy Castle
-  private static int iBUFFER_SIZE = 4096;
-  private static byte [] yBUFFER = new byte[iBUFFER_SIZE];
+  private String g_sCERTIFICATE_SIGNING_ALGORITHM = "SHA256WithRSAEncryption";
+  private String g_sPBKDF2_ALGORITHM = "PBKDF2WithHmacSHA1";
+  private String g_sAES_ALGORITHM = "AES/CTR/PKCS5Padding";
+  private final String g_sINIT_VECTOR = "RandomInitVector";
+  private final String g_sPROVIDER = "BC"; // Bouncy Castle
+  private int iBUFFER_SIZE = 4096;
+  private byte [] yBUFFER = new byte[iBUFFER_SIZE];
   
-  public static void symmetricEncryption(FileChannel oSourceChannel, String sAESSecretKey)
+  public cCryptographer()
+  {
+    System.out.println("Cryptographer initialized");
+  }
+  
+  public void symmetricEncryption(FileChannel oSourceChannel, String sAESSecretKey)
   {
     try
     {
@@ -129,7 +134,7 @@ public class cCryptographer
    * @param sAESSecretKey The encryption key
    * @return The handle to the encrypted file
    */
-  public static File symmetricEncryption(File oSourceFile, String sAESSecretKey)
+  public File symmetricEncryption(File oSourceFile, String sAESSecretKey)
   {
     File oDestinationFile;
     try
@@ -182,7 +187,7 @@ public class cCryptographer
     return oSourceFile;
   }
   
-  public static void symmetricDecryption(FileChannel oSourceChannel, String sAESSecretKey)
+  public void symmetricDecryption(FileChannel oSourceChannel, String sAESSecretKey)
   {
     try
     {      
@@ -234,7 +239,7 @@ public class cCryptographer
    * @param sAESSecretKey The decryption key
    * @return The handle to the decrypted file
    */
-  public static File symmetricDecryption(File oSourceFile, String sAESSecretKey)
+  public File symmetricDecryption(File oSourceFile, String sAESSecretKey)
   {
     File oDestinationFile;
     try
@@ -293,7 +298,7 @@ public class cCryptographer
    * @param sAESSecretKey The encryption key
    * @return The encrypted string
    */
-  public static String symmetricEncryption(String sPlaintext, String sAESSecretKey)
+  public String symmetricEncryption(String sPlaintext, String sAESSecretKey)
   {
     try
     {
@@ -316,7 +321,7 @@ public class cCryptographer
    * @param sAESSecretKey The decryption key
    * @return The decrypted string
    */
-  public static String symmetricDecryption(String sCipherText, String sAESSecretKey)
+  public String symmetricDecryption(String sCipherText, String sAESSecretKey)
   {
     try
     {
@@ -339,7 +344,7 @@ public class cCryptographer
    * @param yAESSecretKey The encryption key
    * @return The encrypted byte array
    */
-  public static byte[] symmetricEncryption(byte[] yPlaintext, byte[] yAESSecretKey)
+  public byte[] symmetricEncryption(byte[] yPlaintext, byte[] yAESSecretKey)
   {
     byte[] yCipherText = null;
     try
@@ -367,7 +372,7 @@ public class cCryptographer
    * @param yAESSecretKey The decryption key
    * @return The decrypted byte array
    */
-  public static byte[] symmetricDecryption(byte[] yCipherText, byte[] yAESSecretKey)
+  public byte[] symmetricDecryption(byte[] yCipherText, byte[] yAESSecretKey)
   {
     byte[] yPlainText = null;
     try
@@ -398,7 +403,7 @@ public class cCryptographer
    * Generate an AES key of 256 bits
    * @return a AES-256 SecretKey 
    */
-  public static byte[] generateAESSecretKey()
+  public byte[] generateAESSecretKey()
   {
     return generateAESSecretKey(256);
   }
@@ -408,7 +413,7 @@ public class cCryptographer
    * @param keysize the size of the key. Eg. 128-bit, 256-bit
    * @return 
    */
-  public static byte[] generateAESSecretKey(int keysize)
+  public byte[] generateAESSecretKey(int keysize)
   {
     byte[] yReturn = null;
     try
@@ -432,7 +437,7 @@ public class cCryptographer
    * @param sStoredSecureHash the output of generateSecurePassword(String sPassword) 
    * @return an AES key of length keysize
    */
-  public static byte[] generateAESSecretKey(int keysize, String sPlaintextPassword, String sStoredSecureHash)
+  public byte[] generateAESSecretKey(int keysize, String sPlaintextPassword, String sStoredSecureHash)
   {
     byte[] yReturn = null;
     try
@@ -461,7 +466,7 @@ public class cCryptographer
    * @param keysize should be at least 2048
    * @return the generated RSA KeyPair
    */
-  public static KeyPair generateAsymmetricKeyPair(int keysize)
+  public KeyPair generateAsymmetricKeyPair(int keysize)
   {
     KeyPair oKeyPair = null;
     try
@@ -484,7 +489,7 @@ public class cCryptographer
    * @param oKeyPair the keypair to use
    * @return the X509Certificate
    */
-  public static Certificate generateCertificate(KeyPair oKeyPair)
+  public Certificate generateCertificate(KeyPair oKeyPair)
   {
     return generateCertificate(oKeyPair, g_sCERTIFICATE_SIGNING_ALGORITHM, g_sPROVIDER);
   }
@@ -496,7 +501,7 @@ public class cCryptographer
    * @param sAlgorithm the Algorithm to use
    * @return the X509Certificate
    */
-  public static Certificate generateCertificate(KeyPair oKeyPair, String sAlgorithm)
+  public Certificate generateCertificate(KeyPair oKeyPair, String sAlgorithm)
   {
     return generateCertificate(oKeyPair, sAlgorithm, g_sPROVIDER);
   }
@@ -509,7 +514,7 @@ public class cCryptographer
    * instance of the provider before calling this method
    * @return the X509Certificate
    */
-  public static Certificate generateCertificate(KeyPair oKeyPair, String sAlgorithm, String sProvider)
+  public Certificate generateCertificate(KeyPair oKeyPair, String sAlgorithm, String sProvider)
   {
     X509Certificate oX509Certificate = null;
     try
@@ -552,7 +557,7 @@ public class cCryptographer
    * @return the secure password in the format iterations:salt:hash when validating a user entered password call:
    * cCryptographer.validateSecurePassword(plaintext, stored hash);
    */
-  public static String generateSecurePassword(String sPassword)
+  public String generateSecurePassword(String sPassword)
   {
     return generateSecurePassword(sPassword, 10000);
   }
@@ -564,7 +569,7 @@ public class cCryptographer
    * @return the secure password in the format iterations:salt:hash when validating a user entered password call:
    * cCryptographer.validateSecurePassword(plaintext, stored hash);
    */
-  public static String generateSecurePassword(String sPassword, int iterations)
+  public String generateSecurePassword(String sPassword, int iterations)
   {
     String sReturn = null;
     try 
@@ -591,7 +596,7 @@ public class cCryptographer
    * @param sStoredSecureHash The stored hash of the users password
    * @return true or false indicating if the password is a match
    */
-  public static boolean validateSecurePassword(String sPlaintextPassword, String sStoredSecureHash) 
+  public boolean validateSecurePassword(String sPlaintextPassword, String sStoredSecureHash) 
   {
     boolean bReturn = false;
     try
@@ -619,13 +624,13 @@ public class cCryptographer
     return bReturn;
   }
   
-  public static String hash(File oFile)
+  public String hash(File oFile)
   {
     String hashhex = "";
     FileInputStream oFileInputStream = null;
     try 
     {
-      // public static byte [] hash(MessageDigest digest, BufferedInputStream in, int bufferSize) throws IOException {
+      // public  byte [] hash(MessageDigest digest, BufferedInputStream in, int bufferSize) throws IOException {
       MessageDigest md = MessageDigest.getInstance("SHA-256");
       
       int sizeRead;
@@ -685,7 +690,7 @@ public class cCryptographer
    * @param yData The data to hash
    * @return 
    */
-  public static byte[] hash(byte[] yData)
+  public byte[] hash(byte[] yData)
   {
     return hash(yData, "SHA-256");
   }
@@ -696,7 +701,7 @@ public class cCryptographer
    * @param sAlgorithm The algorithm to use to hash the data
    * @return 
    */
-  public static byte[] hash(byte[] yData, String sAlgorithm)
+  public byte[] hash(byte[] yData, String sAlgorithm)
   {
     MessageDigest md;
     byte[] digest;
@@ -721,7 +726,7 @@ public class cCryptographer
    * @param sProvider The provider to get the algorithm from
    * @return 
    */
-  public static byte[] hash(byte[] yData, String sAlgorithm, String sProvider)
+  public byte[] hash(byte[] yData, String sAlgorithm, String sProvider)
   {
     MessageDigest md;
     byte[] digest;
@@ -739,17 +744,17 @@ public class cCryptographer
     return null;
   }
   
-  public static String BytesToBase64EncodedString(byte[] yData)
+  public String BytesToBase64EncodedString(byte[] yData)
   {
     return Base64.encodeBase64String(yData);
   }
   
-  public static byte[] StringToBase64DecodedBytes(String sText) 
+  public byte[] StringToBase64DecodedBytes(String sText) 
   {
     return Base64.decodeBase64(sText);
   }
   
-  private static byte[] getSalt()
+  private byte[] getSalt()
   {
     SecureRandom sr = new SecureRandom();
     byte[] salt = new byte[16];
@@ -757,7 +762,7 @@ public class cCryptographer
     return salt;
   }
   
-  private static byte[] fromHex(String hex) throws NoSuchAlgorithmException
+  private byte[] fromHex(String hex) throws NoSuchAlgorithmException
   {
     byte[] bytes = new byte[hex.length() / 2];
     for(int i = 0; i<bytes.length ;i++)
@@ -767,7 +772,7 @@ public class cCryptographer
     return bytes;
   }
   
-  private static String toHex(byte[] array) throws NoSuchAlgorithmException
+  private String toHex(byte[] array) throws NoSuchAlgorithmException
   {
     BigInteger bi = new BigInteger(1, array);
     String hex = bi.toString(16);

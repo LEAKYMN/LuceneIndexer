@@ -23,7 +23,6 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
@@ -47,6 +46,7 @@ public class cAlertDialog extends Stage
   public cAlertDialog(Stage owner, String msg, int type)
   {
     setResizable(false);
+    setAlwaysOnTop(true);
     initModality(Modality.APPLICATION_MODAL);
     initStyle(StageStyle.TRANSPARENT);
 
@@ -66,7 +66,7 @@ public class cAlertDialog extends Stage
     });
 
     BorderPane borderPane = new BorderPane();
-    borderPane.getStylesheets().add(getClass().getResource("alert.css").toExternalForm());
+    borderPane.getStylesheets().add(getClass().getResource("/styles/Dialog.css").toExternalForm());
     borderPane.setTop(label);
 
     HBox hbox2 = new HBox();
@@ -87,9 +87,10 @@ public class cAlertDialog extends Stage
 
     int height = 100;
 
-    final Scene scene = new Scene(borderPane, width, height);
-    scene.setFill(Color.TRANSPARENT);
-    setScene(scene);
+    final Scene oScene = new Scene(borderPane, width, height);
+    oScene.setFill(Color.TRANSPARENT);
+    oScene.getStylesheets().add("/styles/Styles.css");
+    setScene(oScene);
 
     // make sure this stage is centered on top of its owner
     setX(owner.getX() + (owner.getWidth() / 2 - width / 2));

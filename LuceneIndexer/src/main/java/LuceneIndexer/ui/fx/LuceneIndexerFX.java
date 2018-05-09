@@ -16,6 +16,7 @@
  */
 package LuceneIndexer.ui.fx;
 
+import LuceneIndexer.cryptopackage.cCryptographer;
 import LuceneIndexer.dialogs.cConfirmDialog;
 import LuceneIndexer.injection.cInjector;
 import LuceneIndexer.linux.cLinux;
@@ -39,9 +40,9 @@ import javafx.stage.WindowEvent;
 public class LuceneIndexerFX extends Application
 {
   private cSerializationFactory m_oSerializationFactory = new cSerializationFactory();
-  private cMainLayoutController oMainLayoutController;
-  private cWindowBounds oWindowBounds;
-  private File fBounds;
+  private cMainLayoutController m_oMainLayoutController;
+  private cWindowBounds m_oWindowBounds;
+  private File m_fBounds;
   public static Stage m_oStage;
 
   @Override
@@ -50,24 +51,25 @@ public class LuceneIndexerFX extends Application
     FXMLLoader oLoader = new FXMLLoader(getClass().getResource("/fxml/cMainLayout.fxml"));
     Parent oRoot = oLoader.load();
     Scene oScene = new Scene(oRoot);
+    oScene.getStylesheets().add("/styles/Styles.css");
     m_oStage = oStage;
     oStage.setTitle("Lucene Indexer");
     
-    oWindowBounds = new cWindowBounds();
-    oWindowBounds.setX(50);
-    oWindowBounds.setY(50);
-    oWindowBounds.setW(1200);
-    oWindowBounds.setH(800);
-    fBounds = new File("bounds.ser");
-    if (fBounds.exists())
+    m_oWindowBounds = new cWindowBounds();
+    m_oWindowBounds.setX(50);
+    m_oWindowBounds.setY(50);
+    m_oWindowBounds.setW(1200);
+    m_oWindowBounds.setH(800);
+    m_fBounds = new File("bounds.ser");
+    if (m_fBounds.exists())
     {
-      oWindowBounds = (cWindowBounds) m_oSerializationFactory.deserialize(fBounds, false);
+      m_oWindowBounds = (cWindowBounds) m_oSerializationFactory.deserialize(m_fBounds, false);
     }
     
-    oStage.setX(oWindowBounds.getX());
-    oStage.setY(oWindowBounds.getY());
-    oStage.setWidth(oWindowBounds.getW());
-    oStage.setHeight(oWindowBounds.getH());
+    oStage.setX(m_oWindowBounds.getX());
+    oStage.setY(m_oWindowBounds.getY());
+    oStage.setWidth(m_oWindowBounds.getW());
+    oStage.setHeight(m_oWindowBounds.getH());
     
     oStage.setScene(oScene);
     oStage.show();
@@ -91,19 +93,19 @@ public class LuceneIndexerFX extends Application
       }
     });
 
-    oMainLayoutController = oLoader.<cMainLayoutController>getController();
-    cInjector oInjector = new cInjector(this, oMainLayoutController);
+    m_oMainLayoutController = oLoader.<cMainLayoutController>getController();
+    cInjector oInjector = new cInjector(this, m_oMainLayoutController);
     
     cDriveMediator.instance().loadDrives();
   }
 
   private void terminate()
   {
-    oWindowBounds.setX((int)m_oStage.getX());
-    oWindowBounds.setY((int)m_oStage.getY());
-    oWindowBounds.setH((int)m_oStage.getHeight());
-    oWindowBounds.setW((int)m_oStage.getWidth());
-    m_oSerializationFactory.serialize(oWindowBounds, fBounds, false);
+    m_oWindowBounds.setX((int)m_oStage.getX());
+    m_oWindowBounds.setY((int)m_oStage.getY());
+    m_oWindowBounds.setH((int)m_oStage.getHeight());
+    m_oWindowBounds.setW((int)m_oStage.getWidth());
+    m_oSerializationFactory.serialize(m_oWindowBounds, m_fBounds, false);
     
     cDriveMediator.instance().stopScan();
     
@@ -120,7 +122,7 @@ public class LuceneIndexerFX extends Application
    * @param args the command line arguments
    */
   public static void main(String[] args)
-  {
+  {    
     launch(args);
   }
 }

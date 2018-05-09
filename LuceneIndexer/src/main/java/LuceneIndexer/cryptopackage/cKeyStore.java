@@ -18,7 +18,6 @@ package LuceneIndexer.cryptopackage;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.Key;
@@ -95,9 +94,10 @@ public class cKeyStore
     FileOutputStream oOutputStream = null;
     try 
     {
-      KeyPair oKeyPair = cCryptographer.generateAsymmetricKeyPair(2048);
+      cCryptographer oCrypto = new cCryptographer();
+      KeyPair oKeyPair = oCrypto.generateAsymmetricKeyPair(2048);
       oPrivateKey = oKeyPair.getPrivate();
-      Certificate oCertificate = cCryptographer.generateCertificate(oKeyPair);
+      Certificate oCertificate = oCrypto.generateCertificate(oKeyPair);
       Certificate[] lsCertificates = new Certificate[1];
       lsCertificates[0] = oCertificate;
       oOutputStream = new FileOutputStream(m_oKeyStoreFile.getAbsolutePath());
@@ -132,7 +132,8 @@ public class cKeyStore
     try 
     {
       oPrivateKey = oKeyPair.getPrivate();
-      Certificate oCertificate = cCryptographer.generateCertificate(oKeyPair);
+      cCryptographer oCrypto = new cCryptographer();
+      Certificate oCertificate = oCrypto.generateCertificate(oKeyPair);
       Certificate[] lsCertificates = new Certificate[1];
       lsCertificates[0] = oCertificate;
       oOutputStream = new FileOutputStream(m_oKeyStoreFile.getAbsolutePath());

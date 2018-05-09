@@ -226,19 +226,19 @@ public class cLuceneIndexReader extends Observable
           {
             Document oDocument = m_oIndexReader.document(fi);
             eDocument eDoc = eDocument.from(oDocument);
-            if (!m_oDuplicateResults.containsKey(eDoc.sFileHash) && eDoc.sFileHash != null)
+            if (!m_oDuplicateResults.containsKey(eDoc.hashProperty().get()) && eDoc.hashProperty().get() != null)
             {
-              eSearchField oSearchField = new eSearchField(eDocument.TAG_Hash, eDoc.sFileHash);
+              eSearchField oSearchField = new eSearchField(eDocument.TAG_Hash, eDoc.hashProperty().get());
               ArrayList<eSearchField> lsSearchFields = new ArrayList<>(Arrays.asList(oSearchField));
 
               ArrayList<eDocument> oDocs = search(lsSearchFields, true, false, true);
               if (oDocs.size() > 1)
               {
                 ArrayList<eDocument> lsReturn = oDocs;
-                m_oDuplicateResults.put(eDoc.sFileHash, lsReturn);
+                m_oDuplicateResults.put(eDoc.hashProperty().get(), lsReturn);
               }
             }
-            else if (eDoc.sFileHash == null)
+            else if (eDoc.hashProperty().get() == null)
             {
               m_lDuplicateSearch.incrementAndGet();
             }
@@ -358,13 +358,13 @@ public class cLuceneIndexReader extends Observable
           Document oDocument = oSearcher.doc(oTopDocs.scoreDocs[i].doc);
           eDocument eDoc = eDocument.from(oDocument);
         
-          String sAbsPath = eDoc.sFileAbsolutePath;
+          String sAbsPath = eDoc.absolutePathProperty().get();
           if (sAbsPath == null)
           {
-            sAbsPath = eDoc.sFilePath + File.separator + eDoc.sFileName;
-            if (eDoc.sFileExtension != null && !eDoc.sFileExtension.isEmpty())
+            sAbsPath = eDoc.pathProperty().get() + File.separator + eDoc.filenameProperty().get();
+            if (eDoc.extensionProperty().get() != null && !eDoc.extensionProperty().get().isEmpty())
             {
-              sAbsPath += "." + eDoc.sFileExtension;
+              sAbsPath += "." + eDoc.extensionProperty().get();
             }
           }
           

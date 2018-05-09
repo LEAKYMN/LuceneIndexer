@@ -1,1 +1,19 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><LuceneIndex><Index><Location>/index</Location><HashDocuments>false</HashDocuments><HashFirstBlockOnly>false</HashFirstBlockOnly><ScanThreads>10</ScanThreads></Index><Drives><Type Scan="true">Local Disk</Type><Type Scan="true">Network Drive</Type></Drives><Categories Default="File"><Category Name="Document">txt,doc,docx,pdf</Category><Category Name="Video">avi,mp4,mkv,flv</Category><Category Name="Image">jpeg,jpg,png</Category><Category Name="Audio">mp3,flac,m4a,wma,gp3</Category></Categories></LuceneIndex>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<LuceneIndex>
+  <Index>
+    <Location>index</Location>
+    <HashDocuments>true</HashDocuments>
+    <HashFirstBlockOnly>true</HashFirstBlockOnly>
+    <ScanThreads>10</ScanThreads>
+  </Index>
+  <Drives>
+    <Type Scan="true">Local Disk</Type>
+    <Type Scan="true">Network Drive</Type>
+  </Drives>
+  <Categories Default="File">
+    <Category Name="Document">txt,doc,docx,pdf,xls,xlsx</Category>
+    <Category Name="Video">avi,mp4,mkv,flv,wmv,mov</Category>
+    <Category Name="Image">jpeg,jpg,png,tiff,bmp</Category>
+    <Category Name="Audio">mp3,flac,m4a,wma,gp3,wav</Category>
+  </Categories>
+</LuceneIndex>

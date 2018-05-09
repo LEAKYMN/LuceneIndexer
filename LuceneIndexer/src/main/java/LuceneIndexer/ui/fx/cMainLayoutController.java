@@ -67,7 +67,7 @@ import org.apache.commons.io.FileUtils;
 public class cMainLayoutController implements Observer, Initializable
 {
 
-  private final DecimalFormat oNumberFormat = new DecimalFormat("###,###,###,###");
+  private final DecimalFormat m_oNumberFormat = new DecimalFormat("###,###,###,###");
 
   @FXML
   private AnchorPane m_oMainAnchorPane;
@@ -118,8 +118,8 @@ public class cMainLayoutController implements Observer, Initializable
   private TableView m_oDuplicatesTable;
 
   private cSearchTable m_oSearchTable;
-  private cDriveMediator oMediator;
-  private TableColumn[] lsResultHeader;
+  private cDriveMediator m_oMediator;
+  private TableColumn[] m_lsResultHeader;
 
   @Override
   public void initialize(URL url, ResourceBundle rb)
@@ -129,36 +129,36 @@ public class cMainLayoutController implements Observer, Initializable
     m_oIndex.setClosable(false);
     m_oDuplicationTab.setClosable(false);
     m_oDuplicatesTable.getSelectionModel().setSelectionMode(javafx.scene.control.SelectionMode.MULTIPLE);
-    TableColumn<String, Long> oSizeColumn = new TableColumn<>(eDocument.TAG_Size);
-    PropertyValueFactory<String, Long> propertyValueFactory = new PropertyValueFactory<String, Long>(eDocument.TAG_Size);
-    new Callback<TableColumn<String, Long>, TableCell<String, Long>>()
-    {
-      @Override
-      public TableCell<String, Long> call(TableColumn<String, Long> param)
-      {
-        return new TableCell<String, Long>()
-        {
-          @Override
-          protected void updateItem(Long item, boolean empty)
-          {
-            super.updateItem(item, empty);
-
-            if (!empty)
-            {
-              setText(FileUtils.byteCountToDisplaySize(item));
-            }
-            else
-            {
-              setText(null);
-            }
-          }
-        };
-      }
-    };
+//    TableColumn<String, Long> oSizeColumn = new TableColumn<>(eDocument.TAG_Size);
+//    PropertyValueFactory<String, Long> propertyValueFactory = new PropertyValueFactory<String, Long>(eDocument.TAG_Size);
+//    new Callback<TableColumn<String, Long>, TableCell<String, Long>>()
+//    {
+//      @Override
+//      public TableCell<String, Long> call(TableColumn<String, Long> param)
+//      {
+//        return new TableCell<String, Long>()
+//        {
+//          @Override
+//          protected void updateItem(Long item, boolean empty)
+//          {
+//            super.updateItem(item, empty);
+//
+//            if (!empty)
+//            {
+//              setText(FileUtils.byteCountToDisplaySize(item));
+//            }
+//            else
+//            {
+//              setText(null);
+//            }
+//          }
+//        };
+//      }
+//    };
 
     if (cConfig.instance().getHashDocuments())
     {
-      lsResultHeader = new TableColumn[]
+      m_lsResultHeader = new TableColumn[]
       {
         new TableColumn(eDocument.TAG_Path),
         new TableColumn(eDocument.TAG_Filename),
@@ -170,7 +170,7 @@ public class cMainLayoutController implements Observer, Initializable
     }
     else
     {
-      lsResultHeader = new TableColumn[]
+      m_lsResultHeader = new TableColumn[]
       {
         new TableColumn(eDocument.TAG_Path),
         new TableColumn(eDocument.TAG_Filename),
@@ -182,23 +182,139 @@ public class cMainLayoutController implements Observer, Initializable
 
     m_oIndexButton.setId("index");
     double dTotalWidth = m_oMainAnchorPane.getPrefWidth() - 10;
-    double dColumnWidth = dTotalWidth / lsResultHeader.length;
-    for (int i = 0; i < lsResultHeader.length; i++)
+    double dColumnWidth = dTotalWidth / m_lsResultHeader.length;
+    for (int i = 0; i < m_lsResultHeader.length; i++)
     {
-      TableColumn<Map, String> oResultColumn = (TableColumn) lsResultHeader[i];
-      oResultColumn.setCellValueFactory(new MapValueFactory(oResultColumn.getText()));
-      oResultColumn.setMinWidth(dColumnWidth);
-      m_oResultTable.getColumns().add(oResultColumn);
+      if (((TableColumn) m_lsResultHeader[i]).getText().equals(eDocument.TAG_Size))
+      {
+        TableColumn<eDocument, Number> oResultColumn = (TableColumn) m_lsResultHeader[i];
+        oResultColumn.setCellValueFactory(cellData -> cellData.getValue().sizeProperty());
+        oResultColumn.setCellFactory(tc -> new TableCell<eDocument, Number>()
+        {
+          @Override
+          protected void updateItem(Number value, boolean empty)
+          {
+            super.updateItem(value, empty);
+            if (value == null || empty)
+            {
+              setText("");
+            }
+            else
+            {
+              setText(FileUtils.byteCountToDisplaySize(value.longValue()));
+            }
+          }
+        });
+        oResultColumn.setMinWidth(dColumnWidth);
+        m_oResultTable.getColumns().add(oResultColumn);
 
-      TableColumn<Map, String> oIndexColumn = new TableColumn<>(oResultColumn.getText());
-      oIndexColumn.setCellValueFactory(new MapValueFactory(oResultColumn.getText()));
-      oIndexColumn.setMinWidth(dColumnWidth);
-      m_oTotDocsTable.getColumns().add(oIndexColumn);
+        TableColumn<eDocument, Number> oIndexColumn = new TableColumn<>(oResultColumn.getText());
+        oIndexColumn.setCellValueFactory(cellData -> cellData.getValue().sizeProperty());
+        oIndexColumn.setCellFactory(tc -> new TableCell<eDocument, Number>()
+        {
+          @Override
+          protected void updateItem(Number value, boolean empty)
+          {
+            super.updateItem(value, empty);
+            if (value == null || empty)
+            {
+              setText("");
+            }
+            else
+            {
+              setText(FileUtils.byteCountToDisplaySize(value.longValue()));
+            }
+          }
+        });
+        oIndexColumn.setMinWidth(dColumnWidth);
+        m_oTotDocsTable.getColumns().add(oIndexColumn);
 
-      TableColumn<Map, String> oDuplicateTableColumn = new TableColumn<>(oResultColumn.getText());
-      oDuplicateTableColumn.setCellValueFactory(new MapValueFactory(oDuplicateTableColumn.getText()));
-      oDuplicateTableColumn.setMinWidth(dColumnWidth);
-      m_oDuplicatesTable.getColumns().add(oDuplicateTableColumn);
+        TableColumn<eDocument, Number> oDuplicateTableColumn = new TableColumn<>(oResultColumn.getText());
+        oDuplicateTableColumn.setCellValueFactory(cellData -> cellData.getValue().sizeProperty());
+        oDuplicateTableColumn.setCellFactory(tc -> new TableCell<eDocument, Number>()
+        {
+          @Override
+          protected void updateItem(Number value, boolean empty)
+          {
+            super.updateItem(value, empty);
+            if (value == null || empty)
+            {
+              setText("");
+            }
+            else
+            {
+              setText(FileUtils.byteCountToDisplaySize(value.longValue()));
+            }
+          }
+        });
+        oDuplicateTableColumn.setMinWidth(dColumnWidth);
+        m_oDuplicatesTable.getColumns().add(oDuplicateTableColumn);
+      }
+      else
+      {
+        TableColumn<eDocument, String> oResultColumn = (TableColumn) m_lsResultHeader[i];
+        oResultColumn.setCellValueFactory(cellData -> cellData.getValue().getProperty(oResultColumn.getText()));
+        oResultColumn.setCellFactory(tc -> new TableCell<eDocument, String>()
+        {
+          @Override
+          protected void updateItem(String value, boolean empty)
+          {
+            super.updateItem(value, empty);
+            if (value == null || empty)
+            {
+              setText("");
+            }
+            else
+            {
+              setText(value);
+            }
+          }
+        });
+        oResultColumn.setMinWidth(dColumnWidth);
+        m_oResultTable.getColumns().add(oResultColumn);
+
+        TableColumn<eDocument, String> oIndexColumn = new TableColumn<>(oResultColumn.getText());
+        oIndexColumn.setCellValueFactory(cellData -> cellData.getValue().getProperty(oResultColumn.getText()));
+        oIndexColumn.setCellFactory(tc -> new TableCell<eDocument, String>()
+        {
+          @Override
+          protected void updateItem(String value, boolean empty)
+          {
+            super.updateItem(value, empty);
+            if (value == null || empty)
+            {
+              setText("");
+            }
+            else
+            {
+              setText(value);
+            }
+          }
+        });
+        oIndexColumn.setMinWidth(dColumnWidth);
+        m_oTotDocsTable.getColumns().add(oIndexColumn);
+
+        TableColumn<eDocument, String> oDuplicateTableColumn = new TableColumn<>(oResultColumn.getText());
+        oDuplicateTableColumn.setCellValueFactory(cellData -> cellData.getValue().getProperty(oResultColumn.getText()));
+        oDuplicateTableColumn.setCellFactory(tc -> new TableCell<eDocument, String>()
+        {
+          @Override
+          protected void updateItem(String value, boolean empty)
+          {
+            super.updateItem(value, empty);
+            if (value == null || empty)
+            {
+              setText("");
+            }
+            else
+            {
+              setText(value);
+            }
+          }
+        });
+        oDuplicateTableColumn.setMinWidth(dColumnWidth);
+        m_oDuplicatesTable.getColumns().add(oDuplicateTableColumn);
+      }
     }
 
     m_oSearchTable = new cSearchTable(dColumnWidth);
@@ -242,13 +358,13 @@ public class cMainLayoutController implements Observer, Initializable
           sAbsolutePath += "." + sExtension;
         }
         String sMessage = "Are you sure you want to delete '" + sAbsolutePath + "'?";
-          
+
         cConfirmDialog oConfirmDialog = new cConfirmDialog(LuceneIndexerFX.m_oStage, sMessage);
         oConfirmDialog.showAndWait();
         if (oConfirmDialog.getResult() == cConfirmDialog.YES)
         {
           handleContextMenuDeleteFile(oItems);
-          
+
           char cDriveLetter = (m_cmbSearchIndex.getValue() + "").toCharArray()[0];
           if (cIndex.deleteFile(cDriveLetter, new File(sAbsolutePath)))
           {
@@ -262,7 +378,7 @@ public class cMainLayoutController implements Observer, Initializable
     ContextMenu oSearchResultsContextMenu = new ContextMenu();
     oSearchResultsContextMenu.getItems().addAll(oOpenLocationResults, oPlayFileResults, oDeleteFileResults);
     m_oResultTable.setContextMenu(oSearchResultsContextMenu);
-    
+
     MenuItem oOpenLocationIndex = new MenuItem("Open File Location");
     oOpenLocationIndex.setOnAction(new EventHandler<ActionEvent>()
     {
@@ -291,7 +407,7 @@ public class cMainLayoutController implements Observer, Initializable
       public void handle(ActionEvent event)
       {
         HashMap oItems = (HashMap) m_oTotDocsTable.getSelectionModel().getSelectedItem();
-       
+
         String sPath = (String) oItems.get("Path");
         String sFilename = (String) oItems.get("Filename");
         String sAbsolutePath = sPath + File.separator + sFilename;
@@ -301,13 +417,13 @@ public class cMainLayoutController implements Observer, Initializable
           sAbsolutePath += "." + sExtension;
         }
         String sMessage = "Are you sure you want to delete '" + sAbsolutePath + "'?";
-          
+
         cConfirmDialog oConfirmDialog = new cConfirmDialog(LuceneIndexerFX.m_oStage, sMessage);
         oConfirmDialog.showAndWait();
         if (oConfirmDialog.getResult() == cConfirmDialog.YES)
         {
           handleContextMenuDeleteFile(oItems);
-          
+
           char cDriveLetter = (m_cmbIndexDirectories.getValue() + "").toCharArray()[0];
           if (cIndex.deleteFile(cDriveLetter, new File(sAbsolutePath)))
           {
@@ -321,7 +437,7 @@ public class cMainLayoutController implements Observer, Initializable
     ContextMenu oTopDocsContextMenu = new ContextMenu();
     oTopDocsContextMenu.getItems().addAll(oOpenLocationIndex, oPlayFileIndex, oDeleteFileIndex);
     m_oTotDocsTable.setContextMenu(oTopDocsContextMenu);
-    
+
     MenuItem oOpenLocationDuplicates = new MenuItem("Open File Location");
     oOpenLocationDuplicates.setOnAction(new EventHandler<ActionEvent>()
     {
@@ -373,7 +489,7 @@ public class cMainLayoutController implements Observer, Initializable
           {
             oObservableList.forEach(oList ->
             {
-              HashMap oItems = (HashMap)oList;
+              HashMap oItems = (HashMap) oList;
               handleContextMenuDeleteFile(oItems);
               m_oDuplicatesTable.getItems().remove(oItems);
             });
@@ -381,7 +497,7 @@ public class cMainLayoutController implements Observer, Initializable
         }
       }
     });
-    
+
     MenuItem oMarkFileDuplicates = new MenuItem("Mark");
     oMarkFileDuplicates.setOnAction(new EventHandler<ActionEvent>()
     {
@@ -398,7 +514,7 @@ public class cMainLayoutController implements Observer, Initializable
     oDuplicatesContextMenu.getItems().addAll(oOpenLocationDuplicates, oPlayFileDuplicates, oDeleteFileDuplicates, oMarkFileDuplicates);
     m_oDuplicatesTable.setContextMenu(oDuplicatesContextMenu);
 
-    oMediator = cDriveMediator.instance();
+    m_oMediator = cDriveMediator.instance();
 
     displayDrives();
   }
@@ -431,7 +547,7 @@ public class cMainLayoutController implements Observer, Initializable
         }
         new Thread(() ->
         {
-          oMediator.startScan();
+          m_oMediator.startScan();
         }, "handleIndexDrives_index").start();
         break;
       }
@@ -446,7 +562,7 @@ public class cMainLayoutController implements Observer, Initializable
         }
         new Thread(() ->
         {
-          oMediator.stopScan();
+          m_oMediator.stopScan();
           displayDrives();
         }, "handleIndexDrives_cancel").start();
         break;
@@ -465,7 +581,7 @@ public class cMainLayoutController implements Observer, Initializable
       m_oTotDocsTable.getItems().clear();
       new Thread(() ->
       {
-        oMediator.stopScan();
+        m_oMediator.stopScan();
         cProgressPanelFx[] oPanels = cProgressPanelFx.getAll();
         if (oPanels != null)
         {
@@ -544,31 +660,20 @@ public class cMainLayoutController implements Observer, Initializable
     char cDriveLetter = (m_cmbDuplicateIndex.getValue() + "").toCharArray()[0];
     cIndex.cancelDuplicationSearch(cDriveLetter);
   }
-  
+
   public void findDuplicates()
   {
     m_oDuplicatesTable.getItems().clear();
     char cDriveLetter = (m_cmbDuplicateIndex.getValue() + "").toCharArray()[0];
     HashMap<String, ArrayList<eDocument>> oDuplicates = cIndex.findDuplicates(cDriveLetter);
     Set<String> keySet = oDuplicates.keySet();
-    for (String sHash : keySet)
+    keySet.stream().map((sHash) -> oDuplicates.get(sHash)).forEachOrdered((lsDocs) ->
     {
-      ArrayList<eDocument> lsDocs = oDuplicates.get(sHash);
-      for (eDocument oDoc : lsDocs)
+      lsDocs.forEach((oDoc) ->
       {
-        Map<String, Object> oDataRow = new HashMap<>();
-        oDataRow.put(eDocument.TAG_Path, oDoc.sFilePath);
-        oDataRow.put(eDocument.TAG_Filename, oDoc.sFileName);
-        oDataRow.put(eDocument.TAG_Extension, oDoc.sFileExtension);
-        oDataRow.put(eDocument.TAG_Category, oDoc.sFileCategory);
-        oDataRow.put(eDocument.TAG_Size, oDoc.lFileSize);
-        if (cConfig.instance().getHashDocuments())
-        {
-          oDataRow.put(eDocument.TAG_Hash, oDoc.sFileHash);
-        }
-        m_oDuplicatesTable.getItems().add(oDataRow);
-      }
-    }
+        m_oDuplicatesTable.getItems().add(oDoc);
+      });
+    });
   }
 
   public void loadIndexMetadata()
@@ -602,7 +707,7 @@ public class cMainLayoutController implements Observer, Initializable
       }
       else
       {
-        m_oNumberOfDocumentsLabel.setText("Number of Documents: " + oNumberFormat.format(iDocuments));
+        m_oNumberOfDocumentsLabel.setText("Number of Documents: " + m_oNumberFormat.format(iDocuments));
       }
     });
 
@@ -625,7 +730,7 @@ public class cMainLayoutController implements Observer, Initializable
       //m_cmbDuplicateIndex.getItems().add("All");
       m_cmbSearchIndex.getItems().add("All");
 
-      cProgressPanelFx[] lsPanels = oMediator.listDrives();
+      cProgressPanelFx[] lsPanels = m_oMediator.listDrives();
       for (cProgressPanelFx oPanel : lsPanels)
       {
         m_oDriveList.getItems().add(oPanel.getParent());
@@ -662,39 +767,29 @@ public class cMainLayoutController implements Observer, Initializable
   public void setIndexTableDocuments(ArrayList<eDocument> lsDocuments)
   {
     m_oTotDocsTable.getItems().clear();
-    for (eDocument oDoc : lsDocuments)
+    lsDocuments.forEach((oDoc) ->
     {
-      Map<String, Object> oDataRow = new HashMap<>();
-      oDataRow.put(eDocument.TAG_Path, oDoc.sFilePath);
-      oDataRow.put(eDocument.TAG_Filename, oDoc.sFileName);
-      oDataRow.put(eDocument.TAG_Extension, oDoc.sFileExtension);
-      oDataRow.put(eDocument.TAG_Category, oDoc.sFileCategory);
-      oDataRow.put(eDocument.TAG_Size, oDoc.getFormattedFileSize());
-      if (cConfig.instance().getHashDocuments())
-      {
-        oDataRow.put(eDocument.TAG_Hash, oDoc.sFileHash);
-      }
-      m_oTotDocsTable.getItems().add(oDataRow);
-    }
+      m_oTotDocsTable.getItems().add(oDoc);
+    });
   }
 
   public void setResults(ArrayList<eDocument> lsResults)
   {
     m_oResultTable.getItems().clear();
-    for (eDocument oDoc : lsResults)
+    lsResults.forEach((oDoc) ->
     {
-      Map<String, Object> oDataRow = new HashMap<>();
-      oDataRow.put(eDocument.TAG_Path, oDoc.sFilePath);
-      oDataRow.put(eDocument.TAG_Filename, oDoc.sFileName);
-      oDataRow.put(eDocument.TAG_Extension, oDoc.sFileExtension);
-      oDataRow.put(eDocument.TAG_Category, oDoc.sFileCategory);
-      oDataRow.put(eDocument.TAG_Size, oDoc.lFileSize);
-      if (cConfig.instance().getHashDocuments())
-      {
-        oDataRow.put(eDocument.TAG_Hash, oDoc.sFileHash);
-      }
-      m_oResultTable.getItems().add(oDataRow);
-    }
+      //      Map<String, Object> oDataRow = new HashMap<>();
+//      oDataRow.put(eDocument.TAG_Path, oDoc.sFilePath);
+//      oDataRow.put(eDocument.TAG_Filename, oDoc.sFileName);
+//      oDataRow.put(eDocument.TAG_Extension, oDoc.sFileExtension);
+//      oDataRow.put(eDocument.TAG_Category, oDoc.sFileCategory);
+//      oDataRow.put(eDocument.TAG_Size, new SizeProperty(oDoc.lFileSize));
+//      if (cConfig.instance().getHashDocuments())
+//      {
+//        oDataRow.put(eDocument.TAG_Hash, oDoc.sFileHash);
+//      }
+      m_oResultTable.getItems().add(oDoc);
+    });
   }
 
   public boolean getWholeWords()
@@ -777,7 +872,7 @@ public class cMainLayoutController implements Observer, Initializable
       }
     }
   }
-  
+
   private void handleContextMenuMarkFile(HashMap oItems)
   {
     if (oItems != null)

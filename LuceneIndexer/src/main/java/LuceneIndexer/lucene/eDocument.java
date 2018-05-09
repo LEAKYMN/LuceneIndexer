@@ -17,7 +17,10 @@
 package LuceneIndexer.lucene;
 
 import LuceneIndexer.cConfig;
-import org.apache.commons.io.FileUtils;
+import javafx.beans.property.LongProperty;
+import javafx.beans.property.SimpleLongProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import org.apache.lucene.document.Document;
 
 /**
@@ -26,40 +29,105 @@ import org.apache.lucene.document.Document;
  */
 public class eDocument 
 {  
-  public static String TAG_ID = "ID";
-  public static String TAG_Path = "Path";
-  public static String TAG_Filename = "Filename";
-  public static String TAG_Extension = "Extension";
-  public static String TAG_Category = "Category";
-  public static String TAG_Size = "Size";
-  public static String TAG_Hash = "Hash";
+  public final static String TAG_ID = "ID";
+  public final static String TAG_Path = "Path";
+  public final static String TAG_Filename = "Filename";
+  public final static String TAG_Extension = "Extension";
+  public final static String TAG_Category = "Category";
+  public final static String TAG_Size = "Size";
+  public final static String TAG_Hash = "Hash";
   
-  public String sFileAbsolutePath = "";
-  public String sFilePath = "";
-  public String sFileName = "";
-  public String sFileExtension = "";
-  public String sFileCategory = "";
-  public String sFileHash = "";
-  public long lFileSize = 0;
+  private StringProperty m_oFileAbsolutePath = new SimpleStringProperty();
+  private StringProperty m_oFilePath = new SimpleStringProperty();
+  private StringProperty m_oFileName = new SimpleStringProperty();
+  private StringProperty m_oFileExtension = new SimpleStringProperty();
+  private StringProperty m_oFileCategory = new SimpleStringProperty();
+  private StringProperty m_oFileHash = new SimpleStringProperty();
+  private LongProperty m_oFileSize = new SimpleLongProperty(0);
   
   public static eDocument from(Document oDocument)
   {
     eDocument oReturn = new eDocument();
-    oReturn.sFileAbsolutePath = oDocument.get(TAG_ID);
-    oReturn.sFilePath = oDocument.get(TAG_Path);
-    oReturn.sFileName = oDocument.get(TAG_Filename);
-    oReturn.sFileExtension = oDocument.get(TAG_Extension);
-    oReturn.sFileCategory = oDocument.get(TAG_Category);
+    oReturn.m_oFileAbsolutePath = new SimpleStringProperty(oDocument.get(TAG_ID));
+    oReturn.m_oFilePath = new SimpleStringProperty(oDocument.get(TAG_Path));
+    oReturn.m_oFileName = new SimpleStringProperty(oDocument.get(TAG_Filename));
+    oReturn.m_oFileExtension = new SimpleStringProperty(oDocument.get(TAG_Extension));
+    oReturn.m_oFileCategory = new SimpleStringProperty(oDocument.get(TAG_Category));
     if (cConfig.instance().getHashDocuments())
     {
-      oReturn.sFileHash = oDocument.get(TAG_Hash);
+      oReturn.m_oFileHash = new SimpleStringProperty(oDocument.get(TAG_Hash));
     }
-    oReturn.lFileSize = Long.parseLong(oDocument.get(TAG_Size));
+    oReturn.m_oFileSize = new SimpleLongProperty(Long.parseLong(oDocument.get(TAG_Size)));
     return oReturn;
   }
   
-  public String getFormattedFileSize()
+  public final StringProperty absolutePathProperty() 
   {
-    return FileUtils.byteCountToDisplaySize(lFileSize);
+    return this.m_oFileAbsolutePath;
+  }
+  
+  public final StringProperty pathProperty() 
+  {
+    return this.m_oFilePath;
+  }
+  
+  public final StringProperty filenameProperty() 
+  {
+    return this.m_oFileName;
+  }
+  
+  public final StringProperty extensionProperty() 
+  {
+    return this.m_oFileExtension;
+  }
+  
+  public final StringProperty categoryProperty() 
+  {
+    return this.m_oFileCategory;
+  }
+  
+  public final LongProperty sizeProperty() 
+  {
+    return this.m_oFileSize;
+  }
+
+  public final StringProperty hashProperty() 
+  {
+    return this.m_oFileHash;
+  }
+
+  public StringProperty getProperty(String sPropertyName)
+  {
+    StringProperty oReturn = new SimpleStringProperty("Invalid Property Name: " + sPropertyName);
+    switch (sPropertyName)
+    {
+      case TAG_Path:
+      {
+        oReturn = m_oFilePath;
+        break;
+      }
+      case TAG_Filename:
+      {
+        oReturn = m_oFileName;
+        break;
+      }
+      case TAG_Extension:
+      {
+        oReturn = m_oFileExtension;
+        break;
+      }
+      case TAG_Category:
+      {
+        oReturn = m_oFileCategory;
+        break;
+      }
+      case TAG_Hash:
+      {
+        oReturn = m_oFileHash;
+        break;
+      }
+    }
+    
+    return oReturn;
   }
 }
