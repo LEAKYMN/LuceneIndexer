@@ -21,7 +21,6 @@ import LuceneIndexer.linux.cLinux;
 import LuceneIndexer.ui.fx.cProgressPanelFx;
 import java.io.File;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Observable;
 import java.util.TreeMap;
