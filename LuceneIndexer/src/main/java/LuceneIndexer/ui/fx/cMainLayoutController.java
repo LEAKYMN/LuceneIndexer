@@ -327,7 +327,7 @@ public class cMainLayoutController implements Observer, Initializable
       @Override
       public void handle(ActionEvent event)
       {
-        HashMap oItems = (HashMap) m_oResultTable.getSelectionModel().getSelectedItem();
+        eDocument oItems = (eDocument) m_oResultTable.getSelectionModel().getSelectedItem();
         handleContextMenuOpenLocation(oItems);
       }
     });
@@ -337,7 +337,7 @@ public class cMainLayoutController implements Observer, Initializable
       @Override
       public void handle(ActionEvent event)
       {
-        HashMap oItems = (HashMap) m_oResultTable.getSelectionModel().getSelectedItem();
+        eDocument oItems = (eDocument) m_oResultTable.getSelectionModel().getSelectedItem();
         handleContextMenuOpenFile(oItems);
       }
     });
@@ -348,11 +348,11 @@ public class cMainLayoutController implements Observer, Initializable
       @Override
       public void handle(ActionEvent event)
       {
-        HashMap oItems = (HashMap) m_oResultTable.getSelectionModel().getSelectedItem();
-        String sPath = (String) oItems.get("Path");
-        String sFilename = (String) oItems.get("Filename");
+        eDocument oItems = (eDocument) m_oResultTable.getSelectionModel().getSelectedItem();
+        String sPath = (String) oItems.pathProperty().get();
+        String sFilename = (String) oItems.filenameProperty().get();
         String sAbsolutePath = sPath + File.separator + sFilename;
-        Object sExtension = oItems.get("Extension");
+        Object sExtension = oItems.extensionProperty().get();
         if (sExtension != null && !(sExtension + "").isEmpty())
         {
           sAbsolutePath += "." + sExtension;
@@ -385,8 +385,8 @@ public class cMainLayoutController implements Observer, Initializable
       @Override
       public void handle(ActionEvent event)
       {
-        HashMap oItems = (HashMap) m_oTotDocsTable.getSelectionModel().getSelectedItem();
-        handleContextMenuOpenLocation(oItems);
+        eDocument oDoc = (eDocument) m_oTotDocsTable.getSelectionModel().getSelectedItem();
+        handleContextMenuOpenLocation(oDoc);
       }
     });
     MenuItem oPlayFileIndex = new MenuItem("Open/Play File");
@@ -395,8 +395,8 @@ public class cMainLayoutController implements Observer, Initializable
       @Override
       public void handle(ActionEvent event)
       {
-        HashMap oItems = (HashMap) m_oTotDocsTable.getSelectionModel().getSelectedItem();
-        handleContextMenuOpenFile(oItems);
+        eDocument oDoc = (eDocument) m_oTotDocsTable.getSelectionModel().getSelectedItem();
+        handleContextMenuOpenFile(oDoc);
       }
     });
 
@@ -406,12 +406,12 @@ public class cMainLayoutController implements Observer, Initializable
       @Override
       public void handle(ActionEvent event)
       {
-        HashMap oItems = (HashMap) m_oTotDocsTable.getSelectionModel().getSelectedItem();
+        eDocument oDoc = (eDocument) m_oTotDocsTable.getSelectionModel().getSelectedItem();
 
-        String sPath = (String) oItems.get("Path");
-        String sFilename = (String) oItems.get("Filename");
+        String sPath = (String) oDoc.pathProperty().get();
+        String sFilename = (String) oDoc.filenameProperty().get();
         String sAbsolutePath = sPath + File.separator + sFilename;
-        Object sExtension = oItems.get("Extension");
+        Object sExtension = oDoc.extensionProperty().get();
         if (sExtension != null && !(sExtension + "").isEmpty())
         {
           sAbsolutePath += "." + sExtension;
@@ -422,12 +422,12 @@ public class cMainLayoutController implements Observer, Initializable
         oConfirmDialog.showAndWait();
         if (oConfirmDialog.getResult() == cConfirmDialog.YES)
         {
-          handleContextMenuDeleteFile(oItems);
+          handleContextMenuDeleteFile(oDoc);
 
           char cDriveLetter = (m_cmbIndexDirectories.getValue() + "").toCharArray()[0];
           if (cIndex.deleteFile(cDriveLetter, new File(sAbsolutePath)))
           {
-            m_oTotDocsTable.getItems().remove(oItems);
+            m_oTotDocsTable.getItems().remove(oDoc);
           }
         }
       }
@@ -444,8 +444,8 @@ public class cMainLayoutController implements Observer, Initializable
       @Override
       public void handle(ActionEvent event)
       {
-        HashMap oItems = (HashMap) m_oDuplicatesTable.getSelectionModel().getSelectedItem();
-        handleContextMenuOpenLocation(oItems);
+        eDocument oDoc = (eDocument) m_oDuplicatesTable.getSelectionModel().getSelectedItem();
+        handleContextMenuOpenLocation(oDoc);
       }
     });
     MenuItem oPlayFileDuplicates = new MenuItem("Open/Play File");
@@ -454,8 +454,8 @@ public class cMainLayoutController implements Observer, Initializable
       @Override
       public void handle(ActionEvent event)
       {
-        HashMap oItems = (HashMap) m_oDuplicatesTable.getSelectionModel().getSelectedItem();
-        handleContextMenuOpenFile(oItems);
+        eDocument oDoc = (eDocument) m_oDuplicatesTable.getSelectionModel().getSelectedItem();
+        handleContextMenuOpenFile(oDoc);
       }
     });
 
@@ -465,18 +465,17 @@ public class cMainLayoutController implements Observer, Initializable
       @Override
       public void handle(ActionEvent event)
       {
-        //HashMap oItems = (HashMap)
         ObservableList oObservableList = m_oDuplicatesTable.getSelectionModel().getSelectedItems();
         if (oObservableList != null && !oObservableList.isEmpty())
         {
           String sMessage = "Are you sure you want to delete " + oObservableList.size() + " items?";
           if (oObservableList.size() == 1)
           {
-            HashMap oItems = (HashMap) oObservableList.get(0);
-            String sPath = (String) oItems.get("Path");
-            String sFilename = (String) oItems.get("Filename");
+            eDocument oDoc = (eDocument) oObservableList.get(0);
+            String sPath = (String) oDoc.pathProperty().get();
+            String sFilename = (String) oDoc.filenameProperty().get();
             String sAbsolutePath = sPath + File.separator + sFilename;
-            Object sExtension = oItems.get("Extension");
+            Object sExtension = oDoc.extensionProperty().get();
             if (sExtension != null && !(sExtension + "").isEmpty())
             {
               sAbsolutePath += "." + sExtension;
@@ -489,9 +488,9 @@ public class cMainLayoutController implements Observer, Initializable
           {
             oObservableList.forEach(oList ->
             {
-              HashMap oItems = (HashMap) oList;
-              handleContextMenuDeleteFile(oItems);
-              m_oDuplicatesTable.getItems().remove(oItems);
+              eDocument oDoc = (eDocument) oList;
+              handleContextMenuDeleteFile(oDoc);
+              m_oDuplicatesTable.getItems().remove(oDoc);
             });
           }
         }
@@ -504,8 +503,8 @@ public class cMainLayoutController implements Observer, Initializable
       @Override
       public void handle(ActionEvent event)
       {
-        HashMap oItems = (HashMap) m_oDuplicatesTable.getSelectionModel().getSelectedItem();
-        handleContextMenuMarkFile(oItems);
+        eDocument oDoc = (eDocument) m_oDuplicatesTable.getSelectionModel().getSelectedItem();
+        handleContextMenuMarkFile(oDoc);
       }
     });
 
@@ -812,13 +811,13 @@ public class cMainLayoutController implements Observer, Initializable
     return m_cmbSearchIndex.getValue() + "";
   }
 
-  private void handleContextMenuOpenLocation(HashMap oItems)
+  private void handleContextMenuOpenLocation(eDocument oDoc)
   {
-    if (oItems != null)
+    if (oDoc != null)
     {
       try
       {
-        String sPath = (String) oItems.get("Path");
+        String sPath = (String) oDoc.pathProperty().get();
         Desktop.getDesktop().open(new File(sPath));
       }
       catch (IOException ex)
@@ -828,16 +827,16 @@ public class cMainLayoutController implements Observer, Initializable
     }
   }
 
-  private void handleContextMenuOpenFile(HashMap oItems)
+  private void handleContextMenuOpenFile(eDocument oDoc)
   {
-    if (oItems != null)
+    if (oDoc != null)
     {
       try
       {
-        String sPath = (String) oItems.get("Path");
-        String sFilename = (String) oItems.get("Filename");
+        String sPath = (String) oDoc.pathProperty().get();
+        String sFilename = (String) oDoc.filenameProperty().get();
         String sAbsolutePath = sPath + File.separator + sFilename;
-        Object sExtension = oItems.get("Extension");
+        Object sExtension = oDoc.extensionProperty().get();
         if (sExtension != null && !(sExtension + "").isEmpty())
         {
           sAbsolutePath += "." + sExtension;
@@ -851,14 +850,14 @@ public class cMainLayoutController implements Observer, Initializable
     }
   }
 
-  private void handleContextMenuDeleteFile(HashMap oItems)
+  private void handleContextMenuDeleteFile(eDocument oDoc)
   {
-    if (oItems != null)
+    if (oDoc != null)
     {
-      String sPath = (String) oItems.get("Path");
-      String sFilename = (String) oItems.get("Filename");
+      String sPath = (String) oDoc.pathProperty().get();
+      String sFilename = (String) oDoc.filenameProperty().get();
       String sAbsolutePath = sPath + File.separator + sFilename;
-      Object sExtension = oItems.get("Extension");
+      Object sExtension = oDoc.extensionProperty().get();
       if (sExtension != null && !(sExtension + "").isEmpty())
       {
         sAbsolutePath += "." + sExtension;
@@ -873,16 +872,16 @@ public class cMainLayoutController implements Observer, Initializable
     }
   }
 
-  private void handleContextMenuMarkFile(HashMap oItems)
+  private void handleContextMenuMarkFile(eDocument oDoc)
   {
-    if (oItems != null)
+    if (oDoc != null)
     {
       try
       {
-        String sPath = (String) oItems.get("Path");
-        String sFilename = (String) oItems.get("Filename");
+        String sPath = (String) oDoc.pathProperty().get();
+        String sFilename = (String) oDoc.filenameProperty().get();
         String sAbsolutePath = sPath + File.separator + sFilename;
-        Object sExtension = oItems.get("Extension");
+        Object sExtension = oDoc.extensionProperty().get();
         if (sExtension != null && !(sExtension + "").isEmpty())
         {
           sAbsolutePath += "." + sExtension;
