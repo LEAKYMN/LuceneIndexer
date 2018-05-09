@@ -24,8 +24,6 @@ import java.io.File;
 import java.net.URL;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.ResourceBundle;
 import java.util.concurrent.atomic.AtomicLong;
 import javafx.application.Platform;
@@ -50,6 +48,9 @@ import org.apache.commons.io.FileUtils;
  */
 public class cProgressPanelController implements Initializable
 {
+  public final static SimpleDateFormat g_DateAndTimeFormat = new SimpleDateFormat("dd MMMMMM yyyy HH:mm:ss");
+  public final static SimpleDateFormat g_TimeFormat = new SimpleDateFormat("HH:mm:ss");
+  
   private File m_oDriveRoot;
   private cDrive m_oDrive;
   private cMetadata m_oMetadata;
@@ -57,7 +58,6 @@ public class cProgressPanelController implements Initializable
   private long lUsedSize = 0;
   private long lFreeSpace = 0;
   private AtomicLong oIndexedSize = new AtomicLong(0);
-  private final static SimpleDateFormat g_DF = new SimpleDateFormat("dd MMMMMM yyyy HH:mm:ss");
   private DecimalFormat oNumberFormat = new DecimalFormat( "###.##" );
   private final static double m_dGIGA_BYTE = 1073741824;// metric recommendation
   private final static double m_dTERA_BYTE = 1099511627776L;// metric recommendation
@@ -130,7 +130,8 @@ public class cProgressPanelController implements Initializable
     m_oMetadata = new cMetadata(sMountPoint+"");
     if (m_oMetadata.exists())
     {
-      m_oLastScanLabel.setText("Last Scan: " + ((m_oMetadata.getPropertyValue("lastscan")==null) ? "" : m_oMetadata.getPropertyValue("lastscan")));
+      m_oLastScanLabel.setText("Last Scan: " + ((m_oMetadata.getPropertyValue("lastscan")==null) ? "" : 
+              m_oMetadata.getPropertyValue("lastscan") + " " + " (Scan Duration: " + m_oDrive.getLastScanDuration_Formatted() + ")"));
       m_oStatusLabel.setText("Status: " + m_oMetadata.getPropertyValue("status"));
       double dProgress = Double.parseDouble(m_oMetadata.getPropertyValue("indexed"));
       setProgress(dProgress);
@@ -169,7 +170,7 @@ public class cProgressPanelController implements Initializable
   {
     return lTotalSize > 0;
   }
-  
+
   public void setStatus(String sStatus)
   {
     Platform.runLater(() -> {m_oStatusLabel.setText("Status: " + sStatus);});    
@@ -214,9 +215,9 @@ public class cProgressPanelController implements Initializable
       setProgress(100);
       setStatus("Indexed");
 
-      m_oLastScanLabel.setText("Last Scan: " + g_DF.format(m_oDrive.getLastScanTime())); 
-      m_oMetadata.setPropertyValue("lastscan", g_DF.format(m_oDrive.getLastScanTime()), false);
-      m_oMetadata.setPropertyValue("status", "Indexed, Scan Duration: " + m_oDrive.getLastScanDuration(), false);
+      m_oLastScanLabel.setText("Last Scan: " + g_DateAndTimeFormat.format(m_oDrive.getLastScanTime()) + " (Scan Duration: " + m_oDrive.getLastScanDuration_Formatted() + ")"); 
+      m_oMetadata.setPropertyValue("lastscan", g_DateAndTimeFormat.format(m_oDrive.getLastScanTime()), false);
+      m_oMetadata.setPropertyValue("status", "Indexed", false);
       m_oMetadata.setPropertyValue("indexed", "100", true);
     });
   }
