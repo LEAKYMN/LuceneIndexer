@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane fx:id="m_oMainAnchorPane" xmlns:fx="http://javafx.com/fxml/1" prefHeight="600" prefWidth="800" fx:controller="LuceneIndexer.ui.fx.cMainLayoutController">
+    <children>
+        <TabPane fx:id="m_oTabPaneRoot" AnchorPane.leftAnchor="2" AnchorPane.topAnchor="2" AnchorPane.rightAnchor="2" AnchorPane.bottomAnchor="2">
+            <tabs>
+                <Tab fx:id="m_oSearchTab" text="Search">
+                    <AnchorPane id="SearchTabAnchorPane" prefHeight="600" prefWidth="800">
+                        <children>
+                            <Label fx:id="m_lblSearchLabel" layoutX="4" layoutY="7" text="Search: " />
+                            <CheckBox fx:id="m_chkWholeWords" AnchorPane.topAnchor="7" AnchorPane.rightAnchor="270" text="Whole Words Only"/>
+                            <Label fx:id="m_lblSearchIndex" AnchorPane.topAnchor="7" AnchorPane.rightAnchor="190" text="Index: " />
+                            <ComboBox fx:id="m_cmbSearchIndex" AnchorPane.topAnchor="2" AnchorPane.rightAnchor="110" prefWidth="80" layoutY="2" />
+                            <Button fx:id="m_btnSearchButton" minWidth="100" AnchorPane.topAnchor="2" AnchorPane.rightAnchor="2" text="Search" onAction="#handleSearch" />
+
+                            <VBox fx:id="m_oSearchBox" AnchorPane.leftAnchor="2" AnchorPane.rightAnchor="2" AnchorPane.topAnchor="30" />  
+                            <TableView fx:id="m_oResultTable" editable="false" AnchorPane.leftAnchor="2" AnchorPane.topAnchor="90" AnchorPane.rightAnchor="2" AnchorPane.bottomAnchor="30" />
+                        </children>
+                    </AnchorPane>
+                </Tab>
+                <Tab fx:id="m_oDrives" text="Drives">
+                    <AnchorPane id="DrivesAnchorPane" prefHeight="600" prefWidth="800">
+                        <children>
+                            <Button fx:id="m_oIndexButton" minWidth="100" AnchorPane.topAnchor="2" AnchorPane.rightAnchor="2" text="Index Drives" onAction="#handleIndexDrives" />
+                            <ListView fx:id="m_oDriveList" editable="false" AnchorPane.leftAnchor="2" AnchorPane.topAnchor="30" AnchorPane.rightAnchor="2.0" AnchorPane.bottomAnchor="30.0" />
+                        </children>
+                    </AnchorPane>
+                </Tab>
+                <Tab fx:id="m_oIndex" text="Index">
+                    <AnchorPane id="IndexAnchorPane" prefHeight="600" prefWidth="800">
+                        <children>
+                            <Label fx:id="m_oIndexDirectoryLabel" layoutX="4" layoutY="2" text="Index Directory: " />
+                            <Label fx:id="m_oIndexSizeLabel" layoutX="4" layoutY="27" text="Index Size: " />
+                            <Label fx:id="m_oNumberOfDocumentsLabel" layoutX="4" layoutY="52" text="Number Of Documents: " />
+
+                            <Label fx:id="m_lblIndex" AnchorPane.topAnchor="7" AnchorPane.rightAnchor="110" text="Index: " />
+                            <ComboBox fx:id="m_cmbIndexDirectories" AnchorPane.topAnchor="2" AnchorPane.rightAnchor="2.0" prefWidth="100" />
+                            <Button fx:id="m_oDeleteIndexButton" minWidth="100" AnchorPane.topAnchor="30" AnchorPane.rightAnchor="2.0" text="Delete Index" onAction="#handleDeleteIndex" />
+                            <Button fx:id="m_oRefreshButton" minWidth="100" AnchorPane.topAnchor="58" AnchorPane.rightAnchor="2.0" text="Refresh" onAction="#handleRefresh" />
+                            <TableView fx:id="m_oTotDocsTable" editable="false" AnchorPane.leftAnchor="2" AnchorPane.topAnchor="87" AnchorPane.rightAnchor="2.0" AnchorPane.bottomAnchor="30.0" />
+                        </children>
+                    </AnchorPane>
+                </Tab>
+                <Tab fx:id="m_oDuplicationTab" text="Duplicates">
+                    <AnchorPane id="DuplicationAnchorPane" prefHeight="600" prefWidth="800">
+                        <children>
+                            <Label fx:id="m_FindDuplicatesLabel" AnchorPane.topAnchor="7" AnchorPane.leftAnchor="2" text="Find Duplicates: " />
+                            <Label fx:id="m_lblDuplicateIndex" AnchorPane.topAnchor="7" AnchorPane.rightAnchor="200" text="Index: " />
+                            <ComboBox fx:id="m_cmbDuplicateIndex" AnchorPane.topAnchor="2" AnchorPane.rightAnchor="110" minWidth="80" prefWidth="80" layoutY="2" />
+                            <Button fx:id="m_oDuplicatesButton" minWidth="70" AnchorPane.topAnchor="2" AnchorPane.rightAnchor="2.0" text="Find Duplicates" onAction="#handleFindDuplicates" />
+                            <TableView fx:id="m_oDuplicatesTable" editable="false" AnchorPane.leftAnchor="2" AnchorPane.topAnchor="30" AnchorPane.rightAnchor="2.0" AnchorPane.bottomAnchor="30.0" />
+                        </children>
+                    </AnchorPane>
+                </Tab>
+            </tabs>
+        </TabPane>
+        <Label fx:id="m_oStatusLabel" AnchorPane.leftAnchor="2" AnchorPane.bottomAnchor="2" text="Status: " />
+    </children>
+</AnchorPane>
