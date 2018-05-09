@@ -99,11 +99,6 @@ public class cDrive
     m_oProgressThread.setDaemon(true);
     m_oProgressThread.start();
     
-    if (cConfig.instance().getHashDocuments())
-    {
-      m_oCrypto = new cCryptographer();
-    }
-    
     resetExecutor();
   }
   

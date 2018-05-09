@@ -35,9 +35,7 @@
                         </goals>
                         <configuration>
                             <excludeScope>system</excludeScope>
-                            <excludes>META-INF/*.SF</excludes>
-                            <excludes>META-INF/*.DSA</excludes>
-                            <excludes>META-INF/*.RSA</excludes>
+                            <excludes>META-INF/*.SF,META-INF/*.DSA,META-INF/*.RSA</excludes>
                             <excludeGroupIds>junit,org.mockito,org.hamcrest</excludeGroupIds>
                             <outputDirectory>${project.build.directory}/classes</outputDirectory>
                         </configuration>
@@ -50,9 +48,6 @@
                 <configuration>
                     <excludeDefaultDirectories>true</excludeDefaultDirectories>
                     <filesets>
-                        <!-- delete directories that will be generated when you 
-                             start the develpment server/client in eclipse  
-                        -->
                         <fileset>
                             <directory>target/classes</directory>
                             <excludes>
@@ -89,9 +84,7 @@
                                 <argument>${project.build.finalName}.jar</argument>
                             </arguments>
                             <excludeScope>system</excludeScope>
-                            <excludes>META-INF/*.SF</excludes>
-                            <excludes>META-INF/*.DSA</excludes>
-                            <excludes>META-INF/*.RSA</excludes>
+                            <excludes>META-INF/*.SF,META-INF/*.DSA,META-INF/*.RSA</excludes>
                             <excludeGroupIds>junit,org.mockito,org.hamcrest</excludeGroupIds>
                             <outputDirectory>${project.build.directory}/classes</outputDirectory>
                         </configuration>

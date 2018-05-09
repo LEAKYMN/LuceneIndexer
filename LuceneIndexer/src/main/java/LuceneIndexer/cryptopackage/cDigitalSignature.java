@@ -54,8 +54,7 @@ public class cDigitalSignature
       PrivateKey oPrivateKey = m_oKeyStore.getPrivateKey(sKeyName);
       oSignature.initSign(oPrivateKey);
 
-      cCryptographer oCrypto = new cCryptographer();
-      byte[] yHash = oCrypto.hash(sData.getBytes());
+      byte[] yHash = cCryptographer.hash(sData.getBytes());
       oSignature.update(yHash);
       byte[] ySignature = oSignature.sign();
 
@@ -79,8 +78,7 @@ public class cDigitalSignature
         Signature oSignature = Signature.getInstance(g_sSIGNING_ALGORITHM);
         oSignature.initVerify((PublicKey)oPublicKey);
         
-        cCryptographer oCrypto = new cCryptographer();
-        byte[] yHash = oCrypto.hash(sData.getBytes());
+        byte[] yHash = cCryptographer.hash(sData.getBytes());
         oSignature.update(yHash);
         
         byte[] ySignature = Base64.decode(sSignature);

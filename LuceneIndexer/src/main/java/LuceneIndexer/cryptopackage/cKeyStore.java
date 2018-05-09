@@ -94,10 +94,9 @@ public class cKeyStore
     FileOutputStream oOutputStream = null;
     try 
     {
-      cCryptographer oCrypto = new cCryptographer();
-      KeyPair oKeyPair = oCrypto.generateAsymmetricKeyPair(2048);
+      KeyPair oKeyPair = cCryptographer.generateAsymmetricKeyPair(2048);
       oPrivateKey = oKeyPair.getPrivate();
-      Certificate oCertificate = oCrypto.generateCertificate(oKeyPair);
+      Certificate oCertificate = cCryptographer.generateCertificate(oKeyPair);
       Certificate[] lsCertificates = new Certificate[1];
       lsCertificates[0] = oCertificate;
       oOutputStream = new FileOutputStream(m_oKeyStoreFile.getAbsolutePath());
@@ -132,8 +131,7 @@ public class cKeyStore
     try 
     {
       oPrivateKey = oKeyPair.getPrivate();
-      cCryptographer oCrypto = new cCryptographer();
-      Certificate oCertificate = oCrypto.generateCertificate(oKeyPair);
+      Certificate oCertificate = cCryptographer.generateCertificate(oKeyPair);
       Certificate[] lsCertificates = new Certificate[1];
       lsCertificates[0] = oCertificate;
       oOutputStream = new FileOutputStream(m_oKeyStoreFile.getAbsolutePath());
