@@ -16,11 +16,18 @@
  */
 package LuceneIndexer.scheduling;
 
+import LuceneIndexer.cConfig;
 import LuceneIndexer.drives.cDriveMediator;
+import LuceneIndexer.injection.cInjector;
+import LuceneIndexer.ui.fx.cMainLayoutController;
+import com.google.inject.Injector;
+import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -31,8 +38,13 @@ import java.util.concurrent.TimeUnit;
  */
 public class cSchedular
 {
+  private final SimpleDateFormat m_oTimeFormat = new SimpleDateFormat("HH:mm:ss");
   private ScheduledExecutorService m_oScheduler = null;
+  private ZonedDateTime oDesiredTimeZoned;
   private int m_iPeriod_hr = 24;
+  private long m_iInitalDelay;
+  
+  
   
   public cSchedular(int iThreadCount)
   {
@@ -45,14 +57,13 @@ public class cSchedular
     LocalDateTime oLocalTimeNow = LocalDateTime.now();
     ZoneId oCurrentTimeZone = ZoneId.systemDefault();
     ZonedDateTime oTimeNowZoned = ZonedDateTime.of(oLocalTimeNow, oCurrentTimeZone);
-    ZonedDateTime oDesiredTimeZoned ;
     oDesiredTimeZoned = oTimeNowZoned.withHour(iHourOfDay_24).withMinute(0).withSecond(0);
     if(oTimeNowZoned.compareTo(oDesiredTimeZoned) > 0)
     {
       oDesiredTimeZoned = oDesiredTimeZoned.plusDays(1);
     }
     Duration duration = Duration.between(oTimeNowZoned, oDesiredTimeZoned);
-    long initalDelay = duration.getSeconds();
+    m_iInitalDelay = duration.getSeconds();
     
     final Runnable oScanner = new Runnable() 
     {
@@ -63,13 +74,39 @@ public class cSchedular
       }
     };
     
-    System.out.println("Scheduled to run at: " + oDesiredTimeZoned + " (In: " + initalDelay + " seconds)");
-    m_oScheduler.scheduleAtFixedRate(oScanner, initalDelay, m_iPeriod_hr*60*60, TimeUnit.SECONDS);
+    m_oScheduler.scheduleAtFixedRate(oScanner, m_iInitalDelay, m_iPeriod_hr*60*60, TimeUnit.SECONDS);
+    
+    Injector oInjector = cInjector.getInjector();
+    cMainLayoutController oMainController = oInjector.getInstance(cMainLayoutController.class);
+    System.out.println("Scheduled to run at: " + oDesiredTimeZoned);
+    oMainController.setScheduleLabelText("Scheduled to run at: " + oDesiredTimeZoned);
+    if (cConfig.instance().getCountdown())
+    {
+      Timer oTimer = new Timer();
+      oTimer.scheduleAtFixedRate(new TimerTask() 
+      {
+        @Override
+        public void run() 
+        {
+          m_iInitalDelay --;
+          long iMillis = m_iInitalDelay*1000;
+
+          String sFormattedDelay = String.format("%02d:%02d:%02d", 
+          TimeUnit.MILLISECONDS.toHours(iMillis),
+          TimeUnit.MILLISECONDS.toMinutes(iMillis) -  
+          TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(iMillis)),
+          TimeUnit.MILLISECONDS.toSeconds(iMillis) - 
+          TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(iMillis)));
+
+          oMainController.setScheduleLabelText("Scheduled to run at: " + oDesiredTimeZoned + " (In: " + sFormattedDelay + ")");
+        }
+      }, 0, 1000);
+    }
   }
   
   public void terminate()
   {
-    m_oScheduler.shutdown();
+    m_oScheduler.shutdownNow();
   }
   
 }

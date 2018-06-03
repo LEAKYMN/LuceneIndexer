@@ -27,6 +27,7 @@
                 <Tab fx:id="m_oDrives" text="Drives">
                     <AnchorPane id="DrivesAnchorPane" prefHeight="600" prefWidth="800">
                         <children>
+                            <Label fx:id="m_lblScheduleLabel" AnchorPane.topAnchor="7" AnchorPane.leftAnchor="2" text="Schedule: " />
                             <Button fx:id="m_oIndexButton" minWidth="100" AnchorPane.topAnchor="2" AnchorPane.rightAnchor="2" text="Index Drives" onAction="#handleIndexDrives" />
                             <ListView fx:id="m_oDriveList" editable="false" AnchorPane.leftAnchor="2" AnchorPane.topAnchor="30" AnchorPane.rightAnchor="2.0" AnchorPane.bottomAnchor="30.0" />
                         </children>

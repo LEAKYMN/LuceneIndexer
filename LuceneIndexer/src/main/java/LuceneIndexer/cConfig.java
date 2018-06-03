@@ -54,6 +54,9 @@ public class cConfig
   private HashMap<String, String> m_oCategoryForFile = new HashMap();
   private HashSet<String> m_oScanDrives = new HashSet();
   private NodeList m_aoNodes = null;
+  private int m_iHourOfDay = 0;
+  private boolean m_bCountdown = false;
+  private boolean m_bEnableSchedular = true;
   
   public static cConfig instance()
   {
@@ -129,6 +132,18 @@ public class cConfig
           m_oCategoryForFile.put(sExtension, sName);
         }
       }
+      
+      Element oScheduleElement = getElement("Schedule");
+      try
+      {
+        m_iHourOfDay = Integer.parseInt(getChildElement(oScheduleElement, "HourOfDay").getTextContent());
+      }
+      catch (Exception ex)
+      {
+        m_iHourOfDay = 23;
+      }
+      m_bCountdown = Boolean.parseBoolean(getChildElement(oScheduleElement, "Countdown").getTextContent());
+      m_bEnableSchedular = Boolean.parseBoolean(getChildElement(oScheduleElement, "Enabled").getTextContent());
     }
     catch (Exception ex)
     {
@@ -193,6 +208,18 @@ public class cConfig
       oCategories.appendChild(oCategory3);
       oCategory3.setAttribute("Name", "Audio");
       oCategory3.setTextContent("mp3,flac,m4a,wma,gp3,wav");
+      
+      Element oSchedule = doc.createElement("Schedule");
+      Element oScheduleEnabled = doc.createElement("Enabled");
+      oSchedule.appendChild(oScheduleEnabled);
+      oScheduleEnabled.setTextContent("true");
+      Element oDisplayNextRunLabel = doc.createElement("Countdown");
+      oSchedule.appendChild(oDisplayNextRunLabel);
+      oDisplayNextRunLabel.setTextContent("true");
+      Element oHourOfDay = doc.createElement("HourOfDay");
+      oSchedule.appendChild(oHourOfDay);
+      oHourOfDay.setTextContent("21");
+      rootElement.appendChild(oSchedule);
       
       TransformerFactory transformerFactory = TransformerFactory.newInstance();
       Transformer transformer = transformerFactory.newTransformer();
@@ -317,5 +344,20 @@ public class cConfig
   public boolean getScanDriveType(String sType)
   {
     return m_oScanDrives.contains(sType);
+  }
+  
+  public int getHourOfDay()
+  {
+    return m_iHourOfDay;
+  }
+
+  public boolean getCountdown()
+  {
+    return m_bCountdown;
+  }
+  
+  public boolean getEnableScheduler()
+  {
+    return m_bEnableSchedular;
   }
 }

@@ -21,7 +21,9 @@ import LuceneIndexer.dialogs.cConfirmDialog;
 import LuceneIndexer.lucene.eDocument;
 import LuceneIndexer.drives.cDriveMediator;
 import LuceneIndexer.drives.cDrive;
+import LuceneIndexer.injection.cInjector;
 import LuceneIndexer.lucene.cIndex;
+import com.google.inject.Injector;
 import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
@@ -40,7 +42,6 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -51,13 +52,10 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.ListView;
 import javafx.scene.control.Tab;
-import javafx.scene.control.cell.MapValueFactory;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TableCell;
-import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.util.Callback;
 import org.apache.commons.io.FileUtils;
 
 /**
@@ -66,7 +64,6 @@ import org.apache.commons.io.FileUtils;
  */
 public class cMainLayoutController implements Observer, Initializable
 {
-
   private final DecimalFormat m_oNumberFormat = new DecimalFormat("###,###,###,###");
 
   @FXML
@@ -116,6 +113,8 @@ public class cMainLayoutController implements Observer, Initializable
   private Tab m_oDuplicationTab;
   @FXML
   private TableView m_oDuplicatesTable;
+  @FXML
+  private Label m_lblScheduleLabel;
 
   private cSearchTable m_oSearchTable;
   private cDriveMediator m_oMediator;
@@ -508,6 +507,11 @@ public class cMainLayoutController implements Observer, Initializable
       }
     });
 
+    if (!cConfig.instance().getEnableScheduler())
+    {
+      m_lblScheduleLabel.setText("Schedular disabled.");
+    }
+    
     // Add MenuItem to ContextMenu
     ContextMenu oDuplicatesContextMenu = new ContextMenu();
     oDuplicatesContextMenu.getItems().addAll(oOpenLocationDuplicates, oPlayFileDuplicates, oDeleteFileDuplicates, oMarkFileDuplicates);
@@ -652,6 +656,14 @@ public class cMainLayoutController implements Observer, Initializable
       });
     }
     displayDrives();
+  }
+  
+  public void setScheduleLabelText(String sText)
+  {
+    Platform.runLater(() ->
+    {
+      m_lblScheduleLabel.setText(sText);
+    });
   }
 
   public void cancelDuplicationSearch()
