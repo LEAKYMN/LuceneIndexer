@@ -16,11 +16,60 @@
  */
 package LuceneIndexer.scheduling;
 
+import LuceneIndexer.drives.cDriveMediator;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 /**
  *
  * @author Philip M. Trenwith
  */
 public class cSchedular
 {
+  private ScheduledExecutorService m_oScheduler = null;
+  private int m_iPeriod_hr = 24;
+  
+  public cSchedular(int iThreadCount)
+  {
+    m_oScheduler = Executors.newScheduledThreadPool(iThreadCount);
+    
+  }
+  
+  public void runAt(int iHourOfDay_24)
+  {
+    LocalDateTime oLocalTimeNow = LocalDateTime.now();
+    ZoneId oCurrentTimeZone = ZoneId.systemDefault();
+    ZonedDateTime oTimeNowZoned = ZonedDateTime.of(oLocalTimeNow, oCurrentTimeZone);
+    ZonedDateTime oDesiredTimeZoned ;
+    oDesiredTimeZoned = oTimeNowZoned.withHour(iHourOfDay_24).withMinute(0).withSecond(0);
+    if(oTimeNowZoned.compareTo(oDesiredTimeZoned) > 0)
+    {
+      oDesiredTimeZoned = oDesiredTimeZoned.plusDays(1);
+    }
+    Duration duration = Duration.between(oTimeNowZoned, oDesiredTimeZoned);
+    long initalDelay = duration.getSeconds();
+    
+    final Runnable oScanner = new Runnable() 
+    {
+      @Override
+      public void run() 
+      { 
+        cDriveMediator.instance().scanComputer();
+      }
+    };
+    
+    System.out.println("Scheduled to run at: " + oDesiredTimeZoned + " (In: " + initalDelay + " seconds)");
+    m_oScheduler.scheduleAtFixedRate(oScanner, initalDelay, m_iPeriod_hr*60*60, TimeUnit.SECONDS);
+  }
+  
+  public void terminate()
+  {
+    m_oScheduler.shutdown();
+  }
   
 }

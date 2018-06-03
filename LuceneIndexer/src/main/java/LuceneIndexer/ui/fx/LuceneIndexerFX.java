@@ -16,7 +16,6 @@
  */
 package LuceneIndexer.ui.fx;
 
-import LuceneIndexer.cryptopackage.cCryptographer;
 import LuceneIndexer.dialogs.cConfirmDialog;
 import LuceneIndexer.injection.cInjector;
 import LuceneIndexer.linux.cLinux;
@@ -24,6 +23,7 @@ import LuceneIndexer.persistance.cSerializationFactory;
 import LuceneIndexer.persistance.cWindowBounds;
 import LuceneIndexer.drives.cDriveMediator;
 import LuceneIndexer.lucene.cIndex;
+import LuceneIndexer.scheduling.cSchedular;
 import java.io.File;
 import javafx.application.Application;
 import javafx.event.EventHandler;
@@ -97,6 +97,9 @@ public class LuceneIndexerFX extends Application
     cInjector oInjector = new cInjector(this, m_oMainLayoutController);
     
     cDriveMediator.instance().loadDrives();
+    
+    cSchedular oSchedular = new cSchedular(1);
+    oSchedular.runAt(12);
   }
 
   private void terminate()
