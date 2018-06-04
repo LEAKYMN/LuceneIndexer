@@ -40,7 +40,6 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -51,13 +50,10 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.ListView;
 import javafx.scene.control.Tab;
-import javafx.scene.control.cell.MapValueFactory;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TableCell;
-import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.util.Callback;
 import org.apache.commons.io.FileUtils;
 
 /**
@@ -66,7 +62,6 @@ import org.apache.commons.io.FileUtils;
  */
 public class cMainLayoutController implements Observer, Initializable
 {
-
   private final DecimalFormat m_oNumberFormat = new DecimalFormat("###,###,###,###");
 
   @FXML

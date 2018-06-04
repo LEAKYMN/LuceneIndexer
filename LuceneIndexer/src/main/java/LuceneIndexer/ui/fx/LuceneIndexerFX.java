@@ -16,7 +16,6 @@
  */
 package LuceneIndexer.ui.fx;
 
-import LuceneIndexer.cryptopackage.cCryptographer;
 import LuceneIndexer.dialogs.cConfirmDialog;
 import LuceneIndexer.injection.cInjector;
 import LuceneIndexer.linux.cLinux;
