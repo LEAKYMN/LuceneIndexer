@@ -16,6 +16,7 @@
  */
 package LuceneIndexer.ui.fx;
 
+import LuceneIndexer.cConfig;
 import LuceneIndexer.dialogs.cConfirmDialog;
 import LuceneIndexer.injection.cInjector;
 import LuceneIndexer.linux.cLinux;
@@ -23,6 +24,7 @@ import LuceneIndexer.persistance.cSerializationFactory;
 import LuceneIndexer.persistance.cWindowBounds;
 import LuceneIndexer.drives.cDriveMediator;
 import LuceneIndexer.lucene.cIndex;
+import LuceneIndexer.scheduling.cSchedular;
 import java.io.File;
 import javafx.application.Application;
 import javafx.event.EventHandler;
@@ -43,6 +45,7 @@ public class LuceneIndexerFX extends Application
   private cWindowBounds m_oWindowBounds;
   private File m_fBounds;
   public static Stage m_oStage;
+  private cSchedular m_oSchedular;
 
   @Override
   public void start(Stage oStage) throws Exception
@@ -96,6 +99,13 @@ public class LuceneIndexerFX extends Application
     cInjector oInjector = new cInjector(this, m_oMainLayoutController);
     
     cDriveMediator.instance().loadDrives();
+    
+    if (cConfig.instance().getEnableScheduler())
+    {
+      m_oSchedular = new cSchedular(1);
+      int iHour = cConfig.instance().getHourOfDay();
+      m_oSchedular.runAt(iHour);
+    }
   }
 
   private void terminate()
@@ -105,6 +115,11 @@ public class LuceneIndexerFX extends Application
     m_oWindowBounds.setH((int)m_oStage.getHeight());
     m_oWindowBounds.setW((int)m_oStage.getWidth());
     m_oSerializationFactory.serialize(m_oWindowBounds, m_fBounds, false);
+    
+    if (m_oSchedular != null)
+    {
+      m_oSchedular.terminate();
+    }
     
     cDriveMediator.instance().stopScan();
     

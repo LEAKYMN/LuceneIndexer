@@ -21,7 +21,9 @@ import LuceneIndexer.dialogs.cConfirmDialog;
 import LuceneIndexer.lucene.eDocument;
 import LuceneIndexer.drives.cDriveMediator;
 import LuceneIndexer.drives.cDrive;
+import LuceneIndexer.injection.cInjector;
 import LuceneIndexer.lucene.cIndex;
+import com.google.inject.Injector;
 import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
@@ -111,6 +113,8 @@ public class cMainLayoutController implements Observer, Initializable
   private Tab m_oDuplicationTab;
   @FXML
   private TableView m_oDuplicatesTable;
+  @FXML
+  private Label m_lblScheduleLabel;
 
   private cSearchTable m_oSearchTable;
   private cDriveMediator m_oMediator;
@@ -503,6 +507,11 @@ public class cMainLayoutController implements Observer, Initializable
       }
     });
 
+    if (!cConfig.instance().getEnableScheduler())
+    {
+      m_lblScheduleLabel.setText("Schedular disabled.");
+    }
+    
     // Add MenuItem to ContextMenu
     ContextMenu oDuplicatesContextMenu = new ContextMenu();
     oDuplicatesContextMenu.getItems().addAll(oOpenLocationDuplicates, oPlayFileDuplicates, oDeleteFileDuplicates, oMarkFileDuplicates);
@@ -647,6 +656,14 @@ public class cMainLayoutController implements Observer, Initializable
       });
     }
     displayDrives();
+  }
+  
+  public void setScheduleLabelText(String sText)
+  {
+    Platform.runLater(() ->
+    {
+      m_lblScheduleLabel.setText(sText);
+    });
   }
 
   public void cancelDuplicationSearch()
