@@ -16,4 +16,9 @@
     <Category Name="Image">jpeg,jpg,png,tiff,bmp</Category>
     <Category Name="Audio">mp3,flac,m4a,wma,gp3,wav</Category>
   </Categories>
+  <Schedule>
+	<Enabled>true</Enabled>
+	<Countdown>true</Countdown>
+	<HourOfDay>11</HourOfDay>
+  </Schedule>
 </LuceneIndex>

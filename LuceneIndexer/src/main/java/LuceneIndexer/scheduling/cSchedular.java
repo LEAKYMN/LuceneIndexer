@@ -52,18 +52,9 @@ public class cSchedular
     
   }
   
-  public void runAt(int iHourOfDay_24)
+  public void runAt(final int iHourOfDay_24)
   {
-    LocalDateTime oLocalTimeNow = LocalDateTime.now();
-    ZoneId oCurrentTimeZone = ZoneId.systemDefault();
-    ZonedDateTime oTimeNowZoned = ZonedDateTime.of(oLocalTimeNow, oCurrentTimeZone);
-    oDesiredTimeZoned = oTimeNowZoned.withHour(iHourOfDay_24).withMinute(0).withSecond(0);
-    if(oTimeNowZoned.compareTo(oDesiredTimeZoned) > 0)
-    {
-      oDesiredTimeZoned = oDesiredTimeZoned.plusDays(1);
-    }
-    Duration duration = Duration.between(oTimeNowZoned, oDesiredTimeZoned);
-    m_iInitalDelay = duration.getSeconds();
+    initNextRun(iHourOfDay_24);
     
     final Runnable oScanner = new Runnable() 
     {
@@ -89,6 +80,10 @@ public class cSchedular
         public void run() 
         {
           m_iInitalDelay --;
+          if (m_iInitalDelay <= 0)
+          {
+            initNextRun(iHourOfDay_24);
+          }
           long iMillis = m_iInitalDelay*1000;
 
           String sFormattedDelay = String.format("%02d:%02d:%02d", 
@@ -104,9 +99,22 @@ public class cSchedular
     }
   }
   
+  private void initNextRun(int iHourOfDay_24)
+  {
+    LocalDateTime oLocalTimeNow = LocalDateTime.now();
+    ZoneId oCurrentTimeZone = ZoneId.systemDefault();
+    ZonedDateTime oTimeNowZoned = ZonedDateTime.of(oLocalTimeNow, oCurrentTimeZone);
+    oDesiredTimeZoned = oTimeNowZoned.withHour(iHourOfDay_24).withMinute(13).withSecond(0);
+    if(oTimeNowZoned.compareTo(oDesiredTimeZoned) > 0)
+    {
+      oDesiredTimeZoned = oDesiredTimeZoned.plusDays(1);
+    }
+    Duration duration = Duration.between(oTimeNowZoned, oDesiredTimeZoned);
+    m_iInitalDelay = duration.getSeconds();
+  }
+  
   public void terminate()
   {
     m_oScheduler.shutdownNow();
   }
-  
 }
